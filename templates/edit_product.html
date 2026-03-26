@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Edit Products</title>
+  <style>
+    :root{
+      --bg:#0b0b0d; --panel:#0f1113; --muted:#9aa1a6; --accent:#00d1b2; --danger:#ff5c7c;
+      --card-shadow: 0 6px 24px rgba(0,0,0,0.7);
+      --radius:14px; --gap:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#060607 0%, #0a0a0b 60%);color:#e6eef0}
+    .app{max-width:1400px;margin:28px auto;padding:28px;}
+    
+    h1{font-size:24px;margin:0 0 24px 0;color:#e6eef0}
+    .breadcrumb{margin-bottom:20px}
+    .breadcrumb a{color:var(--accent);text-decoration:none;cursor:pointer}
+    .breadcrumb a:hover{text-decoration:underline}
+
+    .panel{background:linear-gradient(180deg,var(--panel), #0e0f11);padding:18px;border-radius:var(--radius);box-shadow:var(--card-shadow);}
+
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:var(--muted);cursor:pointer;font-weight:600;transition:all 0.2s}
+    .btn:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#5be3c8);color:#021;border:0}
+    .btn.primary:hover{opacity:0.9}
+
+    .sheet{margin-top:24px;border-radius:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
+    thead th{position:sticky;top:0;background:linear-gradient(180deg,#0e0f11,#0c0c0d);text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600;z-index:10}
+    tbody td{padding:12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    tbody tr{position:relative}
+    tbody tr:hover{background:rgba(255,255,255,0.01)}
+
+    .action-buttons{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-small{padding:6px 10px;font-size:12px;background:transparent;border:1px solid rgba(0,209,178,0.3);color:var(--accent);border-radius:6px;cursor:pointer;transition:all 0.2s}
+    .btn-small:hover{background:rgba(0,209,178,0.1);border-color:var(--accent)}
+    .btn-small.edit{border-color:rgba(0,209,178,0.3)}
+    .btn-small.upload{border-color:rgba(100,200,255,0.3);color:#64c8ff}
+    .btn-small.desc{border-color:rgba(255,200,100,0.3);color:#ffc864}
+
+    /* Edit Modal */
+    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:5000;align-items:center;justify-content:center}
+    .modal.active{display:flex}
+    .modal-content{background:var(--panel);border-radius:12px;padding:24px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-header h2{margin:0;font-size:20px}
+    .close-btn{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+    label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    input[type=text], input[type=number], textarea{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:10px 12px;
+      border-radius:10px;
+      color:inherit;
+      font-size:14px;
+      transition:all 0.2s;
+      font-family: inherit;
+    }
+    textarea{min-height:120px;resize:vertical}
+    input[type=text]:focus, input[type=number]:focus, textarea:focus{
+      border-color:var(--accent);
+      background:rgba(0,209,178,0.05);
+      outline:none;
+    }
+
+    .description-preview{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;margin-top:10px;border-left:3px solid var(--accent)}
+    .preview-line{min-height:18px;margin:4px 0;font-size:13px}
+    .description-help{font-size:11px;color:var(--muted);margin-top:4px}
+
+    .modal-buttons{display:flex;gap:12px;margin-top:24px}
+    .modal-buttons button{flex:1}
+
+    /* Image Upload Modal */
+    .image-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:5001;align-items:center;justify-content:center}
+    .image-modal.active{display:flex}
+    .image-modal-content{background:var(--panel);border-radius:12px;padding:24px;max-width:500px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+
+    .file-input-wrapper{position:relative;overflow:hidden;display:inline-block;width:100%}
+    .file-input-wrapper input[type=file]{position:absolute;left:-9999px}
+    .file-input-label{display:block;background:rgba(0,209,178,0.1);border:2px dashed var(--accent);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s}
+    .file-input-label:hover{background:rgba(0,209,178,0.15)}
+
+    .preview-image{max-width:100%;max-height:300px;border-radius:8px;margin-top:16px}
+
+    .loading{display:none;text-align:center;color:var(--muted);margin:16px 0}
+    .loading.active{display:block}
+
+    footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .app {
+        padding: 16px;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      
+      h1 {
+        font-size: 20px;
+        margin: 0 0 16px 0;
+      }
+      
+      .breadcrumb {
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      
+      .panel {
+        padding: 16px;
+        border-radius: 12px;
+      }
+      
+      .controls {
+        justify-content: center;
+      }
+      
+      .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+      }
+      
+      .sheet {
+        margin-top: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        font-size: 12px;
+        min-width: 700px;
+      }
+      
+      thead th,
+      tbody td {
+        padding: 10px 8px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        gap: 6px;
+        min-width: 90px;
+      }
+      
+      .btn-small {
+        padding: 8px 10px;
+        font-size: 11px;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      
+      /* Modal adjustments for mobile */
+      .modal-content,
+      .image-modal-content {
+        padding: 20px;
+        width: 95%;
+        max-width: 95%;
+        margin: 10px;
+        max-height: 85vh;
+      }
+      
+      .modal-header h2 {
+        font-size: 18px;
+      }
+      
+      .form-group {
+        margin-bottom: 14px;
+      }
+      
+      input[type=text],
+      input[type=number],
+      textarea {
+        padding: 12px;
+        font-size: 16px;
+      }
+      
+      textarea {
+        min-height: 100px;
+      }
+      
+      .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .modal-buttons button {
+        width: 100%;
+        padding: 14px;
+      }
+      
+      .file-input-label {
+        padding: 20px;
+        font-size: 14px;
+      }
+      
+      footer {
+        font-size: 12px;
+        padding: 0 10px;
+        margin-top: 20px;
+      }
+      
+      footer p {
+        margin: 8px 0;
+        line-height: 1.4;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .app {
+        padding: 12px;
+      }
+      
+      h1 {
+        font-size: 18px;
+      }
+      
+      .btn {
+        padding: 14px 12px;
+        font-size: 13px;
+        min-width: 110px;
+      }
+      
+      table {
+        font-size: 11px;
+        min-width: 600px;
+      }
+      
+      thead th,
+      tbody td {
+        padding: 8px 6px;
+      }
+      
+      .modal-content,
+      .image-modal-content {
+        padding: 16px;
+        border-radius: 10px;
+      }
+      
+      .modal-header h2 {
+        font-size: 16px;
+      }
+      
+      .close-btn {
+        font-size: 20px;
+      }
+      
+      .file-input-label {
+        padding: 16px;
+        font-size: 13px;
+      }
+      
+      .preview-image {
+        max-height: 200px;
+      }
+    }
+    
+    @media (max-width: 320px) {
+      .app {
+        padding: 8px;
+      }
+      
+      .btn {
+        min-width: 100px;
+        padding: 12px 10px;
+      }
+      
+      .modal-content,
+      .image-modal-content {
+        padding: 14px;
+        margin: 8px;
+      }
+      
+      .form-group label {
+        font-size: 11px;
+      }
+    }
+  
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+  <!-- Flash Messages -->
+  <div class="flash-container" id="flashContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+            <span>{{ message }}</span>
+            <button class="close-flash">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+  <div class="app">
+    <div class="breadcrumb">
+      <a onclick="goBack()">← Back to Products</a>
+    </div>
+    <h1>📦 Edit Products & Upload Images</h1>
+
+    <div class="panel">
+      <div class="controls">
+        <button class="btn" id="refreshBtn">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Tax (%)</th>
+            <th>Stock</th>
+            <th>Safe Stock</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsBody">
+          <tr>
+            <td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Loading products...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      <p>💡 Click Edit to modify product details, Desc to edit descriptions, or Upload to add/change product image</p>
+    </footer>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Product</h2>
+        <button class="close-btn" onclick="closeEditModal()">×</button>
+      </div>
+      <div class="form-group">
+        <label>Product ID</label>
+        <input type="text" id="editId" readonly style="background:rgba(255,255,255,0.02)">
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="editName">
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" id="editPrice" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Tax (%)</label>
+        <input type="number" id="editTax" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" id="editStock">
+      </div>
+      <div class="form-group">
+        <label>Safe Stock</label>
+        <input type="number" id="editSafeStock">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" id="editCategory" placeholder="e.g., Electronics">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn primary" onclick="saveProduct()">💾 Save</button>
+        <button class="btn" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Description Modal -->
+  <div id="descModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Description</h2>
+        <button class="close-btn" onclick="closeDescModal()">×</button>
+      </div>
+      <div class="form-group">
+        <label>Product</label>
+        <input type="text" id="descProductName" readonly style="background:rgba(255,255,255,0.02)">
+      </div>
+      <div class="form-group">
+        <label>Description (one per line)</label>
+        <textarea id="editDescription" placeholder="Enter description lines, one per line. Each line will be saved as a separate description."></textarea>
+        <div class="description-help">Tip: Each line becomes a separate description bullet point</div>
+      </div>
+      <div class="description-preview">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Preview:</div>
+        <div id="descPreview"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn primary" onclick="saveDescription()">💾 Save Description</button>
+        <button class="btn" onclick="closeDescModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Upload Modal -->
+  <div id="imageModal" class="image-modal">
+    <div class="image-modal-content">
+      <div class="modal-header">
+        <h2>Upload Product Image</h2>
+        <button class="close-btn" onclick="closeImageModal()">×</button>
+      </div>
+      <p style="color:var(--muted);font-size:13px">Select an image for this product. It will be saved as: <strong id="imageName"></strong></p>
+      <div class="file-input-wrapper">
+        <label class="file-input-label" for="imageInput">
+          <div style="font-size:13px">Click to select image or drag & drop</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">(JPG, PNG supported)</div>
+        </label>
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+      <img id="previewImg" class="preview-image" style="display:none">
+      <div id="uploadLoading" class="loading">
+        <p>Uploading...</p>
+      </div>
+      <div class="modal-buttons" style="margin-top:24px">
+        <button class="btn primary" id="uploadBtn" onclick="uploadImage()">📤 Upload Image</button>
+        <button class="btn" onclick="closeImageModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let products = [];
+    let currentEditProduct = null;
+    let currentDescProduct = null;
+    let currentImageProductId = null;
+
+    // Load products on page load
+    window.addEventListener('load', loadProducts);
+
+    function goBack() {
+      window.location.href = '/products';
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/export-products', {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          showError('Failed to load products. Please make sure you are logged in.');
+          return;
+        }
+
+        if (!res.ok) {
+          showError(data.message || 'Failed to load products');
+          return;
+        }
+
+        products = data.products || [];
+        renderTable();
+      } catch (e) {
+        showError('Error: ' + e.message);
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('productsBody');
+      if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No products found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = products.map(p => {
+        // Format description preview
+        let descPreview = 'No description';
+        const descLines = [
+          p.description1,
+          p.description2,
+          p.description3,
+          p.description4,
+          p.description5
+        ].filter(desc => desc && desc.trim() !== '');
+        
+        if (descLines.length > 0) {
+          descPreview = descLines[0];
+          if (descLines.length > 1) {
+            descPreview += ` (+${descLines.length - 1} more)`;
+          }
+        }
+
+        return `
+        <tr>
+          <td>${p.product_id}</td>
+          <td>${escapeHtml(p.name)}</td>
+          <td>$${parseFloat(p.price).toFixed(2)}</td>
+          <td>${p.tax}%</td>
+          <td>${p.stock}</td>
+          <td>${p.safe_stock}</td>
+          <td>${escapeHtml(p.category_name)}</td>
+          <td style="max-width:200px;color:${descLines.length > 0 ? '#e6eef0' : '#666'};font-size:12px">
+            ${descPreview}
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-small edit" onclick="openEditModal(${p.product_id})">✏️ Edit</button>
+              <button class="btn-small desc" onclick="openDescModal(${p.product_id})">📝 Desc</button>
+              <button class="btn-small upload" onclick="openImageModal(${p.product_id})">📤 Image</button>
+            </div>
+          </td>
+        </tr>
+      `}).join('');
+    }
+
+    function openEditModal(productId) {
+      const product = products.find(p => p.product_id === productId);
+      if (!product) return;
+
+      currentEditProduct = product;
+      document.getElementById('editId').value = product.product_id;
+      document.getElementById('editName').value = product.name;
+      document.getElementById('editPrice').value = product.price;
+      document.getElementById('editTax').value = product.tax;
+      document.getElementById('editStock').value = product.stock;
+      document.getElementById('editSafeStock').value = product.safe_stock;
+      document.getElementById('editCategory').value = product.category_name;
+
+      document.getElementById('editModal').classList.add('active');
+      document.getElementById('editName').focus();
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+      currentEditProduct = null;
+    }
+
+    async function saveProduct() {
+      if (!currentEditProduct) return;
+
+      const product = {
+        id: currentEditProduct.product_id,
+        name: document.getElementById('editName').value,
+        price: parseFloat(document.getElementById('editPrice').value || 0).toFixed(2),
+        tax: parseFloat(document.getElementById('editTax').value || 0).toFixed(2),
+        stock: parseInt(document.getElementById('editStock').value || 0),
+        safe_stock: parseInt(document.getElementById('editSafeStock').value || 0),
+        category_name: document.getElementById('editCategory').value
+      };
+
+      try {
+        const res = await fetch('/edit_product', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(product)
+        });
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          showError('Invalid server response');
+          return;
+        }
+
+        if (res.ok) {
+          showSuccess('Product updated successfully!');
+          closeEditModal();
+          loadProducts();
+        } else {
+          showError(data.message || 'Failed to update product');
+        }
+      } catch (e) {
+        showError('Error: ' + e.message);
+      }
+    }
+
+    function openDescModal(productId) {
+      const product = products.find(p => p.product_id === productId);
+      if (!product) return;
+
+      currentDescProduct = product;
+      document.getElementById('descProductName').value = product.name;
+      
+      // Combine descriptions into single textarea
+      const descLines = [
+        product.description1,
+        product.description2,
+        product.description3,
+        product.description4,
+        product.description5
+      ].filter(desc => desc && desc.trim() !== '');
+      
+      document.getElementById('editDescription').value = descLines.join('\n');
+      updateDescPreview();
+      
+      // Update preview on input
+      document.getElementById('editDescription').addEventListener('input', updateDescPreview);
+      
+      document.getElementById('descModal').classList.add('active');
+      document.getElementById('editDescription').focus();
+    }
+
+    function closeDescModal() {
+      document.getElementById('descModal').classList.remove('active');
+      document.getElementById('editDescription').removeEventListener('input', updateDescPreview);
+      currentDescProduct = null;
+    }
+
+    function updateDescPreview() {
+      const textarea = document.getElementById('editDescription');
+      const preview = document.getElementById('descPreview');
+      const lines = textarea.value.split('\n').filter(line => line.trim() !== '');
+      
+      if (lines.length === 0) {
+        preview.innerHTML = '<div class="preview-line" style="color:#666;font-style:italic">No description entered</div>';
+        return;
+      }
+      
+      preview.innerHTML = lines.map(line => 
+        `<div class="preview-line">• ${escapeHtml(line)}</div>`
+      ).join('');
+    }
+
+    async function saveDescription() {
+      if (!currentDescProduct) return;
+
+      const description = document.getElementById('editDescription').value;
+      const productId = currentDescProduct.product_id;
+
+      try {
+        const res = await fetch('/api/update-description', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            product_id: productId,
+            description: description
+          })
+        });
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          showError('Invalid server response');
+          return;
+        }
+
+        if (res.ok) {
+          showSuccess('Description updated successfully!');
+          closeDescModal();
+          loadProducts();
+        } else {
+          showError(data.message || 'Failed to update description');
+        }
+      } catch (e) {
+        showError('Error: ' + e.message);
+      }
+    }
+
+    function openImageModal(productId) {
+      const product = products.find(p => p.product_id === productId);
+      if (!product) return;
+
+      currentImageProductId = productId;
+      document.getElementById('imageName').textContent = `product_${productId}.jpg`;
+      document.getElementById('imageInput').value = '';
+      document.getElementById('previewImg').style.display = 'none';
+      document.getElementById('uploadLoading').classList.remove('active');
+
+      document.getElementById('imageModal').classList.add('active');
+    }
+
+    function closeImageModal() {
+      document.getElementById('imageModal').classList.remove('active');
+      currentImageProductId = null;
+    }
+
+    // Image preview on file select
+    document.getElementById('imageInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = document.getElementById('previewImg');
+        img.src = event.target.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function uploadImage() {
+      if (!currentImageProductId) return;
+
+      const fileInput = document.getElementById('imageInput');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Please select an image first');
+        return;
+      }
+
+      document.getElementById('uploadLoading').classList.add('active');
+      document.getElementById('uploadBtn').disabled = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('product_id', currentImageProductId);
+        formData.append('image', file);
+
+        const res = await fetch('/api/upload-product-image', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          showError('Invalid server response');
+          document.getElementById('uploadLoading').classList.remove('active');
+          document.getElementById('uploadBtn').disabled = false;
+          return;
+        }
+
+        if (res.ok) {
+          showSuccess('Image uploaded successfully as product_' + currentImageProductId + '.jpg');
+          closeImageModal();
+        } else {
+          showError(data.message || 'Failed to upload image');
+        }
+      } catch (e) {
+        showError('Error: ' + e.message);
+      } finally {
+        document.getElementById('uploadLoading').classList.remove('active');
+        document.getElementById('uploadBtn').disabled = false;
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showSuccess(msg) {
+      alert('✅ ' + msg);
+    }
+
+    function showError(msg) {
+      alert('❌ ' + msg);
+    }
+
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', loadProducts);
+  </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Invoices</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:#000; color:#fff; padding:20px; }
+        .container { max-width:1200px; margin:0 auto; }
+        h1 { margin-bottom:20px; }
+        .btn { background:#3498db; color:#fff; padding:10px 20px; border:none; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .btn:hover { background:#2980b9; }
+        table { width:100%; border-collapse:collapse; margin-top:20px; }
+        th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
+        th { background:#111; }
+        tr:hover { background:#1a1a1a; }
+        .status { padding:4px 8px; border-radius:4px; font-size:0.9rem; }
+        .status.draft { background:#f39c12; color:#000; }
+        .status.sent { background:#3498db; }
+        .status.paid { background:#2ecc71; }
+        .status.cancelled { background:#e74c3c; }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+<div class="container">
+    <h1>Invoices</h1>
+    <a href="/billing" class="btn">Create New Invoice</a>
+    <div id="statusMessage" style="margin-top:10px;color:#f1c40f;"></div>
+    <table id="invoicesTable">
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Edit</th>
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script>
+    async function loadInvoices() {
+        try {
+            const res = await fetch('/api/invoices', { credentials:'include' });
+            const data = await res.json();
+            if (data.success) {
+                const tbody = document.querySelector('#invoicesTable tbody');
+                tbody.innerHTML = '';
+                data.invoices.forEach(inv => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${inv.invoice_number || inv.invoice_id}</td>
+                        <td>${inv.customer_name}</td>
+                        <td>${inv.due_date}</td>
+                        <td>${parseFloat(inv.grand_total).toFixed(2)}</td>
+                        <td><span class="status ${inv.status}">${inv.status}</span></td>
+                        <td><a class="btn" href="/billing?invoice_id=${inv.invoice_id}">Edit</a></td>
+                        <td><a class="btn" href="/billing_view?invoice_id=${inv.invoice_id}">View Invoice</a></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                document.getElementById('statusMessage').textContent = data.message || 'Failed to load invoices';
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('statusMessage').textContent = 'Error fetching invoices';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadInvoices);
+</script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

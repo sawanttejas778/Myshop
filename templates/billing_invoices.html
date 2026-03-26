@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>{% if selected_invoice %}Invoice {{ selected_invoice.invoice_number }}{% else %}Professional Invoices{% endif %} · Flask Data</title>
+    <!-- Font Awesome 5 (free) for icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <!-- Google Font: Inter & Roboto Mono for clean look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f3f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            padding: clamp(0.75rem, 3vw, 2rem) clamp(0.75rem, 4vw, 2.5rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .invoice-container {
+            max-width: 1440px;
+            width: 100%;
+            background: white;
+            border-radius: clamp(16px, 4vw, 28px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid #e9eef2;
+        }
+
+        /* header area with flask badge - responsive */
+        .flask-header {
+            background: #0b1120;
+            padding: clamp(0.75rem, 2vw, 1.2rem) clamp(1rem, 3vw, 2rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2d3a4e;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .flask-header h3 {
+            font-weight: 500;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            color: #a5b4cb;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: clamp(5px, 1.5vw, 10px);
+        }
+        .flask-header h3 i {
+            color: #3b82f6;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+        }
+        .flask-header .data-badge {
+            background: #1e2b3c;
+            padding: 0.4rem clamp(0.7rem, 2vw, 1rem);
+            border-radius: 60px;
+            color: #b9c8e0;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            font-weight: 500;
+            border: 1px solid #314a62;
+            white-space: nowrap;
+        }
+        .flask-header .data-badge i {
+            margin-right: 6px;
+            color: #10b981;
+        }
+
+        /* responsive two column layout */
+        .invoice-panels {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .panel-left {
+            flex: 1.2;
+            min-width: 300px;
+            width: 100%;
+            background: #ffffff;
+            padding: clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
+            border-right: 1px solid #eef2f6;
+        }
+
+        .panel-right {
+            flex: 0.9;
+            min-width: 280px;
+            width: 100%;
+            background: #f9fbfd;
+            padding: clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
+        }
+
+        /* invoice meta header */
+        .invoice-title {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: clamp(1.2rem, 4vw, 2rem);
+        }
+        .invoice-title .badge {
+            background: #e6edfb;
+            color: #1d4ed8;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            padding: 0.4rem clamp(0.8rem, 2.5vw, 1rem);
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            border: 1px solid #cbdcff;
+            white-space: nowrap;
+        }
+        .invoice-title h2 {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0f1825;
+            word-break: break-word;
+        }
+
+        /* customer card - fully responsive */
+        .customer-card {
+            background: #f2f5fa;
+            border-radius: clamp(16px, 3vw, 20px);
+            padding: clamp(1.2rem, 3vw, 1.8rem);
+            margin: 1.5rem 0 1.8rem 0;
+            border: 1px solid #e2eaf1;
+            width: 100%;
+            overflow: hidden;
+        }
+        .customer-name {
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            word-break: break-word;
+        }
+        .customer-detail {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 12px;
+            color: #33455a;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+        .customer-detail i {
+            width: 20px;
+            color: #3b82f6;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #dde3e9;
+            margin: 1.5rem 0;
+        }
+
+        /* responsive grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: clamp(1rem, 3vw, 1.8rem);
+        }
+        .info-item {
+            background: white;
+            border-radius: clamp(14px, 2.5vw, 18px);
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border: 1px solid #ecf1f7;
+            width: 100%;
+        }
+        .info-item .label {
+            font-size: clamp(0.65rem, 2vw, 0.75rem);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+        }
+        .info-item .value {
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            font-weight: 600;
+            color: #0b1c2e;
+            word-break: break-word;
+        }
+        .info-item .sub {
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            color: #3a546d;
+            margin-top: 6px;
+            border-top: 1px dashed #d3dee9;
+            padding-top: 6px;
+        }
+
+        /* table styling - fully responsive with horizontal scroll */
+        .items-table-wrapper {
+            overflow-x: auto;
+            margin-top: 1.8rem;
+            border-radius: clamp(14px, 3vw, 18px);
+            border: 1px solid #e3eaf1;
+            background: white;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            min-width: 600px; /* ensures table doesn't squish too much */
+        }
+        th {
+            background: #f0f4fa;
+            font-weight: 600;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #415a77;
+            padding: clamp(0.7rem, 2vw, 1rem);
+            text-align: left;
+            border-bottom: 1px solid #cfddee;
+            white-space: nowrap;
+        }
+        td {
+            padding: clamp(0.7rem, 2vw, 1rem);
+            border-bottom: 1px solid #eaeff5;
+            color: #1f3449;
+            word-break: break-word;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .mono {
+            font-family: 'Roboto Mono', monospace;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+        }
+        .product-badge {
+            background: #e2eaf3;
+            padding: 0.25rem 0.8rem;
+            border-radius: 40px;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* right panel summary blocks */
+        .totals-box {
+            background: white;
+            border-radius: clamp(18px, 4vw, 24px);
+            padding: clamp(1.2rem, 3.5vw, 2rem);
+            border: 1px solid #e4eaf2;
+            box-shadow: 0 8px 15px -10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px dashed #dae2ec;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .totals-row .label {
+            word-break: break-word;
+        }
+        .totals-row:last-of-type {
+            border-bottom: none;
+        }
+        .grand-row {
+            font-weight: 700;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            color: #075985;
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 2px solid #cbd5e1;
+        }
+        .badge-status {
+            display: inline-block;
+            background: #ffedd5;
+            color: #9a3412;
+            padding: 0.3rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            text-transform: capitalize;
+            border: 1px solid #fed7aa;
+            white-space: nowrap;
+        }
+        .shop-id {
+            background: #dee7f2;
+            border-radius: 30px;
+            padding: 0.3rem 1rem;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .meta-footer {
+            margin-top: 2rem;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: #546a7a;
+            background: #eef3f8;
+            border-radius: clamp(14px, 3vw, 18px);
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .meta-footer i {
+            color: #3b6e9b;
+            width: 18px;
+        }
+
+        /* flask data note */
+        .flask-note {
+            background: #eef9ff;
+            border-radius: clamp(12px, 2.5vw, 16px);
+            padding: clamp(0.8rem, 2.2vw, 1.2rem);
+            margin: 1.5rem 1.5rem 1.5rem 1.5rem;
+            border: 1px solid #bdd8f0;
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 2vw, 16px);
+            flex-wrap: wrap;
+        }
+        .flask-note i {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+        }
+        .flask-note div {
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            flex: 1;
+        }
+
+        /* invoice selector - responsive */
+        .invoice-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .invoice-btn {
+            background: white;
+            border: 1px solid #d0ddee;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.1s;
+            color: #1e2f44;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            white-space: nowrap;
+        }
+        .invoice-btn.active {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: white;
+        }
+        .invoice-btn:hover {
+            background: #e9eff8;
+        }
+
+        /* other invoices section */
+        .other-invoices {
+            margin-top: 1.8rem;
+            background: white;
+            border-radius: clamp(14px, 3vw, 18px);
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            border: 1px solid #d8e2ed;
+            width: 100%;
+        }
+        .other-invoice-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px dashed #dee7f0;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+        }
+        .other-invoice-item:last-child {
+            border-bottom: none;
+        }
+
+        /* responsive breakpoints */
+        @media (max-width: 768px) {
+            .panel-left, .panel-right {
+                flex: 100%;
+            }
+            .panel-left {
+                border-right: none;
+                border-bottom: 1px solid #eef2f6;
+            }
+            .customer-detail {
+                flex-wrap: wrap;
+            }
+            .grand-row {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .flask-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .flask-header .data-badge {
+                align-self: flex-start;
+            }
+            .invoice-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .customer-card .shop-id {
+                white-space: normal;
+                word-break: break-word;
+            }
+            .totals-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .meta-footer div {
+                word-break: break-word;
+            }
+        }
+
+        /* touch-friendly improvements */
+        button, .invoice-btn {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* print styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .invoice-container { box-shadow: none; border: 1px solid #ddd; }
+            .flask-header, .flask-note, .invoice-selector { display: none; }
+        }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="invoice-container">
+    <!-- header mimicking Flask data context - fully responsive -->
+    <div class="flask-header">
+        <h3><i class="fas fa-flask"></i>invoice view ·</h3>
+        <span class="data-badge"><i class="fas fa-database"></i> {{ invoices|length }} invoices · {{ invoice_items|length }} items</span>
+    </div>
+
+    {% if read_only and invoices %}
+    <div class="invoice-selector" style="margin-top:1rem;">
+        {% for inv in invoices %}
+            <a class="invoice-btn {% if selected_invoice and selected_invoice.invoice_id == inv.invoice_id %}active{% endif %}" href="{{ url_for('my_invoices') }}?invoice_id={{ inv.invoice_id }}">
+                #{{ inv.invoice_number }} • ₹{{ "%.2f"|format(inv.grand_total) }} • {{ inv.status|capitalize }}
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- main two panel layout -->
+    {% set display_invoice = selected_invoice if selected_invoice else invoices[0] if invoices else None %}
+    {% set display_items = invoice_items if invoice_items else [] %}
+    
+    <div class="invoice-panels">
+        <!-- LEFT PANEL: invoice items table - fully responsive with horizontal scroll -->
+        <div class="panel-left">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                <h3 style="font-weight: 600; font-size: clamp(1rem, 4vw, 1.3rem);">
+                    <i class="fas fa-receipt" style="color:#2563eb; margin-right: 8px;"></i>Line items
+                </h3>
+                <span class="product-badge">{{ display_items|length }} records</span>
+            </div>
+            <div class="items-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Product</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Unit price</th>
+                            <th>Tax %</th>
+                            <th>Tax amt</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceItems">
+                        {% for item in display_items %}
+                        <tr>
+                            <td class="mono">#{{ item.item_id }}</td>
+                            <td>
+                                <span style="font-weight:500;">{{ item.product_name if item.product_name else 'Product' }}</span>
+                                <br><span style="font-size:0.7rem; color:#3f5e7a;">ID: {{ item.product_id }}</span>
+                            </td>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ "%.2f"|format(item.unit_price) }}</td>
+                            <td>{{ "%.2f"|format(item.tax_rate) }}%</td>
+                            <td>₹{{ "%.2f"|format(item.tax_amount) }}</td>
+                            <td><strong>₹{{ "%.2f"|format(item.total) }}</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:2rem; color:#6f8faf;">
+                                <i class="fas fa-box-open" style="font-size:2rem; opacity:0.5; margin-bottom:0.5rem; display:block;"></i>
+                                No invoice items found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: invoice master data -->
+        <div class="panel-right">
+            {% if display_invoice %}
+            <!-- invoice header with status -->
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.2rem;">
+                <h3 style="font-weight: 600; font-size: clamp(1rem, 4vw, 1.3rem);">
+                    <i class="fas fa-file-invoice"></i> Invoice details
+                </h3>
+                {% if not read_only %}
+                <span class="badge-status" style="background:#e0f2fe; color:#0369a1;">
+                    <i class="far fa-clock"></i>
+                    <select id="statusSelect" style="background:transparent; border:none; color:inherit; font-weight:600;">
+                        {% for st in ['draft','sent','paid','cancelled'] %}
+                        <option value="{{ st }}" {% if display_invoice.status==st %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                    </select>
+                </span>
+                {% else %}
+                <span class="badge-status" style="background:#f0f4f8; color:#1e3a56; cursor:default;">
+                    <i class="far fa-clock"></i> {{ display_invoice.status|capitalize }}
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- customer details card - fully responsive -->
+            <div class="customer-card">
+                <div class="customer-name">
+                    <i class="fas fa-user-circle" style="color:#2563eb;"></i> {{ display_invoice.customer_name }}
+                </div>
+                <div class="customer-detail"><i class="fas fa-envelope"></i> {{ display_invoice.customer_email }}</div>
+                <div class="customer-detail"><i class="fas fa-phone-alt"></i> {{ display_invoice.customer_phone }}</div>
+                <div class="customer-detail"><i class="fas fa-map-marker-alt"></i> {{ display_invoice.customer_address }}</div>
+                <div style="margin-top: 1.2rem; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <span><span style="color:#4a627a;">invoice no.</span> <strong>{{ display_invoice.invoice_number }}</strong></span>
+                    <span class="shop-id"><i class="fas fa-store"></i> {{ display_invoice.shop_name or ('Shop #' ~ display_invoice.shop_id) }}</span>
+                    <span><i class="far fa-calendar-alt" style="color:#3b82f6;"></i> due: {{ display_invoice.due_date }}</span>
+                </div>
+            </div>
+
+            <!-- totals summary - responsive -->
+            <div class="totals-box">
+                <h4 style="font-weight:500; margin-bottom:1.2rem; display:flex; align-items: center; gap:6px; flex-wrap:wrap;">
+                    <i class="fas fa-calculator" style="color:#2563eb;"></i>Invoice summary
+                </h4>
+                <div class="totals-row"><span class="label">Subtotal (from items)</span> <span class="mono">₹{{ "%.2f"|format(display_invoice.subtotal) }}</span></div>
+                <div class="totals-row"><span class="label">Total tax</span> <span class="mono">₹{{ "%.2f"|format(display_invoice.total_tax) }}</span></div>
+                <div class="totals-row grand-row"><span class="label">Grand total</span> <span>₹{{ "%.2f"|format(display_invoice.grand_total) }}</span></div>
+                <div style="margin-top: 1rem; background:#f2f7ff; border-radius:12px; padding:0.7rem 1rem; word-break:break-word;">
+                    <span style="color:#1f4a7a;"><i class="fas fa-tag"></i> created by: user #{{ display_invoice.created_by }}</span>
+                </div>
+            </div>
+
+            <!-- metadata footer with timestamps -->
+            <div class="meta-footer">
+                <div><i class="far fa-calendar-check"></i> Created: {{ display_invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') if display_invoice.created_at else 'N/A' }}</div>
+                <div style="margin-top:8px;"><i class="far fa-clock"></i> Last updated: {{ display_invoice.updated_at.strftime('%Y-%m-%d %H:%M:%S') if display_invoice.updated_at else 'N/A' }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- responsive JavaScript for mobile touch and dynamic behavior -->
+<script>
+    (function() {
+        // Make invoice buttons touch-friendly
+        const buttons = document.querySelectorAll('.invoice-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Visual feedback for touch
+                buttons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+            
+            // Ensure minimum touch target size
+            if (window.innerWidth <= 480) {
+                btn.style.padding = '0.8rem 1.2rem';
+            }
+        });
+
+        // Handle responsive table text wrap
+        function adjustTableForMobile() {
+            const table = document.querySelector('table');
+            if (!table) return;
+            
+            if (window.innerWidth <= 600) {
+                table.style.fontSize = '0.75rem';
+            } else {
+                table.style.fontSize = '';
+            }
+        }
+        
+        window.addEventListener('resize', adjustTableForMobile);
+        adjustTableForMobile();
+        
+        // Prevent zoom on double-tap for better UX
+        let lastTap = 0;
+        document.addEventListener('touchend', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 500 && tapLength > 0) {
+                e.preventDefault();
+            }
+            lastTap = currentTime;
+        });
+    })();
+</script>
+
+<script>
+    // status dropdown updates backend using existing invoice API
+    document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        const invoiceId = params.get('invoice_id');
+        const sel = document.getElementById('statusSelect');
+        if (sel && invoiceId) {
+            sel.addEventListener('change', async function() {
+                const newStatus = this.value;
+                try {
+                    const res = await fetch(`/api/invoices/${invoiceId}`);
+                    const body = await res.json();
+                    if (res.ok && body.success && body.invoice) {
+                        const inv = body.invoice;
+                        inv.status = newStatus;
+                        const u = await fetch(`/api/invoices/${invoiceId}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type':'application/json'},
+                            credentials:'include',
+                            body: JSON.stringify(inv)
+                        });
+                        const uj = await u.json();
+                        if (!u.ok || !uj.success) {
+                            alert('Status update failed: '+(uj.message||u.statusText));
+                            sel.value = inv.status;
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Error saving status');
+                }
+            });
+        }
+    });
+</script>
+
+<script>
+    // fetch invoice via API and re-render table (used when selecting via JS)
+    async function fetchInvoice(id) {
+        try {
+            const res = await fetch(`/api/invoices/${id}`, {credentials:'include'});
+            const data = await res.json();
+            if (res.ok && data.success && data.invoice) {
+                populate(data.invoice);
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    function updateStatusOptions(current) {
+        const sel = document.getElementById('statusSelect');
+        if (!sel) return;
+        for (let opt of sel.options) {
+            if (current === 'paid') {
+                opt.disabled = !(opt.value === 'paid' || opt.value === 'cancelled');
+            } else {
+                opt.disabled = false;
+            }
+        }
+    }
+
+    function populate(inv) {
+        // only update portions that exist; template may already have static data
+        const statusSel = document.getElementById('statusSelect');
+        if (statusSel) {
+            statusSel.value = inv.status;
+            updateStatusOptions(inv.status);
+        }
+
+        const tbody = document.getElementById('invoiceItems');
+        if (tbody && inv.items) {
+            tbody.innerHTML = '';
+            inv.items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="mono">#${item.item_id}</td>
+                    <td><span style="font-weight:500;">${item.product_name||'Product'}</span><br><span style="font-size:0.7rem; color:#3f5e7a;">ID: ${item.product_id}</span></td>
+                    <td>${item.description}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.unit_price.toFixed(2)}</td>
+                    <td>${item.tax_rate.toFixed(2)}</td>
+                    <td>₹${item.tax_amount.toFixed(2)}</td>
+                    <td><strong>₹${item.total.toFixed(2)}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        const invoiceId = params.get('invoice_id');
+        if (invoiceId) fetchInvoice(invoiceId);
+    });
+</script>
+
+<!-- 
+    Expected Flask context variables:
+    - invoices: list of invoice objects from the invoices table
+    - invoice_items: list of item objects from invoice_items table (filtered by selected invoice if needed)
+    - selected_invoice: the currently selected invoice object (optional)
+    
+    Object structure based on your tables:
+    Invoice: invoice_id, invoice_number, customer_name, customer_email, customer_phone, 
+             customer_address, due_date, shop_id, subtotal, total_tax, grand_total, 
+             status, created_by, created_at, updated_at
+    
+    InvoiceItem: item_id, invoice_id, product_id, description, quantity, unit_price,
+                 tax_rate, tax_amount, total
+-->
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{shop_name}} - Customer Management</title>
+    <style>
+        /* Same CSS as before - keeping it clean */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(145deg, #1a1a1a 0%, #000000 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .shop-name {
+            font-size: 1.2em;
+            color: #888;
+            margin-top: 5px;
+            border-left: 3px solid #444;
+            padding-left: 15px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .form-section {
+            background: #0a0a0a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .form-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .required::after {
+            content: '*';
+            color: #ff4444;
+            margin-left: 4px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #666;
+            background: #222;
+        }
+
+        .btn-submit {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #fff;
+            padding: 15px 40px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(145deg, #333 0%, #222 100%);
+            border-color: #666;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .list-section {
+            background: #0a0a0a;
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #333;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .list-title {
+            font-size: 1.8em;
+            color: #fff;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-container input {
+            padding-right: 45px;
+            background: #1a1a1a url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat right 15px center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #222;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 2px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #222;
+            color: #ccc;
+            font-size: 0.95em;
+        }
+
+        tr:hover {
+            background: #111;
+        }
+
+        .customer-id {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .shop-badge {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            border: 1px solid #444;
+            display: inline-block;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .spinner {
+            border: 4px solid #1a1a1a;
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 16px 24px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: #0a1f0a;
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .alert-error {
+            background: #1f0a0a;
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: #111;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-size: 1.8em;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            h1 { font-size: 2em; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; }
+        }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+    <!-- Flash Messages -->
+    <div class="flash-container" id="flashContainer">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+              <span>{{ message }}</span>
+              <button class="close-flash">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="container">
+        <header>
+            <h1>CUSTOMER MANAGEMENT</h1>
+            <div class="shop-name">{{shop_name}}</div>
+            <div class="subtitle">Premium Customer Relationship Management System</div>
+        </header>
+
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success"></div>
+        <div id="alertError" class="alert alert-error"></div>
+
+        <!-- Create Customer Form Section -->
+        <section class="form-section">
+            <h2 class="form-title">CREATE NEW CUSTOMER</h2>
+            <form id="customerForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="customer_name" class="required">Customer Name</label>
+                        <input type="text" id="customer_name" name="customer_name" required placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_mobile_number" class="required">Mobile Number</label>
+                        <input type="tel" id="customer_mobile_number" name="customer_mobile_number" required placeholder="+91 9876543210">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="required">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="customer@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shopid" class="required">Shop</label>
+                        <select id="shopid" name="shopid" required>
+                            <option value="">Loading shops...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address1" class="required">Address Line 1</label>
+                        <input type="text" id="address1" name="address1" required placeholder="House/Street number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address2">Address Line 2</label>
+                        <input type="text" id="address2" name="address2" placeholder="Landmark/Locality">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city" class="required">City</label>
+                        <input type="text" id="city" name="city" required placeholder="Enter city">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pincode" class="required">Pincode</label>
+                        <input type="text" id="pincode" name="pincode" required placeholder="6 digit pincode" maxlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Vilage" class="required">Village</label>
+                        <input type="text" id="Vilage" name="Vilage" required placeholder="Enter village name">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">CREATE CUSTOMER</button>
+            </form>
+        </section>
+
+        <!-- Customer List Section -->
+        <section class="list-section">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-label">Total Customers</div>
+                    <div class="stat-value" id="totalCustomers">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Current Shop</div>
+                    <div class="stat-value" id="currentShop">{{shop_name}}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Search Results</div>
+                    <div class="stat-value" id="searchResults">0</div>
+                </div>
+            </div>
+
+            <div class="list-header">
+                <h2 class="list-title">CUSTOMER DIRECTORY</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search customers...">
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading customers...</div>
+            </div>
+
+            <!-- Customer Table -->
+            <div class="table-container" id="tableContainer">
+                <table id="customerTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>Address Line 1</th>
+                            <th>Address Line 2</th>
+                            <th>City</th>
+                            <th>Village</th>
+                            <th>Pincode</th>
+                            <th>Shop ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <tr>
+                            <td colspan="10" class="no-data">No customers found. Add your first customer above.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let searchTimeout = null;
+
+        function showAlert(type, message) {
+            const alertElement = document.getElementById(`alert${type}`);
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load shops
+        async function loadShops() {
+            try {
+                const response = await fetch('/api/user-shops', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                const shopSelect = document.getElementById('shopid');
+                
+                if (data.success && data.shops && data.shops.length > 0) {
+                    shopSelect.innerHTML = '<option value="">Select Shop</option>';
+                    data.shops.forEach(shop => {
+                        const option = document.createElement('option');
+                        option.value = shop.shopid || shop.id;
+                        option.textContent = shop.name || shop.shop_name;
+                        shopSelect.appendChild(option);
+                    });
+                } else {
+                    shopSelect.innerHTML = '<option value="">No shops available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading shops:', error);
+                document.getElementById('shopid').innerHTML = '<option value="">Error loading shops</option>';
+            }
+        }
+
+        // Fetch customers
+        async function fetchCustomers(searchTerm = '') {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const tableContainer = document.getElementById('tableContainer');
+            const tbody = document.getElementById('customerTableBody');
+
+            loadingSpinner.style.display = 'block';
+            tableContainer.style.opacity = '0.5';
+
+            try {
+                let url = `${API_BASE_URL}/api/customers`;
+                if (searchTerm) {
+                    url = `${API_BASE_URL}/api/customers/search?q=${encodeURIComponent(searchTerm)}`;
+                }
+
+                const response = await fetch(url, { credentials: 'same-origin' });
+                const data = await response.json();
+
+                console.log('RAW API RESPONSE:', data);
+                console.log('Type:', typeof data);
+                console.log('Is Array?', Array.isArray(data));
+                
+                loadingSpinner.style.display = 'none';
+                tableContainer.style.opacity = '1';
+
+                // Handle the response
+                let customers = [];
+                
+                if (Array.isArray(data)) {
+                    customers = data;
+                } else if (data && typeof data === 'object') {
+                    // If it's an object with a data property
+                    customers = data.data || [];
+                }
+
+                document.getElementById('totalCustomers').textContent = customers.length;
+                document.getElementById('searchResults').textContent = customers.length;
+
+                if (customers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="10" class="no-data">No customers found</td></tr>`;
+                    return;
+                }
+
+                // Log first customer to see structure
+                console.log('First customer:', customers[0]);
+                console.log('First customer keys:', Object.keys(customers[0]));
+
+                let html = '';
+                customers.forEach((customer) => {
+                    // Try to access data - this will work if your API returns objects with proper keys
+                    const customerId = customer.customer_id || customer.id || '';
+                    const customerName = customer.customer_name || customer.name || '';
+                    const mobile = customer.customer_mobile_number || customer.mobile || customer.mobile_number || '';
+                    const email = customer.email || '';
+                    const address1 = customer.address1 || '';
+                    const address2 = customer.address2 || '';
+                    const city = customer.city || '';
+                    const village = customer.Vilage || customer.village || '';
+                    const pincode = customer.pincode || '';
+                    const shopId = customer.shopid || customer.shop_id || '';
+                    
+                    html += `
+                        <tr>
+                            <td><span class="customer-id">#${customerId}</span></td>
+                            <td><strong>${customerName}</strong></td>
+                            <td>${mobile}</td>
+                            <td>${email}</td>
+                            <td>${address1}</td>
+                            <td>${address2 || '-'}</td>
+                            <td>${city}</td>
+                            <td>${village}</td>
+                            <td>${pincode}</td>
+                            <td><span class="shop-badge">Shop ${shopId}</span></td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+                loadingSpinner.style.display = 'none';
+                tableContainer.style.opacity = '1';
+                tbody.innerHTML = `<tr><td colspan="10" class="no-data">Error loading customers: ${error.message}</td></tr>`;
+                showAlert('Error', 'Failed to fetch customers');
+            }
+        }
+
+        // Create customer
+        document.getElementById('customerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'CREATING...';
+
+            const formData = {
+                customer_name: document.getElementById('customer_name').value,
+                customer_mobile_number: document.getElementById('customer_mobile_number').value,
+                address1: document.getElementById('address1').value,
+                address2: document.getElementById('address2').value || '',
+                city: document.getElementById('city').value,
+                pincode: document.getElementById('pincode').value,
+                Vilage: document.getElementById('Vilage').value,
+                email: document.getElementById('email').value,
+                shopid: parseInt(document.getElementById('shopid').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/customers`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    showAlert('Success', 'Customer created successfully!');
+                    document.getElementById('customerForm').reset();
+                    document.getElementById('searchInput').value = '';
+                    await fetchCustomers();
+                } else {
+                    const error = await response.json();
+                    showAlert('Error', error.error || 'Failed to create customer');
+                }
+            } catch (error) {
+                showAlert('Error', 'Failed to create customer');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'CREATE CUSTOMER';
+            }
+        });
+
+        // Search with debounce
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const searchTerm = e.target.value.trim();
+            searchTimeout = setTimeout(() => {
+                fetchCustomers(searchTerm);
+            }, 500);
+        });
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', () => {
+            loadShops();
+            fetchCustomers();
+        });
+    </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

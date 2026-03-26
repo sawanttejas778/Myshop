@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Khatabook - Premium Accounting Ledger</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0c12 0%, #05070c 100%);
+            color: #74a2db;
+            font-family: 'Inter', 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            letter-spacing: 0.01em;
+        }
+
+        /* premium dark theme with enhanced contrast */
+        .navbar {
+            background: rgba(12, 16, 24, 0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(66, 153, 225, 0.25);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .card {
+            background: rgba(18, 22, 32, 0.85);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(56, 78, 110, 0.5);
+            border-radius: 1.75rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.6);
+            transition: all 0.25s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 25px 45px -14px rgba(0, 0, 0, 0.7);
+        }
+
+        .card-header {
+            background: rgba(26, 32, 44, 0.8);
+            border-bottom: 1px solid rgba(66, 87, 114, 0.5);
+            border-radius: 1.75rem 1.75rem 0 0 !important;
+            padding: 1.1rem 1.6rem;
+            font-weight: 600;
+        }
+
+        .card-header h5 {
+            color: #689adc;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        /* Enhanced table readability */
+        .table {
+            color: #5a71bb;
+            vertical-align: middle;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table thead th {
+            background: rgba(15, 20, 30, 0.9);
+            border-bottom: 2px solid #2c3e55;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: #9bb5e6;
+            padding: 1rem 0.75rem;
+        }
+
+        .table tbody tr {
+            background: transparent;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(45, 85, 125, 0.2);
+            transform: scale(1.002);
+        }
+
+        .table tbody td {
+            padding: 0.9rem 0.75rem;
+            color: #485685;
+        }
+
+        /* balance colors with high contrast */
+        .balance-positive {
+            color: #4ade80;
+            font-weight: 700;
+            text-shadow: 0 0 2px rgba(74, 222, 128, 0.2);
+            background: rgba(74, 222, 128, 0.08);
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+        }
+
+        .balance-negative {
+            color: #f97373;
+            font-weight: 700;
+            background: rgba(249, 115, 115, 0.08);
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+        }
+
+        .transaction-credit {
+            color: #4ade80;
+            font-weight: 700;
+            background: rgba(74, 222, 128, 0.1);
+            display: inline-block;
+            padding: 0.2rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .transaction-debit {
+            color: #f97373;
+            font-weight: 700;
+            background: rgba(249, 115, 115, 0.1);
+            display: inline-block;
+            padding: 0.2rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+        }
+
+        /* button styling */
+        .btn {
+            border-radius: 2rem;
+            padding: 0.5rem 1.3rem;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.01em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(105deg, #2563eb, #1d4ed8);
+            border: none;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(105deg, #3b82f6, #2563eb);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(105deg, #0d9488, #0f766e);
+            border: none;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(105deg, #14b8a6, #0d9488);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-outline-light {
+            border: 1px solid #4b556b;
+            color: #cbd5e6;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-outline-light:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        /* modal styling */
+        .modal-content {
+            background: #11161f;
+            border: 1px solid #2d3a4e;
+            border-radius: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-header {
+            border-bottom-color: #2d3a4e;
+        }
+
+        .form-control, .form-select {
+            background-color: #1a212e;
+            border: 1px solid #334155;
+            color: #141618;
+            border-radius: 1rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #1f2a3e;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+            color: rgb(24, 22, 22);
+        }
+
+        .form-control::placeholder {
+            color: #6b7a8f;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #6b8dea;
+            letter-spacing: 0.02em;
+        }
+
+        /* sidebar premium */
+        .sidebar {
+            background: rgba(8, 12, 20, 0.75);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-link {
+            color: #7296fa;
+            border-radius: 1.2rem;
+            margin: 0.4rem 0.6rem;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(95deg, #2563eb30, #1e40af20);
+            color: rgb(29, 12, 12);
+            border-left: 3px solid #3b82f6;
+            padding-left: 1rem;
+        }
+
+        /* Flash Messages - Floating Overlay */
+        .flash-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 420px;
+            pointer-events: none;
+        }
+
+        .flash-message {
+            background: rgba(20, 30, 45, 0.98);
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            color: #e0e0e0;
+            pointer-events: all;
+            border: 1px solid rgba(100, 150, 200, 0.2);
+        }
+
+        .flash-message.success {
+            border-left-color: #4ade80;
+            background: rgba(15, 40, 25, 0.98);
+        }
+
+        .flash-message.error {
+            border-left-color: #dc3545;
+            background: rgba(40, 15, 20, 0.98);
+        }
+
+        .flash-message.warning {
+            border-left-color: #ff9800;
+            background: rgba(40, 30, 10, 0.98);
+        }
+
+        .flash-message i {
+            font-size: 20px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .flash-message.success i {
+            color: #4ade80;
+        }
+
+        .flash-message.error i {
+            color: #ff6b9d;
+        }
+
+        .flash-message.warning i {
+            color: #ffc107;
+        }
+
+        .flash-message .close-flash {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #6b8dea;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .flash-message .close-flash:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .flash-message.fade-out {
+            animation: fadeOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(450px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(450px);
+                opacity: 0;
+            }
+        }
+
+        /* responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 12px;
+            }
+            .card-header h5 {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 0.4rem 0.9rem;
+                font-size: 0.8rem;
+            }
+            .table {
+                font-size: 0.75rem;
+            }
+            .balance-positive, .balance-negative {
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d4a6e;
+            border-radius: 10px;
+        }
+
+        /* party badge styling */
+        .party-type-badge {
+            padding: 0.3rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-customer {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f640;
+        }
+
+        .badge-supplier {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f59e0b40;
+        }
+
+        .text-secondary-emphasis {
+            color: #94a3b8 !important;
+        }
+
+        /* action buttons inside table */
+        .action-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+    <!-- Flash Messages Container -->
+    <div class="flash-container" id="flashContainer">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+              <span>{{ message }}</span>
+              <button class="close-flash">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar - Premium Black -->
+            <nav class="col-md-2 d-none d-md-block sidebar vh-100 sticky-top">
+                <div class="sidebar-sticky p-3 pt-4">
+                    <div class="d-flex align-items-center gap-2 mb-5">
+                        <i class="fas fa-crown fs-3 text-primary" style="filter: drop-shadow(0 0 5px #3b82f6);"></i>
+                        <h4 class="fw-bold mb-0" style="background: linear-gradient(120deg, #ffffff, #94a3f5); -webkit-background-clip: text; background-clip: text; color: transparent;">Khatabook</h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active py-2 px-3" href="#parties">
+                                <i class="fas fa-users me-2"></i> Parties
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-2 px-3" href="#transactions">
+                                <i class="fas fa-exchange-alt me-2"></i> Transactions
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="mt-5 pt-5 small text-secondary">
+                        <i class="fas fa-chart-line me-1"></i> Ledger Pro
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-10 main-content px-md-4 px-3 py-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 mb-4 gap-3">
+                    <div>
+                        <h1 class="display-5 fw-semibold" style="background: linear-gradient(135deg, #f0f4ff, #9bb5ff); -webkit-background-clip: text; background-clip: text; color: transparent;">Khatabook</h1>
+                        <p class="text-secondary-emphasis mb-0"><i class="fas fa-shield-alt me-1"></i> Smart accounting · Real-time ledger</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#searchCustomerModal">
+                            <i class="fas fa-search me-1"></i> Search & Add Customer
+                        </button>
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
+                            <i class="fas fa-plus-circle me-1"></i> Add Supplier
+                        </button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
+                            <i class="fas fa-rupee-sign me-1"></i> Add Transaction
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Parties List -->
+                <div id="parties" class="card mb-5">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                        <h5 class="mb-0"><i class="fas fa-handshake me-2 text-primary"></i> Parties Directory</h5>
+                        <span class="badge bg-primary bg-opacity-25 px-3 py-1 rounded-pill fs-6" id="partyCountBadge">Loading...</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Type</th>
+                                        <th>Balance</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="partiesTable">
+                                    {% for party in parties %}
+                                    <tr data-party-id="{{ party.id }}">
+                                        <td><i class="fas fa-user-circle me-2 text-primary"></i> {{ party.name }}</td>
+                                        <td>{{ party.phone or '-' }}</td>
+                                        <td><span class="party-type-badge {% if party.type == 'customer' %}badge-customer{% else %}badge-supplier{% endif %}">{{ party.type.title() }}</span></td>
+                                        <td><span class="{% if party.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">₹{{ "%.2f"|format(party.balance) }}</span></td>
+                                        <td class="action-group">
+                                            <button class="btn btn-sm btn-outline-light" onclick="viewTransactions({{ party.id }})">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <button class="btn btn-sm btn-success" onclick="addTransactionForParty({{ party.id }}, '{{ party.name }}')">
+                                                <i class="fas fa-plus-circle"></i> Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions Section -->
+                <div id="transactions" class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2 text-info"></i> Recent Transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="transactionsContent">
+                            <!-- Transactions will be loaded here via backend / api -->
+                            <div class="text-center py-4 text-secondary-emphasis">
+                                <i class="fas fa-spinner fa-2x mb-2 opacity-50 fa-spin"></i>
+                                <p>Loading recent transactions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Search Customer Modal (AJAX powered) -->
+    <div class="modal fade" id="searchCustomerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-search me-2 text-primary"></i> Search & Add Customer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="customerSearchInput" class="form-label">Search by Name, Phone or Email <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="customerSearchInput" placeholder="Type customer name, phone, or email...">
+                    </div>
+                    <div id="customerSearchResults" class="mb-3" style="max-height: 300px; overflow-y: auto; display: none;">
+                        <div class="list-group" id="customerResultsList"></div>
+                    </div>
+                    <div id="noCustomerMessage" class="alert alert-info d-none">
+                        <i class="fas fa-info-circle me-2"></i> No customers found. Try searching with different keywords.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Supplier Modal (Flask backend integrated) -->
+    <div class="modal fade" id="addSupplierModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-info"></i> Add New Supplier</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('index') if request.endpoint else '#' }}">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_party">
+                        <input type="hidden" name="type" value="supplier">
+                        <div class="mb-3">
+                            <label for="supplierName" class="form-label">Supplier Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="supplierName" name="name" placeholder="e.g., Gupta Traders" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierPhone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="supplierPhone" name="phone" placeholder="+91 98765 43210">
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="supplierAddress" name="address" rows="2" placeholder="City, State, Full address"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info px-4">Add Supplier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal (Flask backend integrated) -->
+    <div class="modal fade" id="addTransactionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-coins me-2 text-success"></i> Add New Transaction</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('index') if request.endpoint else '#' }}">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <div class="mb-3">
+                            <label for="transParty" class="form-label">Select Party <span class="text-danger">*</span></label>
+                            <select class="form-control" id="transParty" name="party_id" required>
+                                <option value="">-- Choose Party --</option>
+                                {% for party in parties %}
+                                <option value="{{ party.id }}">{{ party.name }} ({{ party.type }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transType" class="form-label">Transaction Type <span class="text-danger">*</span></label>
+                            <select class="form-control" id="transType" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="credit">Credit (Money Received)</option>
+                                <option value="debit">Debit (Money Given)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transAmount" class="form-label">Amount (₹) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control" id="transAmount" name="amount" placeholder="0.00" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transDescription" class="form-label">Description / Remarks</label>
+                            <textarea class="form-control" id="transDescription" name="description" rows="2" placeholder="Sale invoice, advance payment, etc."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transDate" class="form-label">Transaction Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="transDate" name="date" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success px-4">Add Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Transactions Modal (Dynamic for AJAX) -->
+    <div class="modal fade" id="viewTransactionsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-receipt me-2"></i> Ledger: <span id="partyNameDisplay" class="fw-bold text-primary">Party</span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTable">
+                                <tr><td colspan="4" class="text-center text-secondary">Loading transactions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3 text-end fw-bold" id="balanceFooter"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set default date to today for transaction modal
+        const dateInput = document.getElementById('transDate');
+        if (dateInput) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            dateInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // Function to fetch and display transactions for a party (uses existing backend API route)
+        function viewTransactions(partyId) {
+            // Using the existing API endpoint as per original design
+            fetch(`/api/khatabook/transactions/${partyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tbody = document.getElementById('transactionsTable');
+                        const balanceFooter = document.getElementById('balanceFooter');
+                        tbody.innerHTML = '';
+                        let balance = 0;
+                        data.transactions.forEach(trans => {
+                            const amountVal = parseFloat(trans.amount);
+                            if(trans.type === 'credit') balance += amountVal;
+                            else balance -= amountVal;
+                            
+                            const row = `
+                                <tr>
+                                    <td class="text-nowrap">${trans.transaction_date}</td>
+                                    <td><span class="${trans.type === 'credit' ? 'transaction-credit' : 'transaction-debit'}">${trans.type === 'credit' ? 'CREDIT ↑' : 'DEBIT ↓'}</span></td>
+                                    <td class="fw-bold">₹${amountVal.toFixed(2)}</td>
+                                    <td>${trans.description ? escapeHtml(trans.description) : '—'}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        });
+                        if(data.transactions.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-secondary">No transactions found for this party</td></tr>';
+                            balanceFooter.innerHTML = '<span class="text-secondary">Balance: ₹0.00</span>';
+                        } else {
+                            const balanceClass = balance >= 0 ? 'balance-positive' : 'balance-negative';
+                            balanceFooter.innerHTML = `<span class="${balanceClass} fs-6">Net Balance: ₹${Math.abs(balance).toFixed(2)} ${balance >= 0 ? '(Party owes you)' : '(You owe party)'}</span>`;
+                        }
+                        const partyName = data.party_name || 'Party';
+                        document.getElementById('partyNameDisplay').innerHTML = escapeHtml(partyName);
+                        new bootstrap.Modal(document.getElementById('viewTransactionsModal')).show();
+                    } else {
+                        alert('Unable to fetch transactions. Please check connection.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching transactions:', err);
+                    alert('Error loading transactions. Make sure backend is running.');
+                });
+        }
+
+        // Helper: add transaction for specific party (pre-select party in modal)
+        function addTransactionForParty(partyId, partyName) {
+            const partySelect = document.getElementById('transParty');
+            if(partySelect) {
+                for(let i = 0; i < partySelect.options.length; i++) {
+                    if(partySelect.options[i].value == partyId) {
+                        partySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            // Update modal title for better UX
+            const modalTitle = document.querySelector('#addTransactionModal .modal-title');
+            if(modalTitle) {
+                modalTitle.innerHTML = `<i class="fas fa-coins me-2 text-success"></i> Add Transaction for ${escapeHtml(partyName)}`;
+            }
+            // Reset amount/desc but keep date
+            const amountField = document.getElementById('transAmount');
+            const descField = document.getElementById('transDescription');
+            if(amountField) amountField.value = '';
+            if(descField) descField.value = '';
+            const dateField = document.getElementById('transDate');
+            if(dateField && !dateField.value) {
+                const today = new Date().toISOString().slice(0,10);
+                dateField.value = today;
+            }
+            const transactionModal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+            transactionModal.show();
+        }
+
+        // Reset modal title when add transaction modal is closed
+        document.getElementById('addTransactionModal')?.addEventListener('hidden.bs.modal', function () {
+            const modalTitle = document.querySelector('#addTransactionModal .modal-title');
+            if(modalTitle) {
+                modalTitle.innerHTML = `<i class="fas fa-coins me-2 text-success"></i> Add New Transaction`;
+            }
+        });
+
+        // Simple escape to prevent XSS
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // Load recent transactions for all parties on page load
+        function loadRecentTransactions() {
+            const partyRows = document.querySelectorAll('#partiesTable tr[data-party-id]');
+            const partyIds = Array.from(partyRows).map(row => row.dataset.partyId).filter(id => id);
+            
+            if (!partyIds.length) {
+                document.getElementById('transactionsContent').innerHTML = `
+                    <div class="text-center py-4 text-secondary-emphasis">
+                        <i class="fas fa-inbox fa-2x mb-2 opacity-50"></i>
+                        <p>No parties added yet. Add a supplier or customer to see transactions.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let allTransactions = [];
+            let loadedCount = 0;
+
+            partyIds.forEach(partyId => {
+                fetch(`/api/khatabook/transactions/${partyId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.transactions) {
+                            data.transactions.forEach(trans => {
+                                trans.party_name = data.party_name;
+                            });
+                            allTransactions.push(...data.transactions);
+                        }
+                        loadedCount++;
+                        if (loadedCount === partyIds.length) {
+                            displayRecentTransactions(allTransactions);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading transactions for party:', partyId, err);
+                        loadedCount++;
+                        if (loadedCount === partyIds.length) {
+                            displayRecentTransactions(allTransactions);
+                        }
+                    });
+            });
+        }
+
+        function displayRecentTransactions(transactions) {
+            // Sort by date, most recent first, limit to 20
+            transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+            const recent = transactions.slice(0, 20);
+
+            if (recent.length === 0) {
+                document.getElementById('transactionsContent').innerHTML = `
+                    <div class="text-center py-4 text-secondary-emphasis">
+                        <i class="fas fa-exchange-alt fa-2x mb-2 opacity-50"></i>
+                        <p>No transactions yet. Add a transaction to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Party</th>
+                                <th>Type</th>
+                                <th>Amount (₹)</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            recent.forEach(trans => {
+                const amountVal = parseFloat(trans.amount);
+                const typeClass = trans.type === 'credit' ? 'transaction-credit' : 'transaction-debit';
+                const typeText = trans.type === 'credit' ? 'CREDIT ↑' : 'DEBIT ↓';
+                html += `
+                    <tr>
+                        <td class="text-nowrap">${trans.transaction_date}</td>
+                        <td>${trans.party_name || '-'}</td>
+                        <td><span class="${typeClass}">${typeText}</span></td>
+                        <td class="fw-bold">₹${amountVal.toFixed(2)}</td>
+                        <td>${trans.description ? escapeHtml(trans.description) : '—'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('transactionsContent').innerHTML = html;
+        }
+
+        // Customer search functionality
+        document.getElementById('customerSearchInput')?.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim();
+            if (!searchTerm) {
+                document.getElementById('customerSearchResults').style.display = 'none';
+                document.getElementById('noCustomerMessage').classList.add('d-none');
+                return;
+            }
+
+            fetch(`/api/customers/search?q=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsList = document.getElementById('customerResultsList');
+                    resultsList.innerHTML = '';
+                    
+                    if (!Array.isArray(data) || data.length === 0) {
+                        document.getElementById('customerSearchResults').style.display = 'none';
+                        document.getElementById('noCustomerMessage').classList.remove('d-none');
+                        return;
+                    }
+
+                    document.getElementById('noCustomerMessage').classList.add('d-none');
+                    document.getElementById('customerSearchResults').style.display = 'block';
+
+                    data.forEach(customer => {
+                        const html = `
+                            <button type="button" class="list-group-item list-group-item-action text-start" onclick="selectCustomer(${customer.customer_id}, '${escapeHtml(customer.customer_name)}', '${escapeHtml(customer.customer_mobile_number || '')}', '${escapeHtml(customer.email || '')}')">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-user-circle text-primary fs-5"></i>
+                                    <div>
+                                        <strong>${escapeHtml(customer.customer_name)}</strong><br>
+                                        <small class="text-secondary">${escapeHtml(customer.customer_mobile_number || '')} • ${escapeHtml(customer.email || '')}</small>
+                                    </div>
+                                </div>
+                            </button>
+                        `;
+                        resultsList.innerHTML += html;
+                    });
+                })
+                .catch(err => {
+                    console.error('Error searching customers:', err);
+                    document.getElementById('noCustomerMessage').classList.remove('d-none');
+                });
+        });
+
+        function selectCustomer(customerId, customerName, phone, email) {
+            // Add customer as a party with type='customer'
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = window.location.href;
+            form.innerHTML = `
+                <input type="hidden" name="action" value="add_party">
+                <input type="hidden" name="name" value="${escapeHtml(customerName)}">
+                <input type="hidden" name="phone" value="${escapeHtml(phone)}">
+                <input type="hidden" name="type" value="customer">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Refresh party count badge and load transactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const partyRows = document.querySelectorAll('#partiesTable tr[data-party-id]');
+            
+            const partyCountBadge = document.getElementById('partyCountBadge');
+            if(partyCountBadge && partyRows.length) {
+                partyCountBadge.innerText = `${partyRows.length} ${partyRows.length === 1 ? 'party' : 'parties'}`;
+            } else if(partyCountBadge) {
+                partyCountBadge.innerText = '0 parties';
+            }
+            
+            // Load recent transactions
+            loadRecentTransactions();
+            
+            // Auto-submit handling: reload page after form submit to reflect backend changes
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 800);
+                });
+            });
+
+            // Handle flash message close buttons
+            const closeButtons = document.querySelectorAll('.flash-message .close-flash');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const message = this.closest('.flash-message');
+                    message.classList.add('fade-out');
+                    setTimeout(() => message.remove(), 400);
+                });
+            });
+
+            // Auto-remove flash messages after 3 seconds
+            const messages = document.querySelectorAll('.flash-message');
+            messages.forEach(msg => {
+                setTimeout(() => {
+                    if(msg.parentElement) {
+                        msg.classList.add('fade-out');
+                        setTimeout(() => {
+                            if(msg.parentElement) msg.remove();
+                        }, 400);
+                    }
+                }, 3000);
+            });
+        });
+    </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

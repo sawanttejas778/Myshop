@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Place Order - Cash on Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, #f6d365, #fda085);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    header {
+      background: linear-gradient(90deg, #111, #444);
+      color: white;
+      padding: 25px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    }
+    .order-card {
+      background: rgba(255,255,255,.95);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 6px 15px rgba(0,0,0,.2);
+    }
+    .order-card h2 {
+      font-size: 22px;
+      color: #222;
+      margin-bottom: 10px;
+    }
+    .payment-info {
+      background: #f0f8ff;
+      border-left: 4px solid #00d1b2;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      font-size: 14px;
+      color: #333;
+    }
+    .payment-info strong {
+      color: #00d1b2;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #00d1b2;
+      background: #f9fffe;
+      box-shadow: 0 0 8px rgba(0,209,178,.2);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .error-message {
+      color: #ff4d6d;
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+    .error-message.show {
+      display: block;
+    }
+    .order-summary {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+    .summary-row.total {
+      font-size: 18px;
+      font-weight: 600;
+      color: #222;
+      border-top: 2px solid #ddd;
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+    .summary-row.total span:last-child {
+      color: #ff4d6d;
+    }
+    .payment-method {
+      background: #f0fff5;
+      border: 2px solid #4CAF50;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .payment-method h3 {
+      color: #4CAF50;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .payment-method p {
+      color: #666;
+      font-size: 14px;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, #111, #444);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,.3);
+    }
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .back-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: #ddd;
+      color: #111;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: #bbb;
+    }
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .success-message {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease-in;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 600px) {
+      .order-card {
+        padding: 25px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div><!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>  <div class="container">
+    <header>💳 Place Order</header>
+
+    <div id="messageContainer">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="{% if category == 'success' %}success-message{% else %}error-message{% endif %}">{{ msg|safe }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="order-card">
+      <h2>Delivery & Contact Information</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Please provide your address and contact details for delivery</p>
+
+      <div class="payment-method">
+        <h3>💰 Cash on Delivery</h3>
+        <p>Pay when your order arrives at your doorstep</p>
+      </div>
+
+      <div id="orderSummary" class="order-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="summarySubtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax:</span>
+          <span id="summaryTax">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Amount:</span>
+          <span id="summaryTotal">$0.00</span>
+        </div>
+      </div>
+
+      <form id="orderForm">
+        <input type="hidden" id="hiddenShopId" name="shop_id" value="">
+        <input type="hidden" id="hiddenSubtotal" name="subtotal" value="">
+        <input type="hidden" id="hiddenTax" name="tax" value="">
+        <input type="hidden" id="hiddenTotal" name="total_amount" value="">
+        <div class="form-group">
+          <label for="fullName">Full Name *</label>
+          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+          <div class="error-message" id="fullNameError"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            <div class="error-message" id="emailError"></div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" placeholder="+1234567890" required>
+            <div class="error-message" id="phoneError"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Street Address *</label>
+          <input type="text" id="address" name="address" placeholder="House number, street name" required>
+          <div class="error-message" id="addressError"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City *</label>
+            <input type="text" id="city" name="city" placeholder="City" required>
+            <div class="error-message" id="cityError"></div>
+          </div>
+          <div class="form-group">
+            <label for="state">State/Province *</label>
+            <input type="text" id="state" name="state" placeholder="State" required>
+            <div class="error-message" id="stateError"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="zipcode">Zip/Postal Code *</label>
+            <input type="text" id="zipcode" name="zipcode" placeholder="Postal code" required>
+            <div class="error-message" id="zipcodeError"></div>
+          </div>
+          <div class="form-group">
+            <label for="country">Country *</label>
+            <input type="text" id="country" name="country" placeholder="Country" required>
+            <div class="error-message" id="countryError"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Additional Notes (Optional)</label>
+          <textarea id="notes" name="notes" placeholder="Any special instructions for delivery (e.g., ring bell twice, leave at porch)"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Place Order - <span id="totalDisplay">$0.00</span></button>
+        <a href="{{ url_for('view_cart') }}" class="back-btn">Back to Cart</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Get order total from injected server-side data, URL params, or API
+    let orderTotal = 0;
+    let orderTax = 0;
+    let orderSubtotal = 0;
+
+    // Check for server-injected cart data
+    const injectedCart = {% if cart_items is defined %}{{ cart_items | tojson | safe }}{% else %}null{% endif %};
+    const injectedSubtotal = {% if order_subtotal is defined %}{{ order_subtotal }}{% else %}null{% endif %};
+    const injectedTax = {% if order_tax is defined %}{{ order_tax }}{% else %}null{% endif %};
+    const injectedTotal = {% if order_total is defined %}{{ order_total }}{% else %}null{% endif %};
+
+    if (injectedCart && Array.isArray(injectedCart) && injectedCart.length > 0) {
+      // Use server-side computed totals when available; fallback to per-item tax computation
+      orderSubtotal = Number(injectedSubtotal) || injectedCart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+      orderTax = Number(injectedTax) || injectedCart.reduce((t, item) => t + (Number(item.price) * item.quantity) * ((Number(item.tax) || 0) / 100), 0);
+      orderTotal = Number(injectedTotal) || orderSubtotal + orderTax;
+      updateSummary();
+    } else {
+      // Parse URL parameters as a next fallback
+      const urlParams = new URLSearchParams(window.location.search);
+      orderSubtotal = parseFloat(urlParams.get('subtotal')) || 0;
+      orderTax = parseFloat(urlParams.get('tax')) || 0;
+      orderTotal = parseFloat(urlParams.get('total')) || (orderSubtotal + orderTax);
+
+      // If no params or injected data, fetch from API (prefer shop-specific checkout if shop_id present)
+      if (!orderTotal || orderTotal === 0) {
+        loadOrderData();
+      } else {
+        updateSummary();
+      }
+    }
+
+    async function loadOrderData() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const shopId = urlParams.get('shop_id');
+
+        // Prefer server-side checkout endpoints that compute totals using per-product tax
+        const endpoint = shopId ? '/api/checkout-shop' : '/api/checkout';
+        const payload = shopId ? { shop_id: shopId } : {};
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (data.success) {
+          orderSubtotal = Number(data.subtotal) || 0;
+          orderTax = Number(data.tax) || 0;
+          orderTotal = Number(data.total) || (orderSubtotal + orderTax);
+          updateSummary();
+        }
+      } catch (err) {
+        console.error('Failed to load order data:', err);
+      }
+    }
+
+    function updateSummary() {
+      document.getElementById('summarySubtotal').innerText = '$' + orderSubtotal.toFixed(2);
+      document.getElementById('summaryTax').innerText = '$' + orderTax.toFixed(2);
+      document.getElementById('summaryTotal').innerText = '$' + orderTotal.toFixed(2);
+      document.getElementById('totalDisplay').innerText = '$' + orderTotal.toFixed(2);
+    }
+
+    // Form validation
+    const form = document.getElementById('orderForm');
+    const fields = {
+      fullName: { required: true, pattern: /^[a-zA-Z\s]{3,}$/, message: 'Name must be at least 3 characters' },
+      email: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' },
+      phone: { required: true, pattern: /^[\d+\-\s()]{7,}$/, message: 'Enter a valid phone number' },
+      address: { required: true, pattern: /^.{5,}$/, message: 'Address must be at least 5 characters' },
+      city: { required: true, pattern: /^[a-zA-Z\s]{2,}$/, message: 'Enter a valid city name' },
+      state: { required: true, pattern: /^[a-zA-Z\s]{2,}$/, message: 'Enter a valid state/province' },
+      zipcode: { required: true, pattern: /^.{2,}$/, message: 'Enter a valid postal code' },
+      country: { required: true, pattern: /^[a-zA-Z\s]{2,}$/, message: 'Enter a valid country' }
+    };
+
+    function validateField(fieldName) {
+      const el = document.getElementById(fieldName);
+      const errorEl = document.getElementById(fieldName + 'Error');
+      const rule = fields[fieldName];
+
+      if (!rule) return true;
+
+      let valid = true;
+      if (rule.required && !el.value.trim()) {
+        errorEl.innerText = 'This field is required';
+        valid = false;
+      } else if (el.value.trim() && !rule.pattern.test(el.value.trim())) {
+        errorEl.innerText = rule.message;
+        valid = false;
+      } else {
+        errorEl.innerText = '';
+      }
+
+      errorEl.classList.toggle('show', !valid);
+      return valid;
+    }
+
+    // Real-time validation on blur
+    Object.keys(fields).forEach(fieldName => {
+      const el = document.getElementById(fieldName);
+      if (el) {
+        el.addEventListener('blur', () => validateField(fieldName));
+        el.addEventListener('input', () => {
+          if (el.value.trim()) validateField(fieldName);
+        });
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Validate all fields
+      let allValid = true;
+      Object.keys(fields).forEach(fieldName => {
+        if (!validateField(fieldName)) allValid = false;
+      });
+
+      if (!allValid) return;
+
+      // set hidden inputs for totals and shop_id then submit via fetch (JSON)
+      const urlParams = new URLSearchParams(window.location.search);
+      const payload = {};
+      if (urlParams.get('shop_id')) {
+        payload.shop_id = urlParams.get('shop_id');
+      }
+      payload.subtotal = parseFloat(orderSubtotal.toFixed(2));
+      payload.tax_amount = parseFloat(orderTax.toFixed(2));
+      payload.total_amount = parseFloat(orderTotal.toFixed(2));
+
+      // collect contact/address fields expected by server
+      payload.phone = document.getElementById('phone').value.trim();
+      payload.street = document.getElementById('address').value.trim();
+      payload.city = document.getElementById('city').value.trim();
+      payload.state = document.getElementById('state').value.trim();
+      payload.zipcode = document.getElementById('zipcode').value.trim();
+      payload.country = document.getElementById('country').value.trim();
+      payload.notes = document.getElementById('notes').value.trim();
+
+      // disable submit button while processing
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="loading"></span> Placing order...';
+
+      fetch('/submit-order', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(payload)
+      }).then(async (res) => {
+        let data = null;
+        try { data = await res.json(); } catch (e) { /* ignore */ }
+        if (res.ok && data && data.success) {
+          showMessage('Order placed successfully! Redirecting to orders...', 'success');
+          setTimeout(() => { window.location.href = '/orders'; }, 1200);
+        } else {
+          const msg = data && data.message ? data.message : ('Failed to place order (status ' + res.status + ')');
+          showMessage(msg, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      }).catch(err => {
+        console.error('Order submission failed', err);
+        showMessage('Failed to place order. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      });
+    });
+
+    // Show message
+    function showMessage(msg, type) {
+      const container = document.getElementById('messageContainer');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = type === 'success' ? 'success-message' : 'error-message';
+      msgDiv.innerText = msg;
+      container.innerHTML = '';
+      container.appendChild(msgDiv);
+
+      if (type === 'error') {
+        setTimeout(() => msgDiv.remove(), 4000);
+      }
+    }
+
+    // Prefill with user info if available
+    function prefillUserInfo() {
+      const userName = '{{ full_name }}';
+      if (userName && userName.trim()) {
+        document.getElementById('fullName').value = userName;
+      }
+    }
+
+    // If injected cart exists, we can optionally prefill some fields or show items elsewhere.
+    if (injectedCart && Array.isArray(injectedCart) && injectedCart.length > 0) {
+      // Example: auto-fill email/phone if available on server (not implemented)
+      // You could also render cart items inside the page here if desired.
+    }
+
+    prefillUserInfo();
+  </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

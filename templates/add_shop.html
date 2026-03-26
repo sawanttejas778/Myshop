@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Add Shop</title>
+  <style>
+    :root{
+      --bg:#0b0b0d; --panel:#0f1113; --muted:#9aa1a6; --accent:#00d1b2; --danger:#ff5c7c; --glass: rgba(255,255,255,0.03);
+      --card-shadow: 0 6px 24px rgba(0,0,0,0.7);
+      --radius:14px; --gap:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#060607 0%, #0a0a0b 60%);color:#e6eef0}
+    
+    .container{max-width:600px;margin:0 auto;padding:28px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+    
+    .card{background:linear-gradient(180deg,var(--panel), #0e0f11);padding:32px;border-radius:var(--radius);box-shadow:var(--card-shadow)}
+    
+    h1{font-size:24px;margin:0 0 8px 0;color:#e6eef0}
+    .subtitle{color:var(--muted);margin:0 0 24px 0;font-size:14px}
+    
+    .form-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+    
+    label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+    }
+    
+    input[type=text], input[type=email], input[type=password], textarea, select{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:12px 14px;
+      border-radius:10px;
+      color:inherit;
+      font-size:14px;
+      font-family:inherit;
+      transition:all 0.2s;
+    }
+    
+    input[type=text]:focus, input[type=email]:focus, input[type=password]:focus, textarea:focus, select:focus{
+      border-color:var(--accent);
+      background:rgba(0,209,178,0.05);
+      outline:none;
+      box-shadow:0 0 0 3px rgba(0,209,178,0.1);
+    }
+    
+    textarea{resize:vertical;min-height:100px}
+    
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    
+    .btn{
+      padding:12px 24px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+      transition:all 0.2s;
+      text-decoration:none;
+      display:inline-block;
+      text-align:center;
+    }
+    
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent),#5be3c8);
+      color:#021;
+      width:100%;
+    }
+    
+    .btn-primary:hover{opacity:0.9;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,209,178,0.3)}
+    
+    .btn-secondary{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--muted);
+    }
+    
+    .btn-secondary:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)}
+    
+    .alert{
+      padding:12px 16px;
+      border-radius:10px;
+      margin-bottom:16px;
+      font-size:14px;
+      display:none;
+    }
+    
+    .alert.show{display:block}
+    
+    .alert-success{
+      background:rgba(0,209,178,0.1);
+      border:1px solid rgba(0,209,178,0.3);
+      color:#5be3c8;
+    }
+    
+    .alert-error{
+      background:rgba(255,92,124,0.1);
+      border:1px solid rgba(255,92,124,0.3);
+      color:#ff5c7c;
+    }
+    
+    .form-actions{display:flex;gap:12px;margin-top:24px}
+    .form-actions .btn{flex:1}
+    
+    .info-box{
+      background:rgba(0,209,178,0.05);
+      border-left:3px solid var(--accent);
+      padding:12px;
+      border-radius:4px;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:20px;
+    }
+    
+    .back-link{
+      display:inline-block;
+      color:var(--accent);
+      text-decoration:none;
+      font-size:13px;
+      margin-bottom:20px;
+      transition:color 0.2s;
+    }
+    
+    .back-link:hover{color:#5be3c8}
+    
+    @media (max-width:600px){
+      .container{padding:16px}
+      .card{padding:20px}
+      .form-row{grid-template-columns:1fr}
+    }
+  
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+  <!-- Flash Messages -->
+  <div class="flash-container" id="flashContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+            <span>{{ message }}</span>
+            <button class="close-flash">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+  <div class="container">
+    <div class="card">
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+      
+      <h1>🏪 Add New Shop</h1>
+      <p class="subtitle">Create a new shop to manage products and inventory</p>
+      
+      <div id="alertBox" class="alert"></div>
+      
+      <div class="info-box">
+        💡 Fill in your shop details below. You can add products to this shop once it's created.
+      </div>
+      
+      <form id="addShopForm">
+        <div class="form-group">
+          <label for="shopName">Shop Name *</label>
+          <input type="text" id="shopName" name="name" placeholder="e.g., Electronics Store" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="shopTaxId">Tax ID (Optional)</label>
+          <input type="text" id="shopTaxId" name="tax_id" placeholder="e.g., TAX123456">
+        </div>
+        
+        <div class="form-group">
+          <label for="shopDescription">Shop Description (Optional)</label>
+          <textarea id="shopDescription" name="description" placeholder="Tell customers about your shop..."></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✓ Create Shop</button>
+          <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('addShopForm');
+    const alertBox = document.getElementById('alertBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const shopName = document.getElementById('shopName').value.trim();
+      const taxId = document.getElementById('shopTaxId').value.trim();
+      
+      if (!shopName) {
+        showAlert('Please enter a shop name', 'error');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/shops', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: shopName,
+            tax_id: taxId || null
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showAlert(`✓ ${data.message}`, 'success');
+          form.reset();
+          
+          // Redirect to dashboard after 1.5 seconds
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1500);
+        } else {
+          showAlert(`✗ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('Failed to create shop. Please try again.', 'error');
+      }
+    });
+    
+    function showAlert(message, type) {
+      alertBox.textContent = message;
+      alertBox.className = `alert show alert-${type}`;
+      
+      if (type === 'success') {
+        setTimeout(() => {
+          alertBox.classList.remove('show');
+        }, 3000);
+      }
+    }
+  </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

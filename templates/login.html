@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Shop — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+  :root{
+    --primary-grad: linear-gradient(120deg,#f6d365,#fda085);
+    --dark-grad: linear-gradient(90deg,#111,#444);
+    --card-bg: rgba(255,255,255,0.97);
+    --text:#111;
+    --muted:#6b7280;
+    --accent:#ff4d6d;
+  }
+  *{box-sizing:border-box}
+  body{font-family:'Poppins',sans-serif;margin:0;background:var(--primary-grad);min-height:100vh;color:var(--text);}
+  /* Header */
+  .main-header{background:var(--dark-grad);color:#fff;padding:12px 0;box-shadow:0 4px 10px rgba(0,0,0,.25);position:sticky;top:0;z-index:100}
+  .header-container{width:90%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo-header{display:flex;align-items:center;gap:10px;color:white;text-decoration:none;font-weight:700}
+  .user-actions-header{display:flex;align-items:center;gap:16px}
+  .action-item{color:white;text-decoration:none;font-size:14px}
+  .cart-count{background:#fff;color:#111;padding:2px 6px;border-radius:12px;margin-left:6px;font-weight:600}
+
+  /* Page layout */
+  .page-wrap{width:90%;max-width:1200px;margin:36px auto;display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start}
+  .left-panel{background:transparent;color:#fff;padding:28px;border-radius:12px}
+  .left-panel h1{margin:0 0 8px;font-size:28px}
+  .left-panel p{margin:0;color:rgba(255,255,255,0.9)}
+
+  /* Auth card */
+  .auth-card{background:var(--card-bg);border-radius:12px;padding:20px;box-shadow:0 20px 40px rgba(0,0,0,.08)}
+  .auth-tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;padding:10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600}
+  .tab.active{background:var(--primary-grad);color:#111;border-color:rgba(0,0,0,0.04)}
+  .auth-body{padding-top:8px}
+  .form-group{margin-bottom:12px}
+  .form-label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  .form-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;font-size:15px}
+  .form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:var(--primary-grad);color:#111}
+  .link-muted{color:var(--muted);text-decoration:none}
+
+  /* Responsive */
+  @media (max-width: 900px){
+    .page-wrap{grid-template-columns:1fr;gap:16px;padding:8px}
+    .left-panel{order:2;padding:18px}
+    .auth-card{order:1}
+  }
+
+  /* Small helpers */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1995;
+  }
+  .flash-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .flash-container {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: calc(100% - 36px);
+  }
+  .flash-message {
+    min-width: 240px;
+    max-width: 360px;
+    color: #fff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: flash-in 0.3s forwards;
+  }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+
+  @keyframes flash-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes flash-out {
+    to { opacity: 0; transform: translateY(-10px); }
+  }
+  </style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-container">
+      <a href="{{ url_for('dashboard') }}" class="logo-header">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="My Shop" style="height:36px;object-fit:contain" onerror="this.style.display='none'">
+        <span>My Shop</span>
+      </a>
+
+      <div class="user-actions-header">
+        <a href="{{ url_for('orders') }}" class="action-item"><i class="fas fa-box"></i> Orders</a>
+        <a href="{{ url_for('view_cart') }}" class="action-item"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-count">{{ cart_count if cart_count is defined else 0 }}</span></a>
+        {% if user %}
+          <div class="action-item">Hi, {{ full_name.split()[0] if full_name else user }}</div>
+          <a href="{{ url_for('logout') }}" class="action-item">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="action-item">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <div class="left-panel">
+      <h1>Shop with confidence</h1>
+      <p>Secure payments, verified sellers, fast delivery. Create an account or sign in to access your orders and wishlist.</p>
+      <p> If you have not registered with any shops, Please visit shop to Link yor account to their Shop. remember to link your account to a shop to access all features.</p>
+      <p> Not registerd to shop means not access to website</p>
+      <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+        <div style="background:rgba(255,255,255,0.06);padding:12px;border-radius:10px">Free Delivery</div>
+        <div style="background:rgba(255,255,255,0.06);padding:12px;border-radius:10px">Easy Returns</div>
+        <div style="background:rgba(255,255,255,0.06);padding:12px;border-radius:10px">24/7 Support</div>
+      </div>
+    </div>
+
+    <div class="auth-card" role="region" aria-label="Authentication">
+      <div class="auth-tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true" data-target="login">Sign In</button>
+        <button class="tab" role="tab" aria-selected="false" data-target="signup">Create Account</button>
+      </div>
+
+      <div class="auth-body">
+        <!-- Login Form -->
+        <form method="POST" action="/login" id="login-form" class="auth-form" autocomplete="on">
+          <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email</label>
+            <input id="login-email" class="form-input" type="email" name="email" required placeholder="you@domain.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input id="login-password" class="form-input" type="password" name="password" required placeholder="••••••••">
+          </div>
+          <div class="form-actions">
+            <a class="link-muted" href="/forgot_password">Forgot password?</a>
+            <button class="btn btn-primary" type="submit">Sign In</button>
+          </div>
+        </form>
+
+        <!-- Signup Form (hidden by default) -->
+        <form method="POST" action="/sign_up" id="signup-form" class="auth-form" style="display:none;margin-top:12px" autocomplete="on">
+          <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+          <div class="form-group">
+            <label class="form-label" for="signup-name">Full name</label>
+            <input id="signup-name" class="form-input" type="text" name="full_name" required placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-email">Email</label>
+            <input id="signup-email" class="form-input" type="email" name="email" required placeholder="you@domain.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-username">Username</label>
+            <input id="signup-username" class="form-input" type="text" name="username" required placeholder="Enter a username">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-password">Password</label>
+            <input id="signup-password" class="form-input" type="password" name="password" required placeholder="Create a password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signup-role">User Role</label>
+            <select id="signup-role" class="form-input" name="usertype" required>
+            <option value="" disabled selected>Select role</option>
+            <option value="user">User</option>
+            <option value="owner">shop_Owner</option>
+            </select>
+          </div>
+          <div class="form-actions" style="margin-top:8px">
+            <button class="btn" type="button" id="to-login" style="background:transparent;border:1px solid #e5e7eb">Already have an account?</button>
+            <button class="btn btn-primary" type="submit">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="flash-overlay" id="flash-overlay"></div>
+  <div class="flash-container" id="flash-container"></div>
+
+  <script>
+  // Tabs behavior
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.tab');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+
+    function showTab(target){
+      tabs.forEach(t => {
+        const active = t.dataset.target === target;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      if(target === 'signup'){
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+      } else {
+        signupForm.style.display = 'none';
+        loginForm.style.display = 'block';
+      }
+    }
+
+    tabs.forEach(t => t.addEventListener('click', () => showTab(t.dataset.target)));
+    document.getElementById('to-login')?.addEventListener('click', () => showTab('login'));
+
+    // If url includes /sign_up, show signup
+    if(window.location.pathname.includes('/sign_up')){
+      showTab('signup');
+    }
+
+    // Basic client-side validation feedback
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => form.addEventListener('submit', (e) => {
+      const required = form.querySelectorAll('[required]');
+      let ok = true;
+      required.forEach(inp => { if(!inp.value.trim()){ ok = false; inp.style.borderColor = '#f44336'; setTimeout(()=>inp.style.borderColor=''); }});
+      if(!ok){ e.preventDefault(); const flash = window.flashSystem; if(flash) flash.error('Validation','Please fill required fields'); }
+    }));
+
+    // Focus first input
+    loginForm.querySelector('.form-input')?.focus();
+  });
+
+  const flashOverlay = document.getElementById('flash-overlay');
+  const flashContainer = document.getElementById('flash-container');
+  const flashDuration = 3000;
+
+  function hideOverlayWhenEmpty() {
+    if (!flashContainer.querySelector('.flash-message')) {
+      flashOverlay.classList.remove('active');
+    }
+  }
+
+  function showFlash(message, category = 'info') {
+    if (!flashOverlay || !flashContainer) return;
+    flashOverlay.classList.add('active');
+
+    const msgEl = document.createElement('div');
+    msgEl.className = `flash-message ${category}`;
+    msgEl.textContent = message;
+
+    flashContainer.appendChild(msgEl);
+
+    setTimeout(() => {
+      msgEl.style.animation = 'flash-out 0.3s forwards';
+      msgEl.addEventListener('animationend', () => {
+        msgEl.remove();
+        hideOverlayWhenEmpty();
+      });
+    }, flashDuration);
+  }
+
+  if(!window.flashSystem){
+    window.flashSystem = {
+      success: (t, m) => showFlash(m || t, 'success'),
+      error: (t, m) => showFlash(m || t, 'error'),
+      warning: (t, m) => showFlash(m || t, 'warning'),
+      info: (t, m) => showFlash(m || t, 'info')
+    };
+  }
+
+  const initialFlashes = [
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    { category: {{ category|tojson }}, message: {{ message|tojson }} },
+    {% endfor %}
+  ];
+
+  initialFlashes.forEach(f => showFlash(f.message, f.category));
+  </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>
