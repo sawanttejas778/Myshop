@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Product Manager</title>
+  <style>
+    /* ALL ORIGINAL STYLES REMAIN EXACTLY THE SAME */
+    :root{
+      --bg:#0b0b0d; --panel:#0f1113; --muted:#9aa1a6; --accent:#00d1b2; --danger:#ff5c7c; --glass: rgba(255,255,255,0.03);
+      --card-shadow: 0 6px 24px rgba(0,0,0,0.7);
+      --radius:14px; --gap:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#060607 0%, #0a0a0b 60%);color:#e6eef0}
+    .app{max-width:1400px;margin:20px auto;padding:16px 20px;}
+    
+    h1{font-size:24px;margin:0 0 20px 0;color:#e6eef0}
+
+    .panel{background:linear-gradient(180deg,var(--panel), #0e0f11);padding:16px;border-radius:var(--radius);box-shadow:var(--card-shadow);}
+
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;color:var(--muted);cursor:pointer;font-weight:600;transition:all 0.2s;font-size:14px;white-space:nowrap;flex:1 1 auto;min-width:120px;max-width:100%;}
+    .btn:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#5be3c8);color:#021;border:0}
+    .btn.primary:hover{opacity:0.9}
+    .btn.warn{background:transparent;border:1px solid rgba(255,80,80,0.12);color:var(--danger)}
+    .btn.warn:hover{background:rgba(255,80,80,0.05)}
+
+    .form-container{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;margin-bottom:20px}
+    
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    input[type=text], input[type=number], input[type=file], select, textarea{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:10px 12px;
+      border-radius:10px;
+      color:inherit;
+      font-size:14px;
+      transition:all 0.2s;
+      resize:vertical;
+      min-height:38px;
+      font-family: inherit;
+    }
+    textarea{min-height:80px;}
+    input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus{
+      border-color:var(--accent);
+      background:rgba(0,209,178,0.05);
+      outline:none;
+    }
+    
+    .category-search{position:relative}
+    .category-dropdown{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:var(--panel);
+      border:1px solid var(--accent);
+      border-top:none;
+      border-radius:0 0 10px 10px;
+      max-height:200px;
+      overflow-y:auto;
+      z-index:1000;
+      display:none;
+    }
+    .category-dropdown.active{display:block}
+    .category-item{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      cursor:pointer;
+      transition:background 0.2s;
+    }
+    .category-item:hover{background:rgba(0,209,178,0.1)}
+    .category-item:last-child{border-bottom:none}
+
+    .sheet{margin-top:20px;border-radius:10px;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+    thead th{position:sticky;top:0;background:linear-gradient(180deg,#0e0f11,#0c0c0d);text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600;z-index:10}
+    tbody td{padding:12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    tbody tr{position:relative}
+    tbody tr:hover{background:rgba(255,255,255,0.01)}
+    .category-cell{position:relative;z-index:100}
+    .cat-input{width:100%;padding:8px;border:1px solid rgba(0,209,178,0.3);border-radius:4px;background:var(--input);color:#fff;font-size:12px}
+    .cat-input:focus{outline:none;border-color:#00d1b2;box-shadow:0 0 8px rgba(0,209,178,0.3)}
+    .cat-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid rgba(0,209,178,0.6);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,0.8);max-height:250px;overflow-y:auto;display:none;margin-top:2px;z-index:10000}
+    .cat-dropdown.show{display:block}
+    .cat-item{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.02);cursor:pointer;font-size:12px;transition:background 0.2s}
+    .cat-item:hover{background:rgba(0,209,178,0.15)}
+    .cat-item:last-child{border-bottom:none}
+
+    .thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.04)}
+    .small{font-size:12px;color:var(--muted)}
+    
+    /* NEW: Description modal styles */
+    .description-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:2000;align-items:center;justify-content:center}
+    .description-modal.active{display:flex}
+    .description-content{background:var(--panel);border-radius:var(--radius);padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto;box-shadow:var(--card-shadow)}
+    .description-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .description-header h3{margin:0;color:#e6eef0}
+    .description-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .description-buttons{display:flex;gap:10px;margin-top:20px}
+    .description-preview{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;margin-top:15px;border-left:3px solid var(--accent)}
+    .description-preview h4{margin-top:0;color:var(--muted)}
+    .preview-line{min-height:20px;margin:4px 0}
+    
+    /* NEW: Description cell in table */
+    .description-cell{max-width:200px}
+    .description-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:12px;cursor:pointer;padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.03)}
+    .description-text:hover{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.06)}
+    .description-text.empty{color:#666;font-style:italic}
+
+    .hint{font-size:12px;color:var(--muted);margin-top:16px;padding:12px;background:rgba(255,255,255,0.02);border-left:3px solid var(--accent);border-radius:4px}
+
+    footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* Mobile-specific styles */
+    .mobile-controls{display:none;flex-direction:column;gap:8px;margin-bottom:16px}
+    .mobile-controls .btn{width:100%;text-align:center;justify-content:center}
+    .mobile-actions{display:none;position:fixed;bottom:20px;right:20px;z-index:1000}
+    .mobile-fab{width:56px;height:56px;border-radius:50%;background:linear-gradient(90deg,var(--accent),#5be3c8);border:none;color:#021;font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,209,178,0.3);transition:transform 0.2s}
+    .mobile-fab:hover{transform:scale(1.05)}
+    .mobile-fab-menu{position:absolute;bottom:70px;right:0;background:var(--panel);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:8px;min-width:160px;display:none;flex-direction:column;gap:4px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .mobile-fab-menu.active{display:flex}
+    .mobile-fab-menu .btn{width:100%;text-align:left;padding:10px 12px;border:none;background:transparent;color:var(--muted);font-size:14px;border-radius:8px}
+    .mobile-fab-menu .btn:hover{background:rgba(255,255,255,0.05)}
+
+    /* Mobile-only bottom action sheet */
+    .mobile-actions-sheet{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top-left-radius:20px;border-top-right-radius:20px;padding:20px;z-index:1001;box-shadow:0 -10px 40px rgba(0,0,0,0.7);transform:translateY(100%);transition:transform 0.3s ease-out}
+    .mobile-actions-sheet.active{transform:translateY(0)}
+    .mobile-actions-sheet .btn{width:100%;margin-bottom:10px;text-align:center}
+    .sheet-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000}
+    .sheet-overlay.active{display:block}
+
+    /* Responsive */
+    @media (max-width:1024px){
+      .app{padding:12px 16px;margin:16px auto;}
+      h1{font-size:22px;margin-bottom:16px}
+      .panel{padding:14px}
+      .form-container{grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px}
+      .controls{display:none}
+      .mobile-controls{display:flex}
+      .description-content{width:95%;padding:20px}
+    }
+
+    @media (max-width:768px){
+      .app{padding:10px 12px;margin:12px auto;}
+      .panel{padding:12px}
+      h1{font-size:20px;margin-bottom:14px}
+      .form-container{grid-template-columns:1fr;gap:10px}
+      .btn{min-width:100px;padding:9px 12px;font-size:13px}
+      .mobile-actions{display:block}
+      .description-cell{max-width:150px}
+    }
+
+    @media (max-width:640px){
+      .app{padding:8px 10px;margin:8px auto;}
+      .panel{padding:10px}
+      h1{font-size:18px}
+      .sheet{margin-top:16px}
+      table{font-size:12px}
+      thead th{padding:10px;font-size:11px}
+      tbody td{padding:10px;font-size:12px}
+      input[type=text], input[type=number], select, textarea{padding:9px 10px;font-size:13px}
+      .mobile-controls .btn{padding:11px 12px;font-size:14px}
+      .description-cell{max-width:120px}
+    }
+
+    @media (max-width:480px){
+      .mobile-fab{width:52px;height:52px;font-size:22px}
+      .mobile-actions{bottom:16px;right:16px}
+      .description-content{padding:16px}
+    }
+
+    @media (max-width:360px){
+      .app{padding:6px 8px;}
+      .panel{padding:8px}
+    }
+  
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+    /* Flash Messages */
+    .flash-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 3000;
+      max-width: 420px;
+      pointer-events: none;
+    }
+    .flash-message {
+      background: var(--panel);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: all;
+      border: 1px solid rgba(0, 209, 178, 0.3);
+    }
+    .flash-message.success { border-left-color: #4ade80; background: rgba(10, 30, 20, 0.98); color: #4ade80; }
+    .flash-message.error { border-left-color: #dc3545; background: rgba(40, 15, 20, 0.98); color: #ff6b9d; }
+    .flash-message.warning { border-left-color: #ff9800; background: rgba(40, 30, 10, 0.98); color: #ffc107; }
+    .flash-message i { font-size: 20px; flex-shrink: 0; font-weight: bold; }
+    .flash-message .close-flash {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 20px;
+      padding: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .flash-message .close-flash:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.1); }
+    .flash-message.fade-out { animation: fadeOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes slideInRight { from { transform: translateX(450px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(450px); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+  <!-- Flash Messages Container -->
+  <div class="flash-container" id="flashContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+            <span>{{ message }}</span>
+            <button class="close-flash">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+  <div class="app">
+    <h1>📦 Product Manager</h1>
+
+    <div class="panel">
+      <!-- Desktop Controls -->
+      <div class="controls">
+        <button class="btn" id="addRowBtn">+ Add blank row</button>
+        <input id="csvInput" type="file" accept=".csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none">
+        <button class="btn" id="pasteBtn">📋 Paste from Excel</button>
+        <button class="btn primary" id="saveAllBtn">💾 Save All</button>
+        <button class="btn" id="exportCsvBtn">📥 Export CSV</button>
+        <button class="btn warn" id="clearBtn">🗑️ Clear sheet</button>
+        <button class="btn" id="viewEditBtn">✏️ View/Edit Product</button>
+      </div>
+
+      <!-- Mobile Controls (Hidden on desktop) -->
+      <div class="mobile-controls">
+        <button class="btn primary" id="mobileSaveBtn">💾 Save All Products</button>
+        <button class="btn" id="mobileAddRowBtn">+ Add Product Row</button>
+        <button class="btn" id="mobileImportBtn">📁 Import CSV/Excel</button>
+      </div>
+
+      <!-- Grid Form Section - SIMPLIFIED with single description field -->
+      <div class="form-container">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="qName" placeholder="e.g., Wireless Mouse">
+        </div>
+        <div class="form-group">
+          <label>Price</label>
+          <input type="number" id="qPrice" step="0.01" value="0.00">
+        </div>
+        <div class="form-group">
+          <label>Tax (%)</label>
+          <input type="number" id="qTax" step="0.01" value="0.00">
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" id="qStock" value="0">
+        </div>
+        <div class="form-group">
+          <label>Safe Stock</label>
+          <input type="number" id="qSafeStock" value="0">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="qDescription" placeholder="Enter product description (each line becomes a bullet point)"></textarea>
+          <small class="small">Tip: Press Enter for new lines. Each line will be saved as a separate description.</small>
+        </div>
+        <div class="form-group category-search">
+          <label>Category</label>
+          <input type="text" id="qCategory" placeholder="Search or type category..." autocomplete="off">
+          <div class="category-dropdown" id="categoryDropdown"></div>
+        </div>
+        <div class="form-group">
+          <label>Product Image</label>
+          <!-- image uploads disabled for bulk import -->
+          <small class="small">Images are disabled for bulk import. Upload per-product via the product page if needed.</small>
+        </div>
+        <div class="form-group" style="display:flex;gap:8px;align-items:flex-end">
+          <button type="button" class="btn primary" id="qAddBtn" style="flex:1">➕ Add to sheet</button>
+          <button type="button" class="btn" id="qClearBtn">Clear</button>
+        </div>
+      </div>
+
+      <div class="hint">
+        💡 <strong>Tip:</strong> Fill the form above and click "Add to sheet", or import CSV/Excel file, or paste data directly. 
+        For descriptions: Enter text with line breaks - each line becomes a separate description bullet.
+      </div>
+
+      <!-- Products Table - ADDED DESCRIPTION COLUMN -->
+      <div class="sheet">
+        <table id="productsTable">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th style="width:100px">Price</th>
+              <th style="width:80px">Tax %</th>
+              <th style="width:80px">Stock</th>
+              <th style="width:100px">Safe Stock</th>
+              <th style="width:120px">Category</th>
+              <th style="width:180px">Description</th>
+              <th style="width:100px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <footer>Product Manager • Add, edit, import and manage your products</footer>
+    </div>
+  </div>
+
+  <!-- Description Editor Modal -->
+  <div class="description-modal" id="descriptionModal">
+    <div class="description-content">
+      <div class="description-header">
+        <h3>Edit Description</h3>
+        <button class="btn" id="closeModalBtn" style="padding:6px 12px;font-size:12px">✕ Close</button>
+      </div>
+      <div class="description-grid">
+        <div class="form-group">
+          <label>Description Lines (one per line)</label>
+          <textarea id="modalDescription" placeholder="Enter description lines, one per line. Each line will be saved as a separate description." rows="8"></textarea>
+          <small class="small">Tip: Use line breaks to create multiple description points</small>
+        </div>
+        <div class="description-preview">
+          <h4>Preview:</h4>
+          <div id="descriptionPreview"></div>
+        </div>
+      </div>
+      <div class="description-buttons">
+        <button class="btn" id="cancelModalBtn">Cancel</button>
+        <button class="btn primary" id="saveModalBtn">Save Description</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Action Button -->
+  <div class="mobile-actions">
+    <button class="mobile-fab" id="mobileFab">+</button>
+    <div class="mobile-fab-menu" id="mobileFabMenu">
+      <button class="btn" id="fabAddRow">Add Row</button>
+      <button class="btn" id="fabPaste">Paste Data</button>
+      <button class="btn" id="fabExport">Export CSV</button>
+      <button class="btn" id="fabViewEdit">Edit Product</button>
+      <button class="btn warn" id="fabClear">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Mobile Action Sheet -->
+  <div class="sheet-overlay" id="actionSheetOverlay"></div>
+  <div class="mobile-actions-sheet" id="actionSheet">
+    <button class="btn primary" id="sheetSaveBtn">💾 Save All Products</button>
+    <button class="btn" id="sheetAddRowBtn">+ Add Product Row</button>
+    <button class="btn" id="sheetImportBtn">📁 Import CSV/Excel</button>
+    <button class="btn" id="sheetPasteBtn">📋 Paste from Excel</button>
+    <button class="btn" id="sheetExportBtn">📥 Export CSV</button>
+    <button class="btn" id="sheetViewEditBtn">✏️ View/Edit Product</button>
+    <button class="btn warn" id="sheetClearBtn">🗑️ Clear All</button>
+    <button class="btn" id="sheetCloseBtn" style="margin-top:10px">Close</button>
+  </div>
+
+  <script>
+    // Utilities
+    const tableBody = document.querySelector('#productsTable tbody');
+    let nextTempId = -1;
+    let categoriesData = [];
+    let currentEditingRow = null;
+
+    // Description modal elements
+    const descriptionModal = document.getElementById('descriptionModal');
+    const modalDescription = document.getElementById('modalDescription');
+    const descriptionPreview = document.getElementById('descriptionPreview');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const saveModalBtn = document.getElementById('saveModalBtn');
+
+    // Modal functions
+    function showDescriptionModal(row, currentDescriptions = '') {
+      currentEditingRow = row;
+      modalDescription.value = currentDescriptions;
+      updateDescriptionPreview();
+      descriptionModal.classList.add('active');
+      
+      // Update preview when typing
+      modalDescription.addEventListener('input', updateDescriptionPreview);
+    }
+
+    function hideDescriptionModal() {
+      descriptionModal.classList.remove('active');
+      currentEditingRow = null;
+      modalDescription.removeEventListener('input', updateDescriptionPreview);
+    }
+
+    function updateDescriptionPreview() {
+      const lines = modalDescription.value.split('\n').filter(line => line.trim() !== '');
+      if (lines.length === 0) {
+        descriptionPreview.innerHTML = '<div class="preview-line" style="color:#666;font-style:italic">No description entered</div>';
+        return;
+      }
+      
+      descriptionPreview.innerHTML = lines.map(line => 
+        `<div class="preview-line">• ${escapeHtml(line)}</div>`
+      ).join('');
+    }
+
+    // Modal event listeners
+    closeModalBtn.addEventListener('click', hideDescriptionModal);
+    cancelModalBtn.addEventListener('click', hideDescriptionModal);
+    saveModalBtn.addEventListener('click', () => {
+      if (currentEditingRow) {
+        const descriptionInput = currentEditingRow.querySelector('input[data-field="description"]');
+        if (descriptionInput) {
+          descriptionInput.value = modalDescription.value;
+          updateDescriptionCell(currentEditingRow);
+        }
+      }
+      hideDescriptionModal();
+    });
+
+    // Click outside modal to close
+    descriptionModal.addEventListener('click', (e) => {
+      if (e.target === descriptionModal) {
+        hideDescriptionModal();
+      }
+    });
+
+    function updateDescriptionCell(row) {
+      const descriptionInput = row.querySelector('input[data-field="description"]');
+      const descriptionCell = row.querySelector('.description-cell .description-text');
+      const descriptions = descriptionInput.value.split('\n').filter(line => line.trim() !== '');
+      
+      if (descriptions.length === 0) {
+        descriptionCell.textContent = 'No description';
+        descriptionCell.classList.add('empty');
+      } else {
+        descriptionCell.textContent = descriptions[0];
+        if (descriptions.length > 1) {
+          descriptionCell.textContent += ` (+${descriptions.length - 1} more)`;
+        }
+        descriptionCell.classList.remove('empty');
+      }
+    }
+
+    // Mobile elements
+    const mobileFab = document.getElementById('mobileFab');
+    const mobileFabMenu = document.getElementById('mobileFabMenu');
+    const actionSheet = document.getElementById('actionSheet');
+    const actionSheetOverlay = document.getElementById('actionSheetOverlay');
+    const mobileSaveBtn = document.getElementById('mobileSaveBtn');
+    const mobileAddRowBtn = document.getElementById('mobileAddRowBtn');
+    const mobileImportBtn = document.getElementById('mobileImportBtn');
+
+    // Mobile FAB toggle
+    mobileFab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileFabMenu.classList.toggle('active');
+    });
+
+    // Close FAB menu when clicking outside
+    document.addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+    });
+
+    // Show/hide action sheet
+    function showActionSheet() {
+      actionSheet.classList.add('active');
+      actionSheetOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideActionSheet() {
+      actionSheet.classList.remove('active');
+      actionSheetOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Action sheet button handlers
+    document.getElementById('sheetCloseBtn').addEventListener('click', hideActionSheet);
+    document.getElementById('actionSheetOverlay').addEventListener('click', hideActionSheet);
+    
+    // Map sheet buttons to existing functions
+    document.getElementById('sheetSaveBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('saveAllBtn').click();
+    });
+    document.getElementById('sheetAddRowBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('addRowBtn').click();
+    });
+    document.getElementById('sheetImportBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('csvInput').click();
+    });
+    document.getElementById('sheetPasteBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('pasteBtn').click();
+    });
+    document.getElementById('sheetExportBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('exportCsvBtn').click();
+    });
+    document.getElementById('sheetViewEditBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('viewEditBtn').click();
+    });
+    document.getElementById('sheetClearBtn').addEventListener('click', () => {
+      hideActionSheet();
+      document.getElementById('clearBtn').click();
+    });
+
+    // Mobile button handlers
+    mobileSaveBtn.addEventListener('click', () => document.getElementById('saveAllBtn').click());
+    mobileAddRowBtn.addEventListener('click', () => document.getElementById('addRowBtn').click());
+    mobileImportBtn.addEventListener('click', () => document.getElementById('csvInput').click());
+
+    // FAB menu button handlers
+    document.getElementById('fabAddRow').addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+      document.getElementById('addRowBtn').click();
+    });
+    document.getElementById('fabPaste').addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+      document.getElementById('pasteBtn').click();
+    });
+    document.getElementById('fabExport').addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+      document.getElementById('exportCsvBtn').click();
+    });
+    document.getElementById('fabViewEdit').addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+      document.getElementById('viewEditBtn').click();
+    });
+    document.getElementById('fabClear').addEventListener('click', () => {
+      mobileFabMenu.classList.remove('active');
+      document.getElementById('clearBtn').click();
+    });
+
+    // On small screens, replace some buttons with action sheet
+    function checkScreenSize() {
+      if (window.innerWidth <= 768) {
+        // On mobile, show action sheet for complex operations
+        mobileFab.style.display = 'flex';
+      } else {
+        mobileFab.style.display = 'none';
+        hideActionSheet();
+      }
+    }
+
+    // Load categories from server
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          categoriesData = await response.json();
+          // populate any existing selects
+          document.querySelectorAll('select[data-field="categoryid"]').forEach(s => renderCategoryOptions(s, s.value || ''));
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    }
+
+    function renderCategoryOptions(selectEl, value) {
+      // clear
+      selectEl.innerHTML = '';
+      const emptyOpt = document.createElement('option');
+      emptyOpt.value = '';
+      emptyOpt.textContent = '-- Select category --';
+      selectEl.appendChild(emptyOpt);
+
+      categoriesData.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.categories_id;
+        opt.textContent = cat.name;
+        selectEl.appendChild(opt);
+      });
+
+      if (!value) return;
+      // if value matches an id, select it
+      if (!isNaN(Number(value))) {
+        selectEl.value = Number(value);
+        return;
+      }
+      // otherwise try to find by name and add as custom option if not found
+      const found = Array.from(selectEl.options).find(o => o.textContent === value);
+      if (found) {
+        selectEl.value = found.value;
+      } else {
+        const opt = document.createElement('option');
+        opt.value = value; // non-numeric -> server will resolve by name
+        opt.textContent = value + ' (new)';
+        selectEl.appendChild(opt);
+        selectEl.value = value;
+      }
+    }
+
+    function makeRow(obj={name:'',price:'0.00',tax:'0.00',stock:'0',safe_stock:'0',categoryid:'',description:''}){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input data-field="name" type="text" value="${escapeHtml(obj.name||'')}" style="width:100%;min-width:150px"></td>
+        <td><input data-field="price" type="number" step="0.01" value="${obj.price}" style="width:100%"></td>
+        <td><input data-field="tax" type="number" step="0.01" value="${obj.tax}" style="width:100%"></td>
+        <td><input data-field="stock" type="number" value="${obj.stock}" style="width:100%"></td>
+        <td><input data-field="safe_stock" type="number" value="${obj.safe_stock}" style="width:100%"></td>
+        <td>
+          <div class="category-cell" style="position:relative">
+            <input data-field="categoryid" class="cat-input" type="text" value="${escapeHtml(obj.categoryid||'')}" placeholder="type or select category" style="width:100%;min-width:120px;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04)">
+            <div class="cat-dropdown" style="display:none;position:absolute;z-index:1000;left:0;right:0;max-height:200px;overflow:auto;background:var(--panel);border:1px solid rgba(255,255,255,0.06);border-radius:6px;margin-top:6px"></div>
+          </div>
+        </td>
+        <td class="description-cell">
+          <input data-field="description" type="hidden" value="${escapeHtml(obj.description||'')}">
+          <div class="description-text ${!obj.description ? 'empty' : ''}">${getDescriptionPreview(obj.description)}</div>
+        </td>
+        <td style="white-space:nowrap;display:flex;gap:6px">
+          <button class="btn" data-action="editDesc" style="padding:6px 10px;font-size:12px" title="Edit description">📝</button>
+          <button class="btn" data-action="del" style="padding:6px 10px;font-size:12px">✕</button>
+        </td>
+      `;
+
+      // delete
+      tr.querySelector('[data-action="del"]').addEventListener('click', ()=>tr.remove());
+      
+      // edit description
+      tr.querySelector('[data-action="editDesc"]').addEventListener('click', () => {
+        const descriptionInput = tr.querySelector('input[data-field="description"]');
+        showDescriptionModal(tr, descriptionInput.value);
+      });
+
+      // click on description cell to edit
+      tr.querySelector('.description-text').addEventListener('click', () => {
+        const descriptionInput = tr.querySelector('input[data-field="description"]');
+        showDescriptionModal(tr, descriptionInput.value);
+      });
+
+      // attach category typing/autocomplete widget
+      const catInput = tr.querySelector('input[data-field="categoryid"]');
+      const catDropdown = tr.querySelector('.cat-dropdown');
+      attachCategoryAutocomplete(catInput, catDropdown, obj.categoryid || '');
+
+      return tr;
+    }
+
+    function getDescriptionPreview(description) {
+      if (!description) return 'No description';
+      const lines = description.split('\n').filter(line => line.trim() !== '');
+      if (lines.length === 0) return 'No description';
+      let preview = lines[0];
+      if (lines.length > 1) {
+        preview += ` (+${lines.length - 1} more)`;
+      }
+      return escapeHtml(preview);
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
+    function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+
+    // Attach category autocomplete to a row's input and dropdown
+    function attachCategoryAutocomplete(inputEl, dropdownEl, initialValue) {
+      inputEl.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        if (!searchTerm) {
+          dropdownEl.classList.remove('show');
+          return;
+        }
+        const filtered = categoriesData.filter(cat =>
+          cat.name.toLowerCase().includes(searchTerm)
+        );
+        if (filtered.length > 0) {
+          dropdownEl.innerHTML = filtered.map(cat =>
+            `<div class="cat-item" data-id="${cat.categories_id}" data-name="${cat.name}">${cat.name}</div>`
+          ).join('');
+          dropdownEl.classList.add('show');
+        } else {
+          dropdownEl.classList.remove('show');
+        }
+      });
+      dropdownEl.addEventListener('click', (e) => {
+        if (e.target.classList.contains('cat-item')) {
+          inputEl.value = e.target.dataset.name;
+          inputEl.dataset.id = e.target.dataset.id;
+          dropdownEl.classList.remove('show');
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.category-cell')) {
+          dropdownEl.classList.remove('show');
+        }
+      });
+    }
+
+    // Category search (quick-add form)
+    const categoryInput = document.getElementById('qCategory');
+    const categoryDropdown = document.getElementById('categoryDropdown');
+
+    categoryInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = categoriesData.filter(cat => 
+        cat.name.toLowerCase().includes(searchTerm)
+      );
+      
+      if (filtered.length > 0 && searchTerm) {
+        categoryDropdown.innerHTML = filtered.map(cat => 
+          `<div class="category-item" data-id="${cat.categories_id}" data-name="${cat.name}">${cat.name}</div>`
+        ).join('');
+        categoryDropdown.classList.add('active');
+      } else {
+        categoryDropdown.classList.remove('active');
+      }
+    });
+
+    categoryDropdown.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-item')) {
+        categoryInput.value = e.target.dataset.name;
+        categoryInput.dataset.id = e.target.dataset.id;
+        categoryDropdown.classList.remove('active');
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.category-search')) {
+        categoryDropdown.classList.remove('active');
+      }
+    });
+
+    // Controls
+    document.getElementById('addRowBtn').addEventListener('click', ()=>{tableBody.appendChild(makeRow());});
+
+    document.getElementById('qAddBtn').addEventListener('click', async ()=>{
+      const name = document.getElementById('qName').value.trim();
+      const rawCategory = document.getElementById('qCategory').value.trim();
+      const description = document.getElementById('qDescription').value.trim();
+      
+      // if a category id was set by selecting from dropdown, use it; otherwise use the typed category name
+      const categoryid = document.getElementById('qCategory').dataset.id || rawCategory;
+      
+      if (!name) {
+        alert('Please enter a product name');
+        return;
+      }
+      if (!rawCategory) {
+        alert('Please enter or select a category');
+        return;
+      }
+
+      const obj = {
+        name: name,
+        price: parseFloat(document.getElementById('qPrice').value||0).toFixed(2),
+        tax: parseFloat(document.getElementById('qTax').value||0).toFixed(2),
+        stock: document.getElementById('qStock').value||0,
+        safe_stock: document.getElementById('qSafeStock').value||0,
+        categoryid: categoryid,
+        description: description
+      };
+      
+      tableBody.appendChild(makeRow(obj));
+      
+      // clear quick form
+      document.getElementById('qName').value = '';
+      document.getElementById('qPrice').value = '0.00';
+      document.getElementById('qTax').value = '0.00';
+      document.getElementById('qStock').value = '0';
+      document.getElementById('qSafeStock').value = '0';
+      document.getElementById('qDescription').value = '';
+      document.getElementById('qCategory').value = '';
+      document.getElementById('qCategory').dataset.id = '';
+    });
+
+    document.getElementById('csvInput').addEventListener('change', async (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      const name = f.name.toLowerCase();
+      if(name.endsWith('.xlsx')||name.endsWith('.xls')){
+        if(typeof XLSX === 'undefined'){
+          await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+        }
+        const data = await f.arrayBuffer();
+        const wb = XLSX.read(data, {type:'array'});
+        const first = wb.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[first], {defval:''});
+        rows.forEach(r=>{
+          const obj = normalizeRow(r);
+          tableBody.appendChild(makeRow(obj));
+        });
+      } else {
+        const text = await f.text();
+        parseCSVText(text).forEach(r=>tableBody.appendChild(makeRow(r)));
+      }
+      e.target.value='';
+    });
+
+    document.getElementById('pasteBtn').addEventListener('click', ()=>{
+      alert('Select the first cell in Excel and press Ctrl+C (Cmd+C) then click OK and paste here (Ctrl+V / Cmd+V)');
+      const catcher = document.createElement('textarea');
+      catcher.style.position='fixed'; catcher.style.left='50%'; catcher.style.top='50%'; catcher.style.transform='translate(-50%,-50%)'; catcher.style.width='70%'; catcher.style.height='220px'; catcher.style.zIndex=9999; catcher.style.background='#0b0b0d'; catcher.style.color='white'; catcher.style.border='1px solid rgba(255,255,255,0.06)'; catcher.style.padding='12px';
+      document.body.appendChild(catcher);
+      catcher.focus();
+      const done = ()=>{
+        const txt = catcher.value; document.body.removeChild(catcher);
+        if(!txt) return;
+        const parsed = parseTSVText(txt);
+        parsed.forEach(r=>tableBody.appendChild(makeRow(r)));
+      };
+      catcher.addEventListener('blur', done, {once:true});
+      catcher.addEventListener('keydown',(e)=>{if((e.ctrlKey||e.metaKey) && e.key==='Enter'){done();}})
+    });
+
+    document.getElementById('saveAllBtn').addEventListener('click', async ()=>{
+      const productsArr = rowsToObjects();
+
+      if(!productsArr.length){
+        alert("No products to save. Add at least one product first.");
+        return;
+      }
+
+      try{
+        const res = await fetch("/add-products", {
+          method: "POST",
+          credentials: 'same-origin',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productsArr)
+        });
+
+        // Try to parse JSON body (server should return JSON error info)
+        let data = null;
+        try { data = await res.json(); } catch (e) { /* non-json response */ }
+
+        if (!res.ok) {
+          // Prefer server-provided message when available
+          const msg = data && data.message ? data.message : (`Upload failed (status ${res.status})`);
+          alert(`❌ ${msg}`);
+          console.error('Upload failed response:', res.status, data);
+          return;
+        }
+
+        // Success path
+        if (data && data.success) {
+          alert(`✓ ${data.message}`);
+          tableBody.innerHTML = '';
+        } else {
+          const msg = data && data.message ? data.message : 'Unknown server response';
+          alert(`✗ ${msg}`);
+          console.warn('Unexpected server response', data);
+        }
+
+      } catch (err) {
+        console.error("Save failed:", err);
+        alert("❌ Upload failed. Check console for details and ensure server is running and you're logged in.");
+      }
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', async ()=>{
+      try {
+        // Fetch all products from the selected shop
+        const res = await fetch('/api/export-products', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        // Try to parse JSON regardless of status
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          alert('Error: Server returned invalid response. Please make sure you are logged in.');
+          return;
+        }
+        
+        if (!res.ok) {
+          alert('Error: ' + (data.message || 'Failed to export products'));
+          return;
+        }
+        
+        const products = data.products || [];
+        
+        if (products.length === 0) {
+          alert('No products found to export');
+          return;
+        }
+        
+        const header = ['ID','Name','Price','Tax','Stock','Safe Stock','Category'];
+        const csv = [header.join(',')].concat(products.map(p=>
+          [
+            p.products_id,
+            '"' + String(p.name||'').replace(/"/g,'""') + '"',
+            p.price,
+            p.tax,
+            p.stock,
+            p.safe_stock,
+            '"' + String(p.category_name||'').replace(/"/g,'""') + '"'
+          ].join(',')
+        )).join('\n');
+        
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'products_export_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{if(confirm('Clear all rows?')) tableBody.innerHTML='';});
+    document.getElementById('qClearBtn').addEventListener('click', ()=>{
+      document.getElementById('qName').value = '';
+      document.getElementById('qPrice').value = '0.00';
+      document.getElementById('qTax').value = '0.00';
+      document.getElementById('qStock').value = '0';
+      document.getElementById('qSafeStock').value = '0';
+      document.getElementById('qDescription').value = '';
+      document.getElementById('qCategory').value = '';
+      document.getElementById('qCategory').dataset.id = '';
+    });
+
+    // Helpers: parse CSV/TSV
+    function parseCSVText(text){
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if(!lines.length) return [];
+      const headers = splitCSVLine(lines[0]);
+      const rows = lines.slice(1).map(l=>{
+        const values = splitCSVLine(l);
+        const obj = {};
+        headers.forEach((h,i)=>obj[h.trim()]=values[i]||'');
+        return normalizeRow(obj);
+      });
+      return rows;
+    }
+    function splitCSVLine(line){
+      const out=[]; let cur=''; let inQuotes=false; for(let i=0;i<line.length;i++){const c=line[i]; if(c==='"'){ if(inQuotes && line[i+1]==='"'){ cur+='"'; i++; } else { inQuotes=!inQuotes; } } else if(c===',' && !inQuotes){ out.push(cur); cur=''; } else cur+=c; } out.push(cur); return out;
+    }
+    function parseTSVText(text){
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if(!lines.length) return [];
+      const headers = lines[0].split('\t').map(s=>s.trim());
+      return lines.slice(1).map(l=>{
+        const vals = l.split('\t'); const obj={}; headers.forEach((h,i)=>obj[h]=vals[i]||''); return normalizeRow(obj);
+      });
+    }
+
+    function normalizeRow(r){
+      const map = (keys)=>{for(const k of keys){if(r[k]!==undefined) return r[k]}return ''};
+      
+      // Combine description fields from old format
+      let description = '';
+      for (let i = 1; i <= 5; i++) {
+        const desc = map([`description${i}`, `desc${i}`, `line${i}`]);
+        if (desc && desc.trim() !== '') {
+          description += desc + '\n';
+        }
+      }
+      
+      // Also check for single description field
+      const singleDesc = map(['description', 'desc']);
+      if (singleDesc && singleDesc.trim() !== '') {
+        description = singleDesc;
+      }
+      
+      return {
+        name: map(['name','product_name','title'])||'',
+        price: (map(['price','mrp','cost'])||'0').toString(),
+        tax: (map(['tax','tax_percent'])||'0').toString(),
+        stock: map(['stock','quantity','qty'])||'0',
+        safe_stock: map(['safe_stock','safestock'])||'0',
+        categoryid: map(['categoryid','category_id','category'])||'',
+        description: description.trim()
+      }
+    }
+
+    async function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});}
+
+    function rowsToObjects(){
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      return rows.map(tr=>{
+        const obj={};
+        Array.from(tr.querySelectorAll('input[data-field]')).forEach(inp=>obj[inp.dataset.field]=inp.value);
+        obj.imageData = ''; // Keep for backward compatibility
+        return obj;
+      });
+    }
+
+    // View/Edit Product - Navigate to edit page
+    document.getElementById('viewEditBtn').addEventListener('click', () => {
+      window.location.href = '/edit_product';
+    });
+
+    // Paste from clipboard directly into table area (global paste handler)
+    window.addEventListener('paste', (e)=>{
+      const txt = (e.clipboardData && e.clipboardData.getData('text')) || '';
+      if(!txt) return;
+      if(txt.includes('\t') || txt.includes('\n')){
+        if(document.activeElement && (document.activeElement.tagName==='INPUT' || document.activeElement.tagName==='TEXTAREA')) return;
+        const rows = parseTSVText(txt);
+        if(rows.length){ rows.forEach(r=>tableBody.appendChild(makeRow(r))); }
+      }
+    });
+
+    // Initialize
+    loadCategories();
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    // Handle flash message close buttons
+    document.addEventListener('DOMContentLoaded', function() {
+      const closeButtons = document.querySelectorAll('.flash-message .close-flash');
+      closeButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const message = this.closest('.flash-message');
+          if(message) {
+            message.classList.add('fade-out');
+            setTimeout(() => {
+              if(message.parentElement) message.remove();
+            }, 400);
+          }
+        });
+      });
+
+      // Auto-remove flash messages after 3 seconds
+      const messages = document.querySelectorAll('.flash-message');
+      messages.forEach(msg => {
+        setTimeout(() => {
+          if(msg.parentElement) {
+            msg.classList.add('fade-out');
+            setTimeout(() => {
+              if(msg.parentElement) msg.remove();
+            }, 400);
+          }
+        }, 3000);
+      });
+    });
+
+  </script>
+
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Orders</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .status-pending { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-confirmed { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .status-processing { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .status-shipped { background-color: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .status-delivered { background-color: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .status-cancelled { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .status-return_requested { background-color: rgba(249, 115, 22, 0.15); color: #f97316; }
+        .status-request_accepted { background-color: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .status-returned { background-color: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+        
+        .order-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .order-card.pending { border-left-color: #f59e0b; }
+        .order-card.confirmed { border-left-color: #3b82f6; }
+        .order-card.processing { border-left-color: #3b82f6; }
+        .order-card.shipped { border-left-color: #a855f7; }
+        .order-card.delivered { border-left-color: #22c55e; }
+        .order-card.cancelled { border-left-color: #ef4444; }
+        .order-card.return_requested { border-left-color: #f97316; }
+        .order-card.request_accepted { border-left-color: #8b5cf6; }
+        .order-card.returned { border-left-color: #06b6d4; }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black text-gray-100 p-4 md:p-6 min-h-screen">
+  <div id="flashOverlay" class="flash-overlay"></div>
+    <!-- Flash Messages -->
+    <div class="flash-container" id="flashContainer">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+              <span>{{ message }}</span>
+              <button class="close-flash">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Top Bar with Title and Back Button -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">My Orders</h1>
+            <p class="text-gray-400 text-sm mt-1">Track and manage your purchases</p>
+        </div>
+        <a href="/my_invoices"
+           class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-300 text-sm md:text-base flex items-center gap-2 group shadow-lg hover:shadow-xl">
+            <span class="group-hover:-translate-x-1 transition-transform">←</span>
+            View My Invoices
+        </a>
+    </div>
+
+    {% if orders|length > 0 %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 max-w-7xl mx-auto">
+        {% for o in orders %}
+        {% set s = o.status %}
+        {% set is_delivered_or_later = s in ['delivered', 'return_requested', 'request_accepted', 'returned'] %}
+        {% set can_cancel = s in ['pending', 'confirmed', 'processing', 'shipped'] %}
+        
+        <div class="order-card {{ s }} p-5 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 shadow-lg flex flex-col gap-4">
+            <!-- Order Header -->
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-100 line-clamp-2">{{ o.product }}</h2>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="status-badge status-{{ s }}">
+                            {% if s == 'pending' %}
+                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                            {% elif s == 'confirmed' %}
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            {% elif s == 'processing' %}
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            {% elif s == 'shipped' %}
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                            {% elif s == 'delivered' %}
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            {% elif s == 'cancelled' %}
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            {% elif s == 'return_requested' %}
+                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                            {% elif s == 'request_accepted' %}
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                            {% elif s == 'returned' %}
+                            <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                            {% else %}
+                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                            {% endif %}
+                            {{ s|replace('_', ' ')|title }}
+                        </span>
+                        {% if s == 'delivered' and o.delivery_date_str %}
+                        <span class="text-xs text-gray-400">
+                            Delivered on {{ o.delivery_date_str.split(' ')[0] if ' ' in o.delivery_date_str else o.delivery_date_str }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="text-2xl font-bold text-white">₹{{ "%.2f"|format(o.price) }}</span>
+            </div>
+
+            <!-- Order Details -->
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400">Quantity</p>
+                        <p class="font-medium">{{ o.qty }}</p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400">Order Date</p>
+                        <p class="font-medium">{{ o.date.split(' ')[0] if ' ' in o.date else o.date }}</p>
+                    </div>
+                </div>
+                
+                {% if s == 'delivered' and o.delivery_date_str %}
+                <div class="bg-gray-800/30 rounded-lg p-3">
+                    <p class="text-xs text-gray-400">Delivered Date</p>
+                    <p class="font-medium">{{ o.delivery_date_str.split(' ')[0] if ' ' in o.delivery_date_str else o.delivery_date_str }}</p>
+                    {% if o.can_return and o.return_until_date %}
+                    <p class="text-xs text-green-400 mt-1">Eligible for return until {{ o.return_until_date }}</p>
+                    {% elif s == 'delivered' and not o.can_return %}
+                    <p class="text-xs text-gray-500 mt-1">Return window closed (7 days from delivery)</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if s in ['return_requested', 'request_accepted', 'returned'] %}
+                <div class="bg-gray-800/30 rounded-lg p-3">
+                    <p class="text-xs text-gray-400">Return Status</p>
+                    <p class="font-medium">{{ s|replace('_', ' ')|title }}</p>
+                    {% if s == 'returned' %}
+                    <p class="text-xs text-green-400 mt-1">Return completed</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                {% if can_cancel %}
+                <form action="/cancel/{{ o.id }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                    <button class="w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-red-500/20">
+                        Cancel Order
+                    </button>
+                </form>
+                {% endif %}
+                
+                {% if s == 'delivered' and o.can_return %}
+                <form action="/return/{{ o.id }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to return this item?');">
+                    <button class="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-blue-500/20">
+                        Return Item
+                    </button>
+                </form>
+                {% endif %}
+                
+                {% if s == 'delivered' %}
+                <a href="/review/{{ o.product_id }}" class="flex-1">
+                    <button class="w-full px-4 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-95">
+                        Write Review
+                    </button>
+                </a>
+                {% endif %}
+
+                {% if s in ['return_requested', 'request_accepted', 'returned'] %}
+                <a href="/return-status/{{ o.id }}" class="flex-1">
+                    <button class="w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-purple-500/20">
+                        {% if s == 'returned' %}
+                        View Return Details
+                        {% else %}
+                        Track Return
+                        {% endif %}
+                    </button>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Order Stats -->
+    <div class="mt-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-800">
+                <p class="text-sm text-gray-400">Total Orders</p>
+                <p class="text-2xl font-bold text-white">{{ orders|length }}</p>
+            </div>
+            <div class="bg-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-800">
+                <p class="text-sm text-gray-400">Active</p>
+                <p class="text-2xl font-bold text-blue-400">
+                    {{ orders|selectattr('status', 'in', ['pending', 'confirmed', 'processing', 'shipped'])|list|length }}
+                </p>
+            </div>
+            <div class="bg-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-800">
+                <p class="text-sm text-gray-400">Delivered</p>
+                <p class="text-2xl font-bold text-green-400">{{ orders|selectattr('status', 'equalto', 'delivered')|list|length }}</p>
+            </div>
+            <div class="bg-gray-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-800">
+                <p class="text-sm text-gray-400">Returns</p>
+                <p class="text-2xl font-bold text-orange-400">
+                    {{ orders|selectattr('status', 'in', ['return_requested', 'request_accepted', 'returned'])|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty state message -->
+    <div class="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+        <div class="max-w-md">
+            <div class="relative mb-6">
+                <div class="w-32 h-32 mx-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 animate-pulse"></div>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-100 mb-3">No Orders Yet</h2>
+            <p class="text-gray-400 mb-6 text-sm md:text-base">Your order history is empty. Start shopping to see your purchases here!</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="/dashboard" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-blue-500/30">
+                    Browse Products
+                </a>
+                <a href="/" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-all duration-300 border border-gray-700">
+                    View Best Sellers
+                </a>
+
+                <a href="/shop_Invoices" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-all duration-300 border border-gray-700">
+                    View Shop Invoices
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer Note -->
+    <div class="mt-12 pt-6 border-t border-gray-800 text-center">
+        <p class="text-gray-500 text-sm">Need help with an order? <a href="/support" class="text-blue-400 hover:text-blue-300 transition">Contact Support</a></p>
+    </div>
+
+    <!-- Mobile bottom navigation (optional) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 p-4">
+        <div class="flex justify-around">
+            <a href="/dashboard" class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="/orders" class="flex flex-col items-center text-blue-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span class="text-xs mt-1">Orders</span>
+            </a>
+            <a href="/profile" class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-xs mt-1">Profile</span>
+            </a>
+        </div>
+    </div>
+
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

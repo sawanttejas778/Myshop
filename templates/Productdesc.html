@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Product Details | My Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* -----------------------------------------------
+           ROOT VARIABLES & RESET
+        ----------------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gradient-1: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --gradient-2: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
+            --gradient-3: linear-gradient(135deg, #2a2a2a 0%, #111111 100%);
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --primary: #111111;
+            --secondary: #333333;
+            --accent: #ff4d6d;
+            --accent-light: rgba(255, 77, 109, 0.12);
+            --light-bg: #f8f9fa;
+            --border: #e9ecef;
+            --text-dark: #1e1e2f;
+            --text-light: #5a5a6e;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 6px 14px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        body {
+            background: linear-gradient(145deg, #fafafc 0%, #f1f3f7 100%);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ----- improved scroll & selection ----- */
+        ::selection {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #eef2f5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* ----- header (sticky, glossy) ----- */
+        .main-header {
+            background: rgba(17, 17, 17, 0.96);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            padding: 12px 0;
+        }
+
+        .header-container {
+            width: 92%;
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: white;
+            transition: var(--transition);
+        }
+        .logo:hover { opacity: 0.9; transform: scale(0.98); }
+
+        .logo-icon {
+            background: white;
+            border-radius: 16px;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 40px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .action-item:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -2px;
+            right: 2px;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 30px;
+            line-height: 1;
+            box-shadow: 0 2px 8px rgba(255,77,109,0.5);
+        }
+
+        .user-name {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* ----- main content containers ----- */
+        .main-content {
+            width: 92%;
+            max-width: 1400px;
+            margin: 32px auto 50px;
+        }
+
+        /* breadcrumb & back link */
+        .breadcrumb {
+            background: var(--card-bg);
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+        .breadcrumb a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+        .back-link:hover {
+            transform: translateX(-6px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* product grid (2 cols on desktop) */
+        .product-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 70px;
+        }
+        @media (max-width: 860px) {
+            .product-container { grid-template-columns: 1fr; gap: 32px; }
+        }
+
+        /* image section */
+        .product-image-section {
+            position: relative;
+        }
+        .product-image-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            border: 1px solid var(--border);
+        }
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+        .product-image:hover { transform: scale(1.02); }
+        .image-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--gradient-1);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            z-index: 3;
+            box-shadow: var(--shadow-sm);
+        }
+        .shop-info {
+            background: var(--card-bg);
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid var(--border);
+        }
+
+        /* product details card */
+        .product-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 34px 32px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(2px);
+        }
+        .product-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .price-section {
+            background: #ffffffcc;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 24px 0;
+            border: 1px solid var(--border);
+        }
+        .price-value { font-size: 2.2rem; font-weight: 800; }
+        .total-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 2px dashed var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        .stock-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 60px;
+            margin: 24px 0;
+            font-weight: 600;
+            flex-wrap: wrap;
+        }
+        .quantity-selector {
+            background: #f9fafc;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 24px 0;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .quantity-btn {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: 0.1s ease;
+        }
+        .quantity-btn:active { transform: scale(0.94); background: var(--gradient-2); color: white; }
+        .quantity-input {
+            width: 80px;
+            height: 48px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            background: white;
+        }
+
+        /* bullet points */
+        .description-title {
+            font-size: 1.4rem;
+            margin: 28px 0 18px 0;
+            position: relative;
+        }
+        .bullet-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 16px;
+            background: #ffffffaa;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+        }
+        .bullet-item:hover {
+            background: white;
+            transform: translateX(6px);
+            border-color: var(--accent);
+        }
+
+        /* action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 36px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .btn-primary {
+            background: var(--gradient-2);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .btn-secondary {
+            background: white;
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* related products */
+        .related-products-section {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px;
+            margin-top: 28px;
+        }
+        .product-card-small {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            transition: 0.25s ease;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        .product-card-small:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        .product-image-small {
+            width: 100%;
+            height: 210px;
+            object-fit: contain;
+            background: #fefefe;
+            padding: 24px;
+        }
+        .product-info-small {
+            padding: 20px;
+        }
+        .view-btn {
+            width: 100%;
+            margin-top: 16px;
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+
+        /* ----- FLASH MESSAGES (fixed no error, better ux) ----- */
+        .flash-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            z-index: 1400;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.25s;
+        }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            width: calc(100% - 48px);
+        }
+        .flash-message {
+            background: #1f2937e6;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 14px 18px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            border-left: 5px solid;
+            animation: slideIn 0.3s ease;
+        }
+        .flash-message.success { border-left-color: var(--success); background: #10b981e6; }
+        .flash-message.error { border-left-color: var(--danger); background: #ef4444e6; }
+        .flash-message.warning { border-left-color: var(--warning); background: #f59e0be6; }
+        .flash-message.info { border-left-color: #3b82f6; background: #3b82f6e6; }
+        .close-flash {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: white;
+            margin-left: auto;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .fade-out {
+            animation: fadeOut 0.3s forwards !important;
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(30px); visibility: hidden; }
+        }
+
+        /* mobile refinements */
+        @media (max-width: 640px) {
+            .header-container { flex-direction: column; text-align: center; }
+            .product-card { padding: 24px 20px; }
+            .product-title { font-size: 1.7rem; }
+            .price-value { font-size: 1.8rem; }
+            .action-buttons { flex-direction: column; }
+            .flash-container { left: 16px; right: 16px; width: auto; }
+            .user-actions { justify-content: center; }
+        }
+        @keyframes shake {
+            0%,100%{ transform: translateX(0);}
+            25%{ transform: translateX(-5px);}
+            75%{ transform: translateX(5px);}
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-added { background: var(--success) !important; box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
+    </style>
+</head>
+<body>
+<div id="flashOverlay" class="flash-overlay"></div>
+<div class="flash-container" id="flashContainer"></div>
+
+<!-- Header (static placeholders, backend integration ready) -->
+<header class="main-header">
+    <div class="header-container">
+        <a href="/dashboard" class="logo">
+            <div class="logo-icon"><img src="{{ url_for('static', filename='logo.png') }}" alt="My Shop" onerror="this.src='https://placehold.co/200x200?text=🛍️'"></div>
+            <span>My Shop</span>
+        </a>
+        <div class="user-actions">
+            <a href="/dashboard" class="action-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="#" class="action-item" id="globalWishlistBtn" onclick="toggleWishlistModal(); return false;"><i class="fas fa-heart"></i><span>Wishlist</span><span class="cart-count" id="wishlistCount">0</span></a>
+            <a href="{{ url_for('view_cart') }}" class="action-item"><i class="fas fa-shopping-cart"></i><span>Cart</span><span class="cart-count" id="cartCount">{{ cart_count|default(0) }}</span></a>
+            <div class="user-name" id="userName">{{ user_name|default('Guest') }}</div>
+            {% if user %}
+            <a href="{{ url_for('logout') }}" class="action-item"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="action-item"><i class="fas fa-sign-in-alt"></i><span>Login</span></a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<div class="main-content">
+    <!-- breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/dashboard">Home</a> <span>/</span>
+        {% if category_name %}<a href="/dashboard?category={{ product.categoryid if product else '' }}">{{ category_name }}</a><span>/</span>{% endif %}
+        <span style="font-weight:600;">Product Details</span>
+    </div>
+    <a href="/dashboard" class="back-link"><i class="fas fa-arrow-left"></i> Back to Products</a>
+
+    {% if product %}
+    <div class="product-container">
+        <!-- left image column -->
+        <div class="product-image-section">
+            <div class="image-badge">✨ Featured</div>
+            <div class="product-image-container">
+                <img class="product-image" id="mainProductImg" src="{{ product_image_url|default('https://placehold.co/600x500?text=Product') }}" alt="{{ product.name }}" onerror="this.src='https://placehold.co/600x500?text=Product'">
+            </div>
+            {% if product.shop_name %}
+            <div class="shop-info"><span class="shop-label">Sold by:</span><span class="shop-name"><i class="fas fa-store"></i> {{ product.shop_name }}</span></div>
+            {% endif %}
+        </div>
+
+        <!-- right details column -->
+        <div class="product-details-section">
+            <div class="product-card">
+                <h1 class="product-title">{{ product.name }}</h1>
+                {% set product_price = product.price|float if product.pri

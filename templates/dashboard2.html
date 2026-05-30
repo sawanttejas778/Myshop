@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    
+    /* Mobile sidebar toggle */
+    .sidebar-mobile {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .sidebar-mobile.active {
+      transform: translateX(0);
+    }
+    .overlay {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .overlay.active {
+      display: block;
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+
+<body class="bg-[#0f1115] text-white flex flex-col lg:flex-row">
+  <div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<!-- Mobile Header -->
+<div class="lg:hidden flex items-center justify-between p-4 bg-[#1a1d24] border-b border-[#2a2d35]">
+  <div class="flex items-center gap-3">
+    <button id="menuToggle" class="text-[#e4b64c] p-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <h1 class="text-xl font-semibold text-[#e4b64c] truncate">{{ current_shop }}</h1>
+  </div>
+  <div class="flex items-center gap-2">
+    <button id="mobileAddShopBtn" class="p-2 bg-[#e4b64c] text-[#0f1115] rounded hover:bg-[#f5c75f] transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Overlay for mobile sidebar -->
+<div id="overlay" class="overlay fixed inset-0 z-40 lg:hidden"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar-mobile lg:translate-x-0 fixed lg:relative top-0 left-0 w-64 lg:w-64 bg-[#1a1d24] min-h-screen p-6 border-r border-[#2a2d35] z-50 lg:z-auto">
+  <div class="flex items-center justify-between mb-8 lg:block">
+    <h1 class="text-2xl font-semibold text-[#e4b64c]">{{ current_shop }}</h1>
+    <button id="closeSidebar" class="lg:hidden text-gray-400 hover:text-white">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="space-y-3">
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('products') }}">Products</a>
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('manage_orders') }}">Orders</a>
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('billing') }}">Invoice</a>
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('customer') }}">Customers</a>
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('khatabook') }}">Khatabook</a>
+    <a class="block py-2 px-3 rounded hover:bg-[#252932]" href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+</aside>
+
+<!-- Main Section -->
+<main class="flex-1 p-4 lg:p-10">
+
+  <!-- Header -->
+  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+    <h2 class="text-2xl lg:text-3xl font-semibold">Dashboard</h2>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+      <select id="shopDropdown" name="shop" class="px-4 py-2 bg-[#1a1d24] border border-[#2a2d35] rounded focus:outline-none focus:border-[#e4b64c] cursor-pointer flex-1">
+        <option value="">-- Select a Shop --</option>
+        {% for shop in shop_names %}
+          <option value="{{ shop }}" data-shop-id="" {% if shop == current_shop %}selected{% endif %}>{{ shop }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" placeholder="Search..." class="px-4 py-2 bg-[#1a1d24] border border-[#2a2d35] rounded focus:outline-none focus:border-[#e4b64c] flex-1 sm:flex-none sm:w-48">
+      <button id="addShopBtn" class="hidden lg:block px-4 py-2 bg-[#e4b64c] text-[#0f1115] font-semibold rounded hover:bg-[#f5c75f] transition whitespace-nowrap">+ Add Shop</button>
+    </div>
+  </div>
+
+  <!-- Add Shop Modal -->
+  <div id="addShopModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-[#1a1d24] p-6 lg:p-8 rounded-lg shadow-xl border border-[#2a2d35] w-11/12 lg:w-full max-w-md mx-4">
+      <h3 class="text-xl lg:text-2xl font-semibold mb-6 text-[#e4b64c]">🏪 Create New Shop</h3>
+      
+      <div id="modalAlert" class="hidden mb-4 p-3 rounded text-sm"></div>
+      
+      <form id="createShopForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-300 text-sm font-semibold mb-2">Shop Name *</label>
+          <input type="text" id="modalShopName" placeholder="e.g., Electronics Store" class="w-full px-4 py-2 bg-[#252932] border border-[#2a2d35] rounded focus:outline-none focus:border-[#e4b64c]" required>
+        </div>
+        
+        <div>
+          <label class="block text-gray-300 text-sm font-semibold mb-2">Tax ID (Optional)</label>
+          <input type="text" id="modalTaxId" placeholder="e.g., TAX123456" class="w-full px-4 py-2 bg-[#252932] border border-[#2a2d35] rounded focus:outline-none focus:border-[#e4b64c]">
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3 pt-4">
+          <button type="submit" class="flex-1 px-4 py-2 bg-[#e4b64c] text-[#0f1115] font-semibold rounded hover:bg-[#f5c75f] transition">Create Shop</button>
+          <button type="button" id="closeModalBtn" class="flex-1 px-4 py-2 bg-[#252932] text-gray-300 font-semibold rounded hover:bg-[#2a2d35] transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
+    <div class="p-4 lg:p-6 bg-[#1a1d24] rounded shadow-lg border border-[#2a2d35]">
+      <p class="text-gray-300 text-sm lg:text-base">Total Sales</p>
+      <h3 class="text-2xl lg:text-3xl font-bold text-[#e4b64c] stat-value">{{total_sales}}</h3>
+    </div>
+
+    <div class="p-4 lg:p-6 bg-[#1a1d24] rounded shadow-lg border border-[#2a2d35]">
+      <p class="text-gray-300 text-sm lg:text-base">Orders Today</p>
+      <h3 class="text-2xl lg:text-3xl font-bold stat-value">{{orders_today}}</h3>
+    </div>
+
+    <div class="p-4 lg:p-6 bg-[#1a1d24] rounded shadow-lg border border-[#2a2d35]">
+      <p class="text-gray-300 text-sm lg:text-base">Products</p>
+      <h3 class="text-2xl lg:text-3xl font-bold stat-value">{{total_products}}</h3>
+    </div>
+
+    <div class="p-4 lg:p-6 bg-[#1a1d24] rounded shadow-lg border border-[#2a2d35]">
+      <p class="text-gray-300 text-sm lg:text-base">Low Stock Items</p>
+      <h3 class="text-2xl lg:text-3xl font-bold text-red-500 stat-value">{{low_stock_items}}</h3>
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="bg-[#1a1d24] p-4 lg:p-6 rounded shadow-lg border border-[#2a2d35] mb-6 lg:mb-8">
+    <h3 class="text-lg lg:text-xl font-semibold mb-4 text-[#e4b64c]">Recent Orders</h3>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left min-w-[500px]">
+        <thead>
+          <tr class="border-b border-[#2a2d35] text-gray-300">
+            <th class="py-3 text-sm lg:text-base">Order ID</th>
+            <th class="text-sm lg:text-base">Customer</th>
+            <th class="text-sm lg:text-base">Status</th>
+            <th class="text-sm lg:text-base">Amount</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for o in orders_list %}
+          <tr class="border-b border-[#2a2d35]">
+            <td class="py-2 text-sm lg:text-base">#{{ o.id }}</td>
+            <td class="text-sm lg:text-base">{{ o.customer }}</td>
+
+            <td class="text-sm lg:text-base {% if o.status=='Delivered' %}text-green-400{% elif o.status=='Packed' %}text-yellow-400{% elif o.status=='Pending' %}text-gray-300{% else %}text-red-400{% endif %}">
+              {{ o.status }}
+            </td>
+
+            <td class="text-sm lg:text-base">₹ {{ o.amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Low Stock Items -->
+  <div class="bg-[#1a1d24] p-4 lg:p-6 rounded shadow-lg border border-[#2a2d35]">
+    <h3 class="text-lg lg:text-xl font-semibold mb-4 text-red-500">⚠️ Low Stock Items</h3>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left min-w-[500px]">
+        <thead>
+          <tr class="border-b border-[#2a2d35] text-gray-300">
+            <th class="py-3 text-sm lg:text-base">Product ID</th>
+            <th class="text-sm lg:text-base">Product Name</th>
+            <th class="text-sm lg:text-base">Current Stock</th>
+            <th class="text-sm lg:text-base">Safe Stock Level</th>
+            <th class="text-sm lg:text-base">Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="lowStockTableBody">
+          <tr class="border-b border-[#2a2d35]">
+            <td colspan="5" class="py-4 text-center text-gray-400 text-sm lg:text-base">No low stock items</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Mobile sidebar toggle elements
+  const menuToggle = document.getElementById('menuToggle');
+  const closeSidebar = document.getElementById('closeSidebar');
+  const sidebar = document.querySelector('aside');
+  const overlay = document.getElementById('overlay');
+  const mobileAddShopBtn = document.getElementById('mobileAddShopBtn');
+  
+  const addShopBtn = document.getElementById('addShopBtn');
+  const addShopModal = document.getElementById('addShopModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const createShopForm = document.getElementById('createShopForm');
+  const modalAlert = document.getElementById('modalAlert');
+  const shopDropdown = document.getElementById('shopDropdown');
+
+  // Mobile sidebar toggle functions
+  function openSidebar() {
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebarFunc() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Event listeners for mobile sidebar
+  if (menuToggle) {
+    menuToggle.addEventListener('click', openSidebar);
+  }
+  
+  if (closeSidebar) {
+    closeSidebar.addEventListener('click', closeSidebarFunc);
+  }
+  
+  if (overlay) {
+    overlay.addEventListener('click', closeSidebarFunc);
+  }
+
+  // Mobile add shop button
+  if (mobileAddShopBtn) {
+    mobileAddShopBtn.addEventListener('click', () => {
+      addShopModal.classList.remove('hidden');
+      document.getElementById('modalShopName').focus();
+    });
+  }
+
+  // Load shops on page load
+  async function loadShops() {
+    try {
+      const response = await fetch('/api/user-shops', {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.shops.length > 0) {
+        // Clear existing options except the first placeholder
+        while (shopDropdown.options.length > 1) {
+          shopDropdown.remove(1);
+        }
+
+        // Add shops to dropdown
+        data.shops.forEach(shop => {
+          const option = document.createElement('option');
+          option.value = shop.shopid;
+          option.textContent = shop.name;
+          option.dataset.shopId = shop.shopid;
+          shopDropdown.appendChild(option);
+        });
+
+        // If server provided a selected_shop_id in session, use it; otherwise leave selection empty
+        const sel = data.selected_shop_id || '';
+        if (sel) {
+          shopDropdown.value = sel;
+          if (data.selected_shop_name) {
+            document.querySelector('aside h1').textContent = data.selected_shop_name;
+            document.querySelector('.lg\\:hidden h1').textContent = data.selected_shop_name;
+          }
+          // initialize dashboard for the selected shop
+          await loadDashboardStats(sel);
+        } else {
+          // No shop selected by default — show placeholder and don't auto-load stats
+          shopDropdown.value = '';
+          document.querySelector('aside h1').textContent = 'No Shop Selected';
+          document.querySelector('.lg\\:hidden h1').textContent = 'No Shop Selected';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading shops:', error);
+    }
+  }
+
+  // Handle shop selection
+  shopDropdown.addEventListener('change', (e) => {
+    const shopId = e.target.value;
+    if (shopId) {
+      selectShop(shopId);
+    }
+  });
+
+  // Select shop and store in session (without reload)
+  async function selectShop(shopId) {
+    try {
+      console.log('selectShop called with', shopId);
+      const response = await fetch('/api/select-shop', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ shop_id: shopId })
+      });
+
+      let data = null;
+      try { data = await response.json(); } catch (e) { /* ignore non-json */ }
+
+      if (!response.ok) {
+        const msg = data && data.message ? data.message : `Failed to select shop (status ${response.status})`;
+        alert(msg);
+        return;
+      }
+
+      if (data && data.success) {
+        console.log(`Shop selected: ${data.shop_name}`);
+        // Update sidebar shop name (both desktop and mobile)
+        document.querySelector('aside h1').textContent = data.shop_name;
+        document.querySelector('.lg\\:hidden h1').textContent = data.shop_name;
+        // Update dropdown value to reflect selection
+        shopDropdown.value = shopId;
+        // Fetch and update dashboard stats
+        await loadDashboardStats(shopId);
+      } else {
+        const msg = data && data.message ? data.message : 'Unknown error selecting shop';
+        alert(msg);
+      }
+    } catch (error) {
+      console.error('Error selecting shop:', error);
+      alert('Failed to select shop');
+    }
+  }
+
+  // Load dashboard stats for selected shop
+  async function loadDashboardStats(shopId) {
+    try {
+      console.log('loading stats for', shopId);
+      const response = await fetch(`/api/dashboard-stats/${shopId}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      let data = null;
+      try { data = await response.json(); } catch(e) { console.error('Invalid JSON from stats API', e); }
+      console.log('stats response', response.status, data);
+
+      if (data && data.success) {
+        // Update stats cards
+        document.querySelectorAll('.stat-value')[0].textContent = data.total_sales || 0;
+        document.querySelectorAll('.stat-value')[1].textContent = data.orders_today || 0;
+        document.querySelectorAll('.stat-value')[2].textContent = data.total_products || 0;
+        document.querySelectorAll('.stat-value')[3].textContent = data.low_stock_items || 0;
+
+        // Update orders table
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = '';
+        
+        if (data.orders_list && data.orders_list.length > 0) {
+          data.orders_list.forEach(order => {
+            const statusClass = order.status === 'Delivered' ? 'text-green-400' : 
+                               order.status === 'Packed' ? 'text-yellow-400' :
+                               order.status === 'Pending' ? 'text-gray-300' : 'text-red-400';
+            
+            const row = `
+              <tr class="border-b border-[#2a2d35]">
+                <td class="py-2 text-sm lg:text-base">#${order.id}</td>
+                <td class="text-sm lg:text-base">Customer</td>
+                <td class="${statusClass} text-sm lg:text-base">${order.status}</td>
+                <td class="text-sm lg:text-base">₹ ${order.amount}</td>
+              </tr>
+            `;
+            tbody.innerHTML += row;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-gray-400 text-sm lg:text-base">No orders found</td></tr>';
+        }
+
+        // Update low stock items table
+        const lowStockBody = document.getElementById('lowStockTableBody');
+        lowStockBody.innerHTML = '';
+        
+        if (data.low_stock_list && data.low_stock_list.length > 0) {
+          data.low_stock_list.forEach(item => {
+            const statusClass = item.stock <= 0 ? 'text-red-500' : 'text-yellow-500';
+            const row = `
+              <tr class="border-b border-[#2a2d35]">
+                <td class="py-2 text-sm lg:text-base">#${item.product_id}</td>
+                <td class="text-sm lg:text-base">${item.name}</td>
+                <td class="text-sm lg:text-base">${item.stock}</td>
+                <td class="text-sm lg:text-base">${item.safe_stock}</td>
+                <td class="${statusClass} text-sm lg:text-base">${item.stock <= 0 ? '🔴 Out of Stock' : '🟡 Low Stock'}</td>
+              </tr>
+            `;
+            lowStockBody.innerHTML += row;
+          });
+        } else {
+          lowStockBody.innerHTML = '<tr class="border-b border-[#2a2d35]"><td colspan="5" class="py-4 text-center text-gray-400 text-sm lg:text-base">No low stock items</td></tr>';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+    }
+  }
+
+  // Open modal
+  addShopBtn.addEventListener('click', () => {
+    addShopModal.classList.remove('hidden');
+    document.getElementById('modalShopName').focus();
+  });
+
+  // Close modal
+  closeModalBtn.addEventListener('click', () => {
+    addShopModal.classList.add('hidden');
+    createShopForm.reset();
+    modalAlert.classList.add('hidden');
+  });
+
+  // Close modal when clicking outside
+  addShopModal.addEventListener('click', (e) => {
+    if (e.target === addShopModal) {
+      addShopModal.classList.add('hidden');
+      createShopForm.reset();
+      modalAlert.classList.add('hidden');
+    }
+  });
+
+  // Handle form submission
+  createShopForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const shopName = document.getElementById('modalShopName').value.trim();
+    const taxId = document.getElementById('modalTaxId').value.trim();
+
+    if (!shopName) {
+      showModalAlert('Please enter a shop name', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/shops', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: shopName, tax_id: taxId || null })
+      });
+
+      let data = null;
+      try { data = await response.json(); } catch(e) { /* ignore */ }
+
+      if (data.success) {
+        showModalAlert(`✓ ${data.message}`, 'success');
+        createShopForm.reset();
+
+        // Close sidebar on mobile after shop creation
+        closeSidebarFunc();
+        
+        // Refresh page after 1.5 seconds
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
+      } else {
+        showModalAlert(`✗ ${data.message}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showModalAlert('Failed to create shop. Please try again.', 'error');
+    }
+  });
+
+  function showModalAlert(message, type) {
+    modalAlert.textContent = message;
+    modalAlert.classList.remove('hidden');
+    
+    if (type === 'success') {
+      modalAlert.className = 'bg-green-900 bg-opacity-30 border border-green-500 text-green-400 p-3 rounded text-sm';
+    } else {
+      modalAlert.className = 'bg-red-900 bg-opacity-30 border border-red-500 text-red-400 p-3 rounded text-sm';
+    }
+  }
+
+  // Load shops when page loads
+  loadShops();
+</script>
+
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>
