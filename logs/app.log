@@ -204,3 +204,65 @@
 2026-05-30 22:11:00,067 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:11:00] "GET /favicon.ico HTTP/1.1" 200 -
 2026-05-30 22:11:36,276 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
 2026-05-30 22:11:36,277 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:11:36] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:38:15,721 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-05-31 16:38:15,721 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-05-31 16:38:15,743 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-31 16:38:16,445 [WARNING] werkzeug:  * Debugger is active!
+2026-05-31 16:38:16,453 [INFO] werkzeug:  * Debugger PIN: 828-502-184
+2026-05-31 16:38:29,776 [DEBUG] app: REQ GET / from 127.0.0.1
+2026-05-31 16:38:29,777 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:29] "[32mGET / HTTP/1.1[0m" 302 -
+2026-05-31 16:38:29,800 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-05-31 16:38:29,805 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:29] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-05-31 16:38:29,816 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-31 16:38:30,315 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:30] "GET /login HTTP/1.1" 200 -
+2026-05-31 16:38:30,331 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-31 16:38:30,490 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:30] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-31 16:38:30,523 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:38:30,523 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:30] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:38:56,081 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-31 16:38:56,335 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:56] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-31 16:38:56,344 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-31 16:38:56,363 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:56] "GET /login HTTP/1.1" 200 -
+2026-05-31 16:38:56,378 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-31 16:38:56,380 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:56] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-31 16:38:56,409 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:38:56,410 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:38:56] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:39:20,159 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-31 16:39:21,051 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:21] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-31 16:39:21,060 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-05-31 16:39:21,186 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:21] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-05-31 16:39:23,530 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-05-31 16:39:23,552 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:23] "GET /api/user-shops HTTP/1.1" 200 -
+2026-05-31 16:39:23,615 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:39:23,617 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:23] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:39:31,193 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-05-31 16:39:31,193 [DEBUG] app: Request JSON: {'shop_id': '2'}
+2026-05-31 16:39:31,218 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:31] "POST /api/select-shop HTTP/1.1" 200 -
+2026-05-31 16:39:31,229 [DEBUG] app: REQ GET /api/dashboard-stats/2 from 127.0.0.1
+2026-05-31 16:39:31,297 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:31] "GET /api/dashboard-stats/2 HTTP/1.1" 200 -
+2026-05-31 16:39:33,320 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-05-31 16:39:33,321 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-05-31 16:39:33,343 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:33] "POST /api/select-shop HTTP/1.1" 200 -
+2026-05-31 16:39:33,353 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-05-31 16:39:33,382 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:33] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-05-31 16:39:35,696 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-05-31 16:39:35,743 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:35] "GET /products HTTP/1.1" 200 -
+2026-05-31 16:39:35,762 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-05-31 16:39:35,837 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:35] "GET /api/categories HTTP/1.1" 200 -
+2026-05-31 16:39:35,840 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:39:35,840 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:39:35] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:40:34,744 [DEBUG] app: REQ GET /edit_product from 127.0.0.1
+2026-05-31 16:40:34,844 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:34] "GET /edit_product HTTP/1.1" 200 -
+2026-05-31 16:40:34,878 [DEBUG] app: REQ GET /api/export-products from 127.0.0.1
+2026-05-31 16:40:34,896 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:40:34,897 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:34] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:40:34,900 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:34] "GET /api/export-products HTTP/1.1" 200 -
+2026-05-31 16:40:41,316 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-05-31 16:40:41,333 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:41] "GET /products HTTP/1.1" 200 -
+2026-05-31 16:40:41,351 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-05-31 16:40:41,398 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:41] "GET /api/categories HTTP/1.1" 200 -
+2026-05-31 16:40:41,400 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-31 16:40:41,401 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:40:41] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-31 16:41:37,662 [DEBUG] app: REQ GET /api/export-products from 127.0.0.1
+2026-05-31 16:41:37,688 [INFO] werkzeug: 127.0.0.1 - - [31/May/2026 16:41:37] "GET /api/export-products HTTP/1.1" 200 -

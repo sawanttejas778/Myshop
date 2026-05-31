@@ -347,7 +347,6 @@ ON DELETE CASCADE;
 
 create table purchase_reciepts(
     receipt_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    product_id BIGINT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
     shopid INT NOT NULL,
     Reason TEXT,
@@ -482,3 +481,78 @@ create table stock_transfer(
     FOREIGN KEY (from_shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
     FOREIGN KEY (to_shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+create table Sales_order(
+    SONO BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customerid BIGINT UNSIGNED NOT NULL,
+    shopid INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    total_tax DECIMAL(10,2) NOT NULL,
+    cgst DECIMAL(10,2) NOT NULL default 0,
+    sgst DECIMAL(10,2) NOT NULL default 0,
+    igst DECIMAL(10,2) NOT NULL default 0,
+    created_by varchar(255) not null,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255) NOT NULL default "N/A",
+    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
+    FOREIGN KEY (customerid) REFERENCES Customers(customerid) ON DELETE CASCADE
+)
+
+create table sales_item(
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    shopid INT NOT NULL,
+    SONO BIGINT UNSIGNED not null,
+    product_id BIGINT UNSIGNED NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    tax_rate DECIMAL(5,2) NOT NULL,
+    tax_amount DECIMAL(10,2) NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (SONO) REFERENCES Sales_order(SONO) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
+    foreign key (shopid) references Shops(shopid) on delete cascade
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+create table IF NOT EXISTS PR_items(
+    id bigint unsigned primary key auto_increment,
+    shopid int not null,
+    PRID BIGINT UNSIGNED,
+    product_id BIGINT UNSIGNED NOT NULL,
+    quantity int not null,
+    unit_price decimal(10,2) not null,
+    tax_rate decimal(5,2) not null,
+    tax_amount decimal(10,2) not null,
+    total decimal(10,2) not null,
+    FOREIGN KEY (PRID) REFERENCES purchase_reciepts(receipt_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
+    foreign key (shopid) references Shops(shopid) on delete cascade
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+create table supplier_invoice(
+    invoice_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    invoice_number VARCHAR(50) NOT NULL,
+    supplier_name VARCHAR(100) NOT NULL,
+    supplier_email VARCHAR(100),
+    supplier_phone VARCHAR(20),
+    supplier_address TEXT,
+    due_date DATE NOT NULL,
+    shop_id INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    total_tax DECIMAL(10,2) NOT NULL,
+    cgst DECIMAL(10,2) NOT NULL,
+    sgst DECIMAL(10,2) NOT NULL,
+    igst DECIMAL(10,2) NOT NULL,
+    grand_total DECIMAL(10,2) NOT NULL,
+    status ENUM('draft', 'sent', 'paid', 'cancelled') DEFAULT 'draft',
+    cancelled_note text,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    INDEX idx_supplier_invoice_number (invoice_number),
+    INDEX idx_supplier_email (supplier_email),
+    INDEX idx_supplier_status (status),
+    INDEX idx_supplier_created_at (created_at)
+    foreign key (shop_id) references Shops(shopid) on delete cascade
+)
