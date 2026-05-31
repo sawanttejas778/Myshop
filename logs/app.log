@@ -1,0 +1,206 @@
+2026-05-30 21:46:16,669 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-05-30 21:46:16,670 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-05-30 21:46:16,701 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 21:46:17,396 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 21:46:17,402 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 21:48:28,631 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-05-30 21:48:28,632 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-05-30 21:48:28,767 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 21:48:29,407 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 21:48:29,413 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 21:49:23,525 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-05-30 21:49:23,525 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-05-30 21:49:23,541 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 21:49:24,106 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 21:49:24,110 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 21:50:19,733 [DEBUG] app: REQ GET /templates/billing_invoices.html from 127.0.0.1
+2026-05-30 21:50:19,741 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\flask\\app.py', reloading
+2026-05-30 21:50:19,747 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\flask\\ctx.py', reloading
+2026-05-30 21:50:19,750 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\werkzeug\\routing\\map.py', reloading
+2026-05-30 21:50:19,760 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\werkzeug\\routing\\matcher.py', reloading
+2026-05-30 21:50:19,776 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:19] "[35m[1mGET /templates/billing_invoices.html HTTP/1.1[0m" 500 -
+2026-05-30 21:50:20,032 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:20] "GET /templates/billing_invoices.html?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2026-05-30 21:50:20,035 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:20] "GET /templates/billing_invoices.html?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2026-05-30 21:50:20,126 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:20] "GET /templates/billing_invoices.html?__debugger__=yes&cmd=resource&f=console.png&s=bBUpEZ1RJYjuVohvH0Ag HTTP/1.1" 200 -
+2026-05-30 21:50:20,146 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:20] "GET /templates/billing_invoices.html?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2026-05-30 21:50:20,444 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 21:50:21,081 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 21:50:21,085 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 21:50:41,679 [DEBUG] app: REQ GET / from 127.0.0.1
+2026-05-30 21:50:41,680 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:41] "[32mGET / HTTP/1.1[0m" 302 -
+2026-05-30 21:50:41,697 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-05-30 21:50:41,703 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:50:41] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-05-30 21:50:41,716 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-30 21:51:03,641 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\mysql\\connector\\pooling.py', reloading
+2026-05-30 21:51:03,643 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\mysql\\connector\\connection_cext.py', reloading
+2026-05-30 21:51:03,648 [INFO] werkzeug:  * Detected change in 'C:\\Users\\sawan\\anaconda3\\Lib\\site-packages\\mysql\\connector\\abstracts.py', reloading
+2026-05-30 21:51:03,655 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:51:03] "[35m[1mGET /login HTTP/1.1[0m" 500 -
+2026-05-30 21:51:03,756 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:51:03] "GET /login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2026-05-30 21:51:03,757 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:51:03] "GET /login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2026-05-30 21:51:03,780 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:51:03] "GET /login?__debugger__=yes&cmd=resource&f=console.png&s=deEhGDXDoe8HahF4ZYad HTTP/1.1" 200 -
+2026-05-30 21:51:03,826 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 21:51:03] "GET /login?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2026-05-30 21:51:04,319 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 21:51:04,865 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 21:51:04,868 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 22:05:03,930 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-05-30 22:05:03,931 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-05-30 22:05:03,956 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 22:05:04,891 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 22:05:04,897 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 22:05:43,310 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\sqlconnection.py', reloading
+2026-05-30 22:05:43,311 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\sqlconnection.py', reloading
+2026-05-30 22:05:43,312 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\sqlconnection.py', reloading
+2026-05-30 22:05:44,112 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 22:05:44,799 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 22:05:44,801 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 22:05:47,883 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\sqlconnection.py', reloading
+2026-05-30 22:05:48,960 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 22:05:49,701 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 22:05:49,707 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 22:05:52,517 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-05-30 22:05:52,519 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-05-30 22:05:52,875 [INFO] werkzeug:  * Restarting with watchdog (windowsapi)
+2026-05-30 22:05:53,631 [WARNING] werkzeug:  * Debugger is active!
+2026-05-30 22:05:53,634 [INFO] werkzeug:  * Debugger PIN: 122-613-823
+2026-05-30 22:05:58,738 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-30 22:05:59,111 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:05:59] "GET /login HTTP/1.1" 200 -
+2026-05-30 22:05:59,189 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:05:59,349 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:05:59] "GET /static/logo.png HTTP/1.1" 200 -
+2026-05-30 22:06:00,388 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:06:00,389 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:00] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:06:07,444 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-30 22:06:08,618 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:08] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-30 22:06:08,634 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-05-30 22:06:09,034 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:09] "GET /dashboard HTTP/1.1" 200 -
+2026-05-30 22:06:09,061 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:06:09,062 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:09] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-30 22:06:09,513 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:06:09,514 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:09] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:06:59,114 [DEBUG] app: REQ GET /logout from 127.0.0.1
+2026-05-30 22:06:59,115 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:59] "[32mGET /logout HTTP/1.1[0m" 302 -
+2026-05-30 22:06:59,128 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-05-30 22:06:59,130 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:59] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-05-30 22:06:59,144 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-30 22:06:59,172 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:59] "GET /login HTTP/1.1" 200 -
+2026-05-30 22:06:59,192 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:06:59,195 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:59] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-30 22:06:59,225 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:06:59,226 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:06:59] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:07:11,361 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-30 22:07:11,378 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:11] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-30 22:07:11,386 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-30 22:07:11,403 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:11] "GET /login HTTP/1.1" 200 -
+2026-05-30 22:07:11,418 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:07:11,420 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:11] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-30 22:07:11,452 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:07:11,452 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:11] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:07:22,364 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-30 22:07:22,382 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:22] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-30 22:07:22,390 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-05-30 22:07:22,408 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:22] "GET /login HTTP/1.1" 200 -
+2026-05-30 22:07:22,423 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:07:22,424 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:22] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-30 22:07:22,449 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:07:22,449 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:07:22] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:09,081 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-05-30 22:08:09,972 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:09] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-05-30 22:08:09,980 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-05-30 22:08:10,051 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:10] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-05-30 22:08:10,818 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-05-30 22:08:10,833 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:10] "GET /api/user-shops HTTP/1.1" 200 -
+2026-05-30 22:08:10,923 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:10,924 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:10] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:19,836 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-05-30 22:08:19,836 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-05-30 22:08:19,859 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:19] "POST /api/select-shop HTTP/1.1" 200 -
+2026-05-30 22:08:19,870 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-05-30 22:08:19,919 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:19] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-05-30 22:08:22,569 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-05-30 22:08:22,615 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:22] "GET /products HTTP/1.1" 200 -
+2026-05-30 22:08:22,635 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-05-30 22:08:22,690 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:22] "GET /api/categories HTTP/1.1" 200 -
+2026-05-30 22:08:22,739 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:22,740 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:22] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:26,028 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:26,029 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:26] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:27,492 [DEBUG] app: REQ GET /manage-orders from 127.0.0.1
+2026-05-30 22:08:27,562 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:27] "GET /manage-orders HTTP/1.1" 200 -
+2026-05-30 22:08:27,617 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:27,618 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:27] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:30,338 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:30,339 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:30] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:31,530 [DEBUG] app: REQ GET /customer from 127.0.0.1
+2026-05-30 22:08:31,552 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:31] "GET /customer HTTP/1.1" 200 -
+2026-05-30 22:08:31,569 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-05-30 22:08:31,571 [DEBUG] app: REQ GET /api/customers from 127.0.0.1
+2026-05-30 22:08:31,587 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:31] "GET /api/user-shops HTTP/1.1" 200 -
+2026-05-30 22:08:31,620 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:31] "GET /api/customers HTTP/1.1" 200 -
+2026-05-30 22:08:31,628 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:31,629 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:31] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:08:36,534 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:08:36,535 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:08:36] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:09:15,247 [DEBUG] app: REQ GET /khatabook from 127.0.0.1
+2026-05-30 22:09:15,393 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:15] "GET /khatabook HTTP/1.1" 200 -
+2026-05-30 22:09:15,487 [DEBUG] app: REQ GET /api/khatabook/transactions/2 from 127.0.0.1
+2026-05-30 22:09:15,489 [DEBUG] app: REQ GET /api/khatabook/transactions/1 from 127.0.0.1
+2026-05-30 22:09:15,518 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:09:15,518 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:15] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:09:15,548 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:15] "GET /api/khatabook/transactions/1 HTTP/1.1" 200 -
+2026-05-30 22:09:15,554 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:15] "GET /api/khatabook/transactions/2 HTTP/1.1" 200 -
+2026-05-30 22:09:32,771 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:09:32,772 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:32] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:09:35,987 [DEBUG] app: REQ GET /billing from 127.0.0.1
+2026-05-30 22:09:36,021 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:36] "GET /billing HTTP/1.1" 200 -
+2026-05-30 22:09:36,044 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-05-30 22:09:36,100 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:36] "GET /api/categories HTTP/1.1" 200 -
+2026-05-30 22:09:36,121 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:09:36,122 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:36] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:09:36,125 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-05-30 22:09:36,146 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:36] "GET /api/products HTTP/1.1" 200 -
+2026-05-30 22:09:36,155 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-05-30 22:09:36,156 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:36] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-05-30 22:09:39,259 [DEBUG] app: REQ GET /invoices from 127.0.0.1
+2026-05-30 22:09:39,272 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:39] "GET /invoices HTTP/1.1" 200 -
+2026-05-30 22:09:39,292 [DEBUG] app: REQ GET /api/invoices from 127.0.0.1
+2026-05-30 22:09:39,319 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:09:39,320 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:39] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:09:39,350 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:39] "GET /api/invoices HTTP/1.1" 200 -
+2026-05-30 22:09:43,521 [DEBUG] app: REQ GET /billing_view from 127.0.0.1
+2026-05-30 22:09:43,619 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:43] "GET /billing_view?invoice_id=1 HTTP/1.1" 200 -
+2026-05-30 22:09:44,077 [DEBUG] app: REQ GET /api/invoices/1 from 127.0.0.1
+2026-05-30 22:09:44,099 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:44] "GET /api/invoices/1 HTTP/1.1" 200 -
+2026-05-30 22:09:44,988 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:09:44,989 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:09:44] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:43,497 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:43,498 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:43] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:45,033 [DEBUG] app: REQ GET /billing_view from 127.0.0.1
+2026-05-30 22:10:45,061 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:45] "GET /billing_view?invoice_id=3 HTTP/1.1" 200 -
+2026-05-30 22:10:45,095 [DEBUG] app: REQ GET /api/invoices/3 from 127.0.0.1
+2026-05-30 22:10:45,117 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:45] "GET /api/invoices/3 HTTP/1.1" 200 -
+2026-05-30 22:10:45,124 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:45,125 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:45] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:48,385 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:48,385 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:48] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:49,694 [DEBUG] app: REQ GET /billing_view from 127.0.0.1
+2026-05-30 22:10:49,715 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:49] "GET /billing_view?invoice_id=2 HTTP/1.1" 200 -
+2026-05-30 22:10:49,752 [DEBUG] app: REQ GET /api/invoices/2 from 127.0.0.1
+2026-05-30 22:10:49,775 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:49] "GET /api/invoices/2 HTTP/1.1" 200 -
+2026-05-30 22:10:49,777 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:49,778 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:49] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:52,907 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:52,908 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:52] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:54,180 [DEBUG] app: REQ GET /billing_view from 127.0.0.1
+2026-05-30 22:10:54,201 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:54] "GET /billing_view?invoice_id=1 HTTP/1.1" 200 -
+2026-05-30 22:10:54,228 [DEBUG] app: REQ GET /api/invoices/1 from 127.0.0.1
+2026-05-30 22:10:54,248 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:54] "GET /api/invoices/1 HTTP/1.1" 200 -
+2026-05-30 22:10:54,259 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:54,260 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:54] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:10:58,916 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:10:58,917 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:10:58] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:11:00,067 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:11:00,067 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:11:00] "GET /favicon.ico HTTP/1.1" 200 -
+2026-05-30 22:11:36,276 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-05-30 22:11:36,277 [INFO] werkzeug: 127.0.0.1 - - [30/May/2026 22:11:36] "GET /favicon.ico HTTP/1.1" 200 -

@@ -1,6 +1,4 @@
-from multiprocessing import connection
 from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify
-import mysql.connector
 import bcrypt, os, re, random, string
 from datetime import datetime,timedelta
 import json
@@ -12,6 +10,8 @@ from functools import wraps
 import smtplib,secrets
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import mysql.connector
+from sqlconnection import get_db
 
 
 def login_required(f):
@@ -70,15 +70,6 @@ def index():
 
 @app.route("/sign_up", methods=['POST'])
 def sign_up():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     if "user" in session:
         flash("You are logged out by visited a signup page while logged in. Please login again to continue.", "warning")
         session.clear()
@@ -123,15 +114,6 @@ def sign_up():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     if "user" in session:
         flash("You are logged out by visited a login page while logged in. Please login again to continue.", "warning")
         session.clear()
@@ -217,15 +199,6 @@ def send_email(receiver_email, subject, body):
 # Forgot Password Route
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     if request.method == "POST":
         email = request.form["email"]
         conn, cursor = get_db()
@@ -261,15 +234,6 @@ def forgot_password():
 
 @app.route("/reset_password/<token>", methods=["GET", "POST"])
 def reset_password(token):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     cursor.execute("SELECT email, token_expiry FROM Users WHERE reset_token=%s", (token,))
     result = cursor.fetchone()
@@ -330,15 +294,6 @@ def send_otp(email, otp):
 
 @app.route("/verify_otp", methods=["GET", "POST"])
 def verify_otp():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     if "signup_data" not in session:
         flash("Session expired! Please sign up again.", "danger")
         return redirect(url_for("signup"))
@@ -388,15 +343,6 @@ def send_registration_request():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     try:
         # Set autocommit off for transaction control
@@ -639,16 +585,6 @@ def dashboard():
 
 
 def get_product_image_url(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
-
     """
     Get the image URL for a product, checking multiple locations:
     1. Database image field
@@ -710,15 +646,6 @@ def get_product_image_url(product_id):
 @app.route("/admin_dashboard", methods=["GET", "POST"])
 @admin_required
 def admin_dashboard():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     userid = session.get("user")
     current_shop = None
@@ -821,15 +748,6 @@ def admin_dashboard():
 @app.route('/manage-orders')
 @admin_required
 def manage_orders():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     conn, cursor = get_db()
     """Render the Manage_order.html page for the selected shop (admin only).
     Accepts optional query param `shop_id` to override the session selection.
@@ -890,15 +808,6 @@ def random4(length=4):
 @app.route("/products", methods=["GET", "POST"])
 @login_required
 def products():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     if request.method == "POST":
         name = request.form.get("name")
@@ -922,15 +831,6 @@ def products():
 @app.route("/api/categories", methods=["GET"])
 @login_required
 def api_categories():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     """Fetch categories for the current user's shop"""
     try:
@@ -946,15 +846,6 @@ def api_categories():
 @app.route("/api/export-products", methods=["GET"])
 @login_required
 def api_export_products():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur= conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Export all products from the selected shop as JSON"""
     try:
@@ -991,15 +882,6 @@ def api_export_products():
 @app.route('/api/products', methods=['GET'])
 @login_required
 def api_products():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Return products as JSON. Optional query param: category (id or name)."""
     try:
@@ -1052,123 +934,10 @@ def api_products():
         return jsonify({'success': True, 'products': products}), 200
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-'''
-
-
-@app.route('/api/products', methods=['GET'])
-@login_required
-def api_products():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
-    conn, cur = get_db()
-    try:
-        category = request.args.get('category')
-        category_id = None
-        role = session.get("role")
-        shopid = session.get("selected_shop_id")
-        if category:
-            if re.fullmatch(r"\d+", category.strip()):
-                category_id = int(category.strip())
-            else:
-                cur.execute(
-                    "SELECT categories_id FROM Categories WHERE name = %s LIMIT 1",
-                    (category,)
-                )
-                row = cur.fetchone()
-                if row:
-                    category_id = row.get('categories_id')
-        cache_key = f"products:{shopid}:{role}:{category_id}"
-
-        cached = get_cache(cache_key)
-        if cached:
-            return jsonify(cached), 200
-        if role in ["admin", "owner"]:
-            if category_id:
-                cur.execute("""
-                    SELECT product_id as id, name, image, price, stock, tax, safe_stock
-                    FROM Products
-                    WHERE shop_id = %s AND categoryid = %s
-                    ORDER BY product_id DESC
-                """, (shopid, category_id))
-            else:
-                cur.execute("""
-                    SELECT product_id as id, name, image, price, stock, tax, safe_stock
-                    FROM Products
-                    WHERE shop_id = %s
-                    ORDER BY product_id DESC
-                """, (shopid,))
-        elif category_id:
-            cur.execute("""
-                SELECT product_id as id, name, image, price, stock, tax, safe_stock
-                FROM Products
-                WHERE categoryid = %s
-                ORDER BY product_id DESC
-            """, (category_id,))
-        else:
-            cur.execute("""
-                SELECT product_id as id, name, image, price, stock, tax, safe_stock
-                FROM Products
-                ORDER BY product_id DESC
-            """)
-
-        rows = cur.fetchall()
-
-        products = []
-        for r in rows:
-            img = r.get('image')
-            img_path = f'static/uploads/{img}'
-
-            filename = (
-                img_path
-                if img and os.path.exists(os.path.join(app.root_path, img_path))
-                else "static/logo.png"
-            )
-
-            products.append({
-                'id': r.get('id'),
-                'name': r.get('name'),
-                'price': float(r.get('price') or 0),
-                'image': filename,
-                'stock': int(r.get('stock') or 0),
-                'tax': float(r.get('tax') or 0),
-                'safe_stock': int(r.get('safe_stock') or 0)
-            })
-
-        response = {
-            'success': True,
-            'products': products
-        }
-
-        # ---------------- STORE CACHE ----------------
-        set_cache(cache_key, response)
-
-        return jsonify(response), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-'''
-
-
 
 @app.route("/add-products", methods=["POST"])
 @login_required
 def add_products():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """API endpoint to save multiple products in bulk with descriptions."""
     try:
@@ -1278,15 +1047,6 @@ def add_products():
 @app.route('/add_to_cart/<int:product_id>', methods=['GET' , 'POST'])
 @login_required
 def add_to_cart(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur= conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Add product to cart using MySQL tables. Returns JSON with updated cart count."""
     try:
@@ -1362,15 +1122,6 @@ def add_to_cart(product_id):
 @app.route("/api/checkout-shop", methods=["POST"])
 @login_required
 def api_checkout_shop():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur= conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Checkout (create order) for a specific shop's cart for the current user."""
     try:
@@ -1427,15 +1178,6 @@ def add_shop():
 @app.route("/api/shops", methods=["POST"])
 @login_required
 def api_create_shop():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """API endpoint to create a new shop"""
     try:
@@ -1494,15 +1236,6 @@ def api_create_shop():
 @app.route("/api/user-shops", methods=["GET"])
 @login_required
 def api_user_shops():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Fetch all shops for the current user"""
     try:
@@ -1534,15 +1267,6 @@ def api_user_shops():
 @app.route("/api/select-shop", methods=["POST"])
 @login_required
 def api_select_shop():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Select a shop and store shop_id in session"""
     try:
@@ -1585,15 +1309,6 @@ def api_select_shop():
 @app.route("/api/dashboard-stats/<int:shop_id>", methods=["GET"])
 @login_required
 def api_dashboard_stats(shop_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Return dashboard KPIs and low-stock lists for the given shop_id."""
     try:
@@ -1646,15 +1361,6 @@ def api_dashboard_stats(shop_id):
 @app.route("/edit_product", methods=["GET", "POST"])
 @login_required
 def edit_product():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cursor = get_db()
     """Show edit-product page (GET) and update an existing product (POST)."""
     if request.method == 'GET':
@@ -1733,15 +1439,6 @@ def edit_product():
 @app.route("/api/update-description", methods=["POST"])
 @login_required
 def update_description():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     """Update product descriptions from single textarea."""
     conn, cursor = get_db()
     try:
@@ -1813,15 +1510,6 @@ def update_description():
 @app.route("/orders")
 @login_required
 def orders():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Render orders page with recent order items for the current user."""
     userid = session.get('user')
@@ -1917,15 +1605,6 @@ def orders():
 def return_item(order_item_id):
     """Handle return request for an order item"""
     userid = session.get('user')
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
 
     try:
@@ -1999,15 +1678,6 @@ def return_item(order_item_id):
 @app.route("/return-status/<int:order_item_id>")
 @login_required
 def return_status(order_item_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     """Show detailed return status for an order item."""
     userid = session.get('user')
 
@@ -2098,15 +1768,6 @@ def return_status(order_item_id):
 @app.route('/cancel/<int:item_id>', methods=['POST'])
 @login_required
 def cancel_order(item_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Cancel the order associated with the given Order_Items.id (if owned by user).
     This matches the current template which posts the Order_Items id.
@@ -2153,15 +1814,6 @@ def cancel_order(item_id):
         return redirect(url_for('orders'))
 
 def get_cart_count(userid, shopid=None):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Get total cart item count from MySQL for user/shop."""
     try:
@@ -2189,15 +1841,6 @@ def api_cart_count():
 @app.route("/api/view-cart", methods=['GET'])
 @login_required
 def api_view_cart():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Fetch all cart items for the user with product details."""
     try:
@@ -2254,15 +1897,6 @@ def api_view_cart():
 @app.route("/api/update-cart-item", methods=['POST'])
 @login_required
 def api_update_cart_item():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Update quantity of a cart item."""
     try:
@@ -2318,15 +1952,6 @@ def api_update_cart_item():
 @app.route("/api/remove-cart-item", methods=['POST'])
 @login_required
 def api_remove_cart_item():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Remove an item from cart."""
     try:
@@ -2374,15 +1999,6 @@ def api_remove_cart_item():
 @app.route("/api/checkout", methods=['POST'])
 @login_required
 def api_checkout():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     try:
         data = request.get_json() or {}
@@ -2434,15 +2050,6 @@ def api_checkout():
 @app.route("/order")
 @login_required
 def my_orders():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     userid = session.get('user')
     shopid = session.get('selected_shop_id', 1)
@@ -2463,15 +2070,6 @@ def view_cart():
 @app.route('/place_order')
 @login_required
 def place_order():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Render place_order page with server-calculated totals for a shop or the user's cart."""
     userid = session.get('user')
@@ -2541,15 +2139,6 @@ def place_order():
 @app.route('/api/create-order', methods=['POST'])
 @login_required
 def api_create_order():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Create an order from the user's cart for the provided shop (or the cart found).
     Expects JSON with contact/address fields and optionally `shop_id`.
@@ -2650,15 +2239,6 @@ def api_create_order():
 @app.route('/api/update-order-status', methods=['POST'])
 @admin_required
 def api_update_order_status():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     try:
         data = request.get_json() or {}
@@ -2735,15 +2315,6 @@ def api_update_order_status():
 @app.route('/submit-order', methods=["GET",'POST'])
 @login_required
 def submit_order():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cur = conn.cursor(dictionary=True)
-        return conn, cur
     conn, cur = get_db()
     """Handle form POST from place_order page; create order, address, clear cart, flash and redirect."""
     try:
@@ -3001,15 +2572,6 @@ def handle_uncaught_exception(e):
 @app.route('/invoice')
 @login_required
 def invoice():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     conn, cursor = get_db()
     print("Invoice route started")
     try:
@@ -3054,15 +2616,6 @@ def favicon():
 @app.route('/api/upload-product-image', methods=['POST'])
 @login_required
 def upload_product_image():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     """Handle product image uploads and save as product_id.jpg/png in static/uploads"""
     try:
         if 'image' not in request.files:
@@ -3159,15 +2712,6 @@ def cleanup_product_images(product_id):
 
 @app.route('/product_description/<int:product_id>')
 def product_description(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     # Get user ID from session
     user_id = session.get("user")
     conn, cursor = get_db()
@@ -3257,15 +2801,6 @@ def product_description(product_id):
 @app.route('/review/<int:product_id>')
 @login_required
 def review_product(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     """Product review page using get_db() connection"""
     try:
         # Get database connection
@@ -3457,15 +2992,6 @@ def review_product(product_id):
 @app.route('/submit-review/<int:product_id>', methods=['POST'])
 @login_required
 def submit_review_route(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     """Handle review submission using get_db()"""
     if request.method != 'POST':
         return redirect(f'/review/{product_id}')
@@ -3542,15 +3068,6 @@ def submit_review_route(product_id):
 @app.route('/edit-review/<int:rating_id>', methods=['GET', 'POST'])
 @login_required
 def edit_review(rating_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     """Edit existing review"""
     try:
         conn, cur = get_db()
@@ -3629,15 +3146,6 @@ def edit_review(rating_id):
 @app.route('/delete-review/<int:rating_id>', methods=['POST'])
 @login_required
 def delete_review(rating_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn, cursor
     """Delete a review"""
     try:
         conn, cur = get_db()
@@ -3673,15 +3181,6 @@ def delete_review(rating_id):
 @app.route('/api/product/<int:product_id>/stats')
 @login_required
 def get_product_stats(product_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Get product rating statistics for AJAX requests"""
     try:
         conn, cur = get_db()
@@ -3745,15 +3244,6 @@ def billing():
 @app.route('/billing_view')
 @admin_required
 def billing_view():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     selected_id = request.args.get('invoice_id', type=int)
     shop_id = session.get('selected_shop_id')
 
@@ -3806,15 +3296,6 @@ def billing_view():
 @app.route('/my_invoices')
 @login_required
 def my_invoices():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     selected_id = request.args.get('invoice_id', type=int)
     customer_email = session.get('email')
 
@@ -3882,15 +3363,6 @@ def my_invoices():
 @app.route('/invoices')
 @admin_required
 def invoices():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Show a simple listing of invoices with links to edit/view them."""
     return render_template('invoices.html')
 
@@ -3898,15 +3370,6 @@ def invoices():
 @app.route('/api/invoices', methods=['POST'])
 @login_required
 def create_invoice():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Create a new invoice"""
     conn, cur = get_db()
     if not conn or not cur:
@@ -3997,15 +3460,6 @@ def create_invoice():
 @app.route('/api/invoices/<int:invoice_id>', methods=['PUT'])
 @login_required
 def update_invoice(invoice_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Update an existing invoice"""
     conn, cur = get_db()
     if not conn or not cur:
@@ -4100,15 +3554,6 @@ def update_invoice(invoice_id):
 @app.route('/api/invoices', methods=['GET'])
 @login_required
 def list_invoices():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Return a list of invoices for the current shop.
     Supports optional ``shop_id`` query parameter; otherwise defaults to
     the session-selected shop or 1.
@@ -4139,15 +3584,6 @@ def list_invoices():
 @app.route('/api/invoices/<int:invoice_id>', methods=['GET'])
 @login_required
 def get_invoice(invoice_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     """Get a specific invoice by ID"""
     conn, cur = get_db()
     if not conn or not cur:
@@ -4215,7 +3651,7 @@ def get_invoice(invoice_id):
     finally:
         if conn:
             conn.close()
-from mysql.connector import Error
+
 @app.route("/customer", methods=["GET", "POST"])
 @admin_required
 def customer():
@@ -4228,15 +3664,6 @@ def customer():
 @app.route('/api/customers', methods=['GET'])
 @admin_required
 def get_customers():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     conn, cur = get_db()
     if not conn or not cur:
         return jsonify({'error': 'Database connection failed'}), 500
@@ -4273,15 +3700,6 @@ def get_customers():
 
 @app.route('/api/customers/search', methods=['GET'])
 def search_customers():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     search_term = request.args.get('q', '')
 
     if not search_term:
@@ -4324,15 +3742,6 @@ def search_customers():
 @app.route('/api/customers', methods=['POST'])
 @admin_required
 def create_customer():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     app.logger.debug("REQ POST /api/customers")
     data = request.json
     app.logger.debug(f"Request data: {data}")
@@ -4445,15 +3854,6 @@ def create_customer():
 @app.route("/khatabook", methods=["GET", "POST"])
 @admin_required
 def khatabook():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     conn, cur = get_db()
     try:
         # Get shop_id from session or form
@@ -4511,15 +3911,6 @@ def khatabook():
 @app.route("/api/khatabook/parties", methods=["GET"])
 @admin_required
 def api_khatabook_parties():
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
     conn, cur = get_db()
     try:
         shop_id = session.get('selected_shop_id')
@@ -4537,15 +3928,7 @@ def api_khatabook_parties():
 @app.route("/api/khatabook/transactions/<int:party_id>", methods=["GET"])
 @admin_required
 def api_khatabook_transactions(party_id):
-    def get_db():
-        conn = mysql.connector.connect(
-        host="HMyshop.mysql.pythonanywhere-services.com",
-        user="HMyshop",
-        password="Sawanttejas@2002",
-        database="HMyshop$shop"
-        )
-        cursor = conn.cursor(dictionary=True)
-        return conn,cursor
+    conn, cur = get_db()
     conn, cur = get_db()
     conn, cur = get_db()
     try:
