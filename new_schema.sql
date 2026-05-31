@@ -1,7 +1,6 @@
 create database shop;
 use shop;
 
-
 -- Users table
 CREATE TABLE Users (
     userid VARCHAR(255) PRIMARY KEY,
@@ -27,7 +26,7 @@ CREATE TABLE Shops (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255) NOT NULL,
+    updated_by VARCHAR(255) NOT NULL on update default "N/A",
     INDEX idx_shops_userid (userid),
     INDEX idx_shops_name (name),
     FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
@@ -41,7 +40,7 @@ CREATE TABLE Categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255) NOT NULL,
+    updated_by VARCHAR(255) NOT NULL default "N/A",
     INDEX idx_categories_shopid (shopid),
     FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
     INDEX idx_categories_name (name)
@@ -203,7 +202,7 @@ CREATE TABLE Returns (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     order_item_id BIGINT UNSIGNED NOT NULL,
     order_id BIGINT UNSIGNED NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) not null,
     product_id BIGINT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
@@ -242,7 +241,7 @@ CREATE TABLE Returns (
         REFERENCES Products(product_id)  -- Note: it's product_id, not id
         ON DELETE RESTRICT 
         ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+);
 
 
 CREATE TABLE IF NOT EXISTS Invoices (
@@ -269,7 +268,7 @@ CREATE TABLE IF NOT EXISTS Invoices (
     INDEX idx_invoice_number (invoice_number),
     INDEX idx_customer_email (customer_email),
     INDEX idx_status (status),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
     foreign key (shop_id) references Shops(shopid) on delete cascade
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -312,29 +311,14 @@ CREATE TABLE IF NOT EXISTS customer(
 
 CREATE TABLE user_customer(
     customer_id BIGINT unsigned not null,
-    email VARCHAR(255) primary key,
+    email VARCHAR(255),
     shopid int,
-    FOREIGN KEY (email) REFERENCES Users(email),
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id) on delete cascade
+    FOREIGN KEY (email) REFERENCES Users(email)
 );
-
-
 
 ALTER TABLE Users
 ADD COLUMN reset_token varchar(255) DEFAULT NULL,
 ADD COLUMN token_expiry datetime DEFAULT NULL;
-
-ALTER TABLE user_customer
-DROP FOREIGN KEY user_customer_ibfk_1;
-
-ALTER TABLE user_customer
-DROP PRIMARY KEY;
-
-ALTER TABLE user_customer
-DROP FOREIGN KEY user_customer_ibfk_2;
-
-ALTER TABLE user_customer
-DROP PRIMARY KEY;
 
 ALTER TABLE user_customer
 ADD PRIMARY KEY (customer_id, email, shopid);
@@ -354,9 +338,7 @@ create table purchase_reciepts(
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
-    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
-    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE
+    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 create table purchase_orders(
@@ -496,8 +478,8 @@ create table Sales_order(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
     FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
-    FOREIGN KEY (customerid) REFERENCES Customers(customerid) ON DELETE CASCADE
-)
+    FOREIGN KEY (customerid) REFERENCES Customer(customer_id) ON DELETE CASCADE
+);
 
 create table sales_item(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -553,6 +535,6 @@ create table supplier_invoice(
     INDEX idx_supplier_invoice_number (invoice_number),
     INDEX idx_supplier_email (supplier_email),
     INDEX idx_supplier_status (status),
-    INDEX idx_supplier_created_at (created_at)
+    INDEX idx_supplier_created_at (created_at),
     foreign key (shop_id) references Shops(shopid) on delete cascade
-)
+);

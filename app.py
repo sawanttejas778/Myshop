@@ -1189,7 +1189,10 @@ def api_create_shop():
         shop_name = data.get('name').strip()
         tax_id = data.get('tax_id', None)
         userid = session.get('user')
-
+        gstn = data.get('gstn', None)
+        address = data.get('address', None)
+        phone = data.get('phone', None)
+        
         if not userid:
             return jsonify({"success": False, "message": "User not authenticated"}), 401
 
@@ -1209,8 +1212,8 @@ def api_create_shop():
 
         # Insert new shop
         cur.execute(
-            "INSERT INTO Shops (userid, name, tax_id, created_at) VALUES (%s, %s, %s, %s)",
-            (userid, shop_name, tax_id, datetime.now())
+            "INSERT INTO Shops (userid, name, address, phone, gstn, tax_id, created_at, created_by , updated_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (userid, shop_name, address, phone, gstn, tax_id, datetime.now(), userid, userid)
         )
         conn.commit()
         shop_id = cur.lastrowid
