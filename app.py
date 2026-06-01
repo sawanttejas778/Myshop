@@ -3902,8 +3902,8 @@ def create_customer():
             query = """
                 INSERT INTO customer
                 (customer_name, customer_mobile_number, address1, address2,
-                 city, pincode, Vilage, email)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                 city, pincode, Vilage, email , GSTN , Bank_IFSC ,Bank_Account_Number, Bank_Name,created_by,updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 data['customer_name'],
@@ -3913,7 +3913,13 @@ def create_customer():
                 data['city'],
                 data['pincode'],
                 data['Vilage'],
-                data['email']
+                data['email'],
+                data.get('customer_gstn', '') or 'N/A',
+                data.get('customer_bank_ifsc', '') or 'N/A',
+                data.get('customer_bank_account_number', '') or 'N/A',
+                data.get('customer_bank_name', '') or 'N/A',
+                session.get('user_id', 1),
+                session.get('user_id', 1)  
             )
 
             app.logger.debug(f"Executing insert query with values: {values}")

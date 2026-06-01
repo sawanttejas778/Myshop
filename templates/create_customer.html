@@ -375,6 +375,26 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="customer_gstn">Customer GSTN</label>
+                        <input type="text" id="customer_gstn" name="customer_gstn" placeholder="Enter GSTN (15 characters)" maxlength="15">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_bank_ifsc" class="required">Customer Bank IFSC</label>
+                        <input type="text" id="customer_bank_ifsc" name="customer_bank_ifsc" required placeholder="Enter IFSC code">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_bank_account_number" class="required">Customer Bank Account Number</label>
+                        <input type="text" id="customer_bank_account_number" name="customer_bank_account_number" required placeholder="Enter bank account number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_bank_name" class="required">Customer Bank Name</label>
+                        <input type="text" id="customer_bank_name" name="customer_bank_name" required placeholder="Enter bank name">
+                    </div>
+
+                    <div class="form-group">
                         <label for="shopid" class="required">Shop</label>
                         <select id="shopid" name="shopid" required>
                             <option value="">Loading shops...</option>
@@ -614,6 +634,10 @@
                 pincode: document.getElementById('pincode').value,
                 Vilage: document.getElementById('Vilage').value,
                 email: document.getElementById('email').value,
+                customer_gstn: document.getElementById('customer_gstn').value || '',
+                customer_bank_ifsc: document.getElementById('customer_bank_ifsc').value || '',
+                customer_bank_account_number: document.getElementById('customer_bank_account_number').value || '',
+                customer_bank_name: document.getElementById('customer_bank_name').value || '',
                 shopid: parseInt(document.getElementById('shopid').value)
             };
 
