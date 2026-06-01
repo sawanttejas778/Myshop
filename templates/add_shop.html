@@ -12,16 +12,16 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     }
     html,body{height:100%;margin:0;background:linear-gradient(180deg,#060607 0%, #0a0a0b 60%);color:#e6eef0}
+    /* Defensive: ensure page can scroll if other scripts set body overflow:hidden */
+    body{overflow-y:auto}
 
     /* sensible defaults */
     *{box-sizing:border-box}
 
-    /* page container centers horizontally; vertical centering only on tall viewports */
-    .container{max-width:600px;margin:0 auto;padding:28px 20px;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center}
+    /* page container centers horizontally and allows normal document flow */
+    .container{max-width:600px;margin:0 auto;padding:28px 20px 40px;display:block}
 
-    .card{background:linear-gradient(180deg,var(--panel), #0e0f11);padding:32px;border-radius:var(--radius);box-shadow:var(--card-shadow);width:100%;box-sizing:border-box;max-width:100%;max-height:calc(100vh - 96px);overflow:auto;-webkit-overflow-scrolling:touch}
-    /* Allow internal scrolling when viewport is too short so fields remain reachable */
-    .card{max-height:calc(100vh - 56px);overflow:auto}
+    .card{background:linear-gradient(180deg,var(--panel), #0e0f11);padding:32px;border-radius:var(--radius);box-shadow:var(--card-shadow);width:100%;box-sizing:border-box;max-width:100%}
     
     h1{font-size:24px;margin:0 0 8px 0;color:#e6eef0}
     .subtitle{color:var(--muted);margin:0 0 24px 0;font-size:14px}
@@ -142,14 +142,12 @@
     }
 
     /* When viewport height is small (short windows/devices), stop vertical centering and make card scrollable */
-    @media (max-height:700px){
-      .container{min-height:auto;justify-content:flex-start;padding-top:18px;padding-bottom:18px}
-      .card{max-height:calc(100vh - 36px);overflow:auto}
-    }
-
-    /* Vertically center on taller viewports */
-    @media (min-height:701px){
-      .container{justify-content:center}
+    @media (max-width:600px){
+      .container{padding:16px}
+      .card{padding:20px}
+      .form-row{grid-template-columns:1fr}
+      .form-actions{flex-direction:column}
+      .form-actions .btn{width:100%}
     }
     /* When viewport height is small (short windows/devices), stop vertical centering and make card scrollable */
     @media (max-height:700px){
@@ -222,7 +220,7 @@
 
         <div class="form-group">
           <label for="shopgstn">GSTN (Optional)</label>
-          <input type="text" id="shopgstn" name="gstn" placeholder="e.g., 27TAX1234561AZ">
+          <input type="text" id="shopgstn" name="gstn" placeholder="e.g., IF not enter N/A">
         </div>
 
         <div class="form-group">
@@ -254,6 +252,10 @@
       }
       
       try {
+        const gstn = document.getElementById('shopgstn').value.trim();
+        const address = document.getElementById('shopaddress').value.trim();
+        const phone = document.getElementById('shopphone').value.trim();
+
         const response = await fetch('/api/shops', {
           method: 'POST',
           headers: {
@@ -261,7 +263,10 @@
           },
           body: JSON.stringify({
             name: shopName,
-            tax_id: taxId || null
+            tax_id: taxId || null,
+            gstn: gstn || null,
+            address: address || null,
+            phone: phone || null
           })
         });
         

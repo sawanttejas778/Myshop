@@ -333,10 +333,13 @@
           <tr>
             <th>ID</th>
             <th>Product Name</th>
+            <th>HSN Code</th>
+            <th>Location</th>
+            <th>Status</th>
             <th>Price</th>
             <th>Tax (%)</th>
-            <th>Stock</th>
             <th>Safe Stock</th>
+            <th>Stock</th>
             <th>Category</th>
             <th>Description</th>
             <th>Actions</th>
@@ -371,16 +374,24 @@
         <input type="text" id="editName">
       </div>
       <div class="form-group">
+        <label>HSN Code</label>
+        <input type="text" id="editHsn" placeholder="e.g., 8471.80.00">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="editLocation" placeholder="e.g., Warehouse A">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <input type="text" id="editStatus" placeholder="e.g., Active">
+      </div>
+      <div class="form-group">
         <label>Price</label>
         <input type="number" id="editPrice" step="0.01">
       </div>
       <div class="form-group">
         <label>Tax (%)</label>
         <input type="number" id="editTax" step="0.01">
-      </div>
-      <div class="form-group">
-        <label>Stock</label>
-        <input type="number" id="editStock">
       </div>
       <div class="form-group">
         <label>Safe Stock</label>
@@ -519,6 +530,9 @@
         <tr>
           <td>${p.product_id}</td>
           <td>${escapeHtml(p.name)}</td>
+          <td>${escapeHtml(p.hsn_code)}</td>
+          <td>${escapeHtml(p.location)}</td>
+          <td>${escapeHtml(p.status)}</td>
           <td>$${parseFloat(p.price).toFixed(2)}</td>
           <td>${p.tax}%</td>
           <td>${p.stock}</td>
@@ -545,12 +559,13 @@
       currentEditProduct = product;
       document.getElementById('editId').value = product.product_id;
       document.getElementById('editName').value = product.name;
+      document.getElementById('editHsn').value = product.hsn_code || '';
+      document.getElementById('editLocation').value = product.location || '';
+      document.getElementById('editStatus').value = product.status || '';
       document.getElementById('editPrice').value = product.price;
       document.getElementById('editTax').value = product.tax;
-      document.getElementById('editStock').value = product.stock;
       document.getElementById('editSafeStock').value = product.safe_stock;
       document.getElementById('editCategory').value = product.category_name;
-
       document.getElementById('editModal').classList.add('active');
       document.getElementById('editName').focus();
     }
@@ -566,9 +581,11 @@
       const product = {
         id: currentEditProduct.product_id,
         name: document.getElementById('editName').value,
+        hsn_code: parseFloat(document.getElementById('editHsn').value || 0).toFixed(2),
+        location: document.getElementById('editLocation').value || '',
+        status: document.getElementById('editStatus').value || '',
         price: parseFloat(document.getElementById('editPrice').value || 0).toFixed(2),
         tax: parseFloat(document.getElementById('editTax').value || 0).toFixed(2),
-        stock: parseInt(document.getElementById('editStock').value || 0),
         safe_stock: parseInt(document.getElementById('editSafeStock').value || 0),
         category_name: document.getElementById('editCategory').value
       };

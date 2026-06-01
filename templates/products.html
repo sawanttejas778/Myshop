@@ -236,6 +236,44 @@
     .flash-message.fade-out { animation: fadeOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes slideInRight { from { transform: translateX(450px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(450px); opacity: 0; } }
+
+    /* Category Modal Styles */
+    .category-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:2500}
+    .category-modal-overlay.active{display:flex}
+    .category-modal-content{background:linear-gradient(180deg,var(--panel), #0e0f11);border-radius:var(--radius);padding:32px;width:90%;max-width:500px;box-shadow:var(--card-shadow);border:1px solid rgba(0,209,178,0.2)}
+    .category-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .category-modal-header h2{margin:0;font-size:22px;color:#e6eef0}
+    .category-modal-close{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all 0.2s}
+    .category-modal-close:hover{background:rgba(255,255,255,0.1);color:#e6eef0}
+    .category-modal-form{display:flex;flex-direction:column;gap:16px}
+    .category-form-group{display:flex;flex-direction:column;gap:8px}
+    .category-form-group label{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    .category-form-group input{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:12px 14px;border-radius:10px;color:#e6eef0;font-size:14px;font-family:inherit;transition:all 0.2s}
+    .category-form-group input:focus{border-color:var(--accent);background:rgba(0,209,178,0.05);outline:none;box-shadow:0 0 0 3px rgba(0,209,178,0.1)}
+    .category-modal-actions{display:flex;gap:12px;margin-top:24px}
+    .category-modal-actions button{flex:1;padding:12px 16px;border:none;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s}
+    .category-modal-actions .btn-submit{background:linear-gradient(90deg,var(--accent),#5be3c8);color:#021}
+    .category-modal-actions .btn-submit:hover{opacity:0.9;transform:translateY(-2px)}
+    .category-modal-actions .btn-cancel{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--muted)}
+    .category-modal-actions .btn-cancel:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15)}
+    .category-modal-alert{padding:12px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none}
+    .category-modal-alert.show{display:block}
+    .category-modal-alert.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80}
+    .category-modal-alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ff6b9d}
+
+    /* Responsive Category Modal */
+    @media (max-width:768px){
+      .category-modal-content{width:95%;padding:24px;max-width:100%}
+      .category-modal-header h2{font-size:20px}
+      .category-modal-actions{flex-direction:column}
+    }
+
+    @media (max-width:480px){
+      .category-modal-content{width:98%;padding:20px}
+      .category-modal-header h2{font-size:18px}
+      .category-form-group input{padding:11px 12px;font-size:13px}
+      .category-modal-actions button{padding:11px 14px;font-size:13px}
+    }
   </style>
 </head>
 <body>
@@ -298,6 +336,25 @@
           <label>Safe Stock</label>
           <input type="number" id="qSafeStock" value="0">
         </div>
+
+        <div class="form-group">
+          <label>HSN Code</label>
+          <input type="text" id="qHSN" value="">
+        </div>
+
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="qLocation" value="">
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select id="qStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Description</label>
           <textarea id="qDescription" placeholder="Enter product description (each line becomes a bullet point)"></textarea>
@@ -311,17 +368,18 @@
         <div class="form-group">
           <label>Product Image</label>
           <!-- image uploads disabled for bulk import -->
-          <small class="small">Images are disabled for bulk import. Upload per-product via the product page if needed.</small>
+          <small class="small">Images are disabled for bulk import. Upload per-product via the product page if needed. Remember one more thing if you going for audit please maintain proper documentation/data create product with correct HSN, TAX and follow the guidelines.</small>
         </div>
         <div class="form-group" style="display:flex;gap:8px;align-items:flex-end">
           <button type="button" class="btn primary" id="qAddBtn" style="flex:1">➕ Add to sheet</button>
           <button type="button" class="btn" id="qClearBtn">Clear</button>
+          <button type="button" class="btn" id="openCategoryModalBtn" style="white-space:nowrap;flex-shrink:0">+ Add Category</button>
         </div>
       </div>
 
       <div class="hint">
         💡 <strong>Tip:</strong> Fill the form above and click "Add to sheet", or import CSV/Excel file, or paste data directly. 
-        For descriptions: Enter text with line breaks - each line becomes a separate description bullet.
+        For descriptions: Enter text with line breaks - each line becomes a separate description bullet. status is INACTIVE or ACTIVE. Location can be A1, B2 etc. HSN code is a numeric code for tax classification. Safe stock is the minimum stock level before reordering.
       </div>
 
       <!-- Products Table - ADDED DESCRIPTION COLUMN -->
@@ -330,6 +388,9 @@
           <thead>
             <tr>
               <th>Product Name</th>
+              <th style="width:120px">HSN Code</th>
+              <th style="width:100px">Location</th>
+              <th style="width:80px">Status</th>
               <th style="width:100px">Price</th>
               <th style="width:80px">Tax %</th>
               <th style="width:80px">Stock</th>
@@ -371,6 +432,27 @@
         <button class="btn" id="cancelModalBtn">Cancel</button>
         <button class="btn primary" id="saveModalBtn">Save Description</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Category Floating Modal -->
+  <div class="category-modal-overlay" id="categoryModalOverlay">
+    <div class="category-modal-content">
+      <div class="category-modal-header">
+        <h2>📁 Add New Category</h2>
+        <button class="category-modal-close" id="closeCategoryModal">&times;</button>
+      </div>
+      <div class="category-modal-alert" id="categoryModalAlert"></div>
+      <form class="category-modal-form" id="categoryForm">
+        <div class="category-form-group">
+          <label for="categoryName">Category Name *</label>
+          <input type="text" id="categoryName" name="name" placeholder="e.g., Electronics, Clothing, Food" required autocomplete="off">
+        </div>
+        <div class="category-modal-actions">
+          <button type="submit" class="btn-submit">✓ Create Category</button>
+          <button type="button" class="btn-cancel" id="cancelCategoryModal">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -638,6 +720,9 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><input data-field="name" type="text" value="${escapeHtml(obj.name||'')}" style="width:100%;min-width:150px"></td>
+        <td><input data-field="hsn" type="text" value="${escapeHtml(obj.hsn||'')}" style="width:100%;min-width:150px"></td>
+        <td><input data-field="location" type="text" value="${escapeHtml(obj.location||'')}" style="width:100%;min-width:150px"></td>
+        <td><input data-field="status" type="text" value="${escapeHtml(obj.status||'')}" style="width:100%;min-width:150px"></td>
         <td><input data-field="price" type="number" step="0.01" value="${obj.price}" style="width:100%"></td>
         <td><input data-field="tax" type="number" step="0.01" value="${obj.tax}" style="width:100%"></td>
         <td><input data-field="stock" type="number" value="${obj.stock}" style="width:100%"></td>
@@ -790,6 +875,11 @@
         tax: parseFloat(document.getElementById('qTax').value||0).toFixed(2),
         stock: document.getElementById('qStock').value||0,
         safe_stock: document.getElementById('qSafeStock').value||0,
+        // provide both `hsn` (used by makeRow) and `HSN_code` (used by backend normalize)
+        hsn: document.getElementById('qHSN').value.trim() || '',
+        HSN_code: document.getElementById('qHSN').value.trim() || '',
+        location: document.getElementById('qLocation').value.trim(),
+        status: document.getElementById('qStatus').value.trim(),
         categoryid: categoryid,
         description: description
       };
@@ -999,6 +1089,7 @@
         description = singleDesc;
       }
       
+      const hsnVal = map(['HSN_code','hsn','hsn_code','HSN'])||'';
       return {
         name: map(['name','product_name','title'])||'',
         price: (map(['price','mrp','cost'])||'0').toString(),
@@ -1006,6 +1097,12 @@
         stock: map(['stock','quantity','qty'])||'0',
         safe_stock: map(['safe_stock','safestock'])||'0',
         categoryid: map(['categoryid','category_id','category'])||'',
+        // Provide both lowercase `hsn` and `HSN_code` for compatibility
+        HSN_code: hsnVal,
+        hsn: hsnVal,
+        // Support location and status if present in CSV
+        location: map(['location','loc','Location'])||'',
+        status: map(['status','state'])||'Active',
         description: description.trim()
       }
     }
@@ -1075,6 +1172,99 @@
 
   </script>
 
+<!-- Category Modal Script -->
+<script>
+  // Category Modal Elements
+  const categoryModalOverlay = document.getElementById('categoryModalOverlay');
+  const categoryForm = document.getElementById('categoryForm');
+  const categoryNameInput = document.getElementById('categoryName');
+  const openCategoryModalBtn = document.getElementById('openCategoryModalBtn');
+  const closeCategoryModalBtn = document.getElementById('closeCategoryModal');
+  const cancelCategoryModalBtn = document.getElementById('cancelCategoryModal');
+  const categoryModalAlert = document.getElementById('categoryModalAlert');
+
+  // Open modal
+  openCategoryModalBtn.addEventListener('click', () => {
+    categoryModalOverlay.classList.add('active');
+    categoryNameInput.focus();
+  });
+
+  // Close modal functions
+  function closeCategoryModal() {
+    categoryModalOverlay.classList.remove('active');
+    categoryForm.reset();
+    categoryModalAlert.classList.remove('show', 'success', 'error');
+  }
+
+  closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+  cancelCategoryModalBtn.addEventListener('click', closeCategoryModal);
+
+  // Close when clicking overlay background
+  categoryModalOverlay.addEventListener('click', (e) => {
+    if (e.target === categoryModalOverlay) {
+      closeCategoryModal();
+    }
+  });
+
+  // Handle form submission
+  categoryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const categoryName = categoryNameInput.value.trim();
+
+    if (!categoryName) {
+      showCategoryAlert('Please enter a category name', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: categoryName })
+      });
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (e) {
+        /* ignore non-json */
+      }
+
+      if (response.ok && data && data.success) {
+        showCategoryAlert(`✓ ${data.message || 'Category created successfully!'}`, 'success');
+        categoryForm.reset();
+
+        // Refresh category list in the main form
+        loadCategories();
+
+        // Close modal after 1.5 seconds
+        setTimeout(() => {
+          closeCategoryModal();
+        }, 1500);
+      } else {
+        const errorMsg = data && data.message ? data.message : 'Failed to create category';
+        showCategoryAlert(`✗ ${errorMsg}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showCategoryAlert('Network error. Please try again.', 'error');
+    }
+  });
+
+  function showCategoryAlert(message, type) {
+    categoryModalAlert.textContent = message;
+    categoryModalAlert.classList.add('show', type);
+
+    // Remove error/success class after 5 seconds
+    setTimeout(() => {
+      categoryModalAlert.classList.remove('show', type);
+    }, 5000);
+  }
+</script>
 
 <script>
 (function(){

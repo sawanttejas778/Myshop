@@ -843,6 +843,50 @@ def api_categories():
         return jsonify({"error": str(err)}), 500
 
 
+@app.route("/api/categories", methods=["POST"])
+@login_required
+def create_category():
+    """Create a new category"""
+    conn, cursor = get_db()
+    try:
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        shopid = session.get('selected_shop_id')
+        user = session.get('user')
+        print(f"Creating category with name: '{name}' for shopid: {shopid} by user: {user}")
+
+        if not name:
+            return jsonify({"success": False, "message": "Category name is required"}), 400
+
+        # Check if category already exists
+        cursor.execute("SELECT categories_id FROM Categories WHERE name = %s", (name,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"success": False, "message": "Category already exists"}), 409
+
+        # Insert new category
+        cursor.execute("INSERT INTO Categories (name, shopid , created_by,updated_by) VALUES (%s, %s, %s, %s)", (name, shopid, user, user))
+        conn.commit()
+        
+        # Get the inserted category ID
+        new_category_id = cursor.lastrowid
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": f"Category '{name}' created successfully",
+            "category_id": new_category_id,
+            "name": name
+        }), 201
+
+    except mysql.connector.Error as err:
+        conn.close()
+        return jsonify({"success": False, "message": f"Database error: {str(err)}"}), 500
+    except Exception as err:
+        conn.close()
+        return jsonify({"success": False, "message": f"Error: {str(err)}"}), 500
+
+
 @app.route("/api/export-products", methods=["GET"])
 @login_required
 def api_export_products():
@@ -856,21 +900,70 @@ def api_export_products():
         shop_id = session.get("selected_shop_id")
         if not shop_id:
             return jsonify({"success": False, "message": "No shop selected"}), 400
-        # Fetch all products with category names for the selected shop
+        # Fetch all products with category names and descriptions for the selected shop
         cur.execute(
             """
-            SELECT p.product_id, p.name, p.price, p.tax, p.stock, p.safe_stock, c.name AS category_name
+            SELECT p.product_id, p.name, p.HSN_code, p.location, p.status, p.price, p.tax, p.stock, p.safe_stock,
+                   c.name AS category_name,
+                   pd.description1, pd.description2, pd.description3, pd.description4, pd.description5
             FROM Products p
             LEFT JOIN Categories c ON p.categoryid = c.categories_id
+            LEFT JOIN product_desc pd ON p.product_id = pd.product_id
             WHERE p.shop_id = %s
             ORDER BY p.product_id DESC
             """,
             (shop_id,)
         )
 
-        products = cur.fetchall()
+        rows = cur.fetchall() or []
         cur.close()
         conn.close()
+
+        products = []
+        for r in rows:
+            # Normalize HSN code key variations
+            hsn = r.get('HSN_code') or r.get('hsn_code') or r.get('HSN') or r.get('hsn') or ''
+
+            # Ensure location is a string
+            location = r.get('location') or ''
+
+            # Normalize status into 'Active' or 'Inactive'
+            status_raw = r.get('status')
+            status = 'Inactive'
+            try:
+                if status_raw is None:
+                    status = 'Inactive'
+                elif isinstance(status_raw, (int, float)):
+                    status = 'Active' if int(status_raw) == 1 else 'Inactive'
+                else:
+                    s = str(status_raw).strip().lower()
+                    if s in ('1', 'true', 'active', 'a', 'yes', 'y'):
+                        status = 'Active'
+                    elif s in ('0', 'false', 'inactive', 'n', 'no'):
+                        status = 'Inactive'
+                    else:
+                        status = str(status_raw).strip().capitalize()
+            except Exception:
+                status = str(status_raw or '')
+
+            prod = {
+                'product_id': r.get('product_id') or r.get('productid') or r.get('products_id'),
+                'name': r.get('name') or '',
+                'hsn_code': hsn,
+                'location': str(location),
+                'status': status,
+                'price': float(r.get('price') or 0),
+                'tax': float(r.get('tax') or 0),
+                'stock': int(r.get('stock') or 0),
+                'safe_stock': int(r.get('safe_stock') or 0),
+                'category_name': r.get('category_name') or '',
+                'description1': r.get('description1') or '',
+                'description2': r.get('description2') or '',
+                'description3': r.get('description3') or '',
+                'description4': r.get('description4') or '',
+                'description5': r.get('description5') or ''
+            }
+            products.append(prod)   
 
         return jsonify({"success": True, "products": products}), 200
     except mysql.connector.Error as err:
@@ -954,7 +1047,7 @@ def add_products():
         for product in data:
             name = product.get("name", "").strip()
             if not name:
-                continue  # Skip products without a name
+                continue  # Skip products without a na
 
             price = product.get("price", "0.00")
             tax = product.get("tax", "0.00")
@@ -962,6 +1055,11 @@ def add_products():
             safe_stock = product.get("safe_stock", "0")
             category_input = product.get("categoryid") or product.get("category", "")
             description = product.get("description", "").strip()
+            user = session.get("user")
+            # Accept HSN from multiple possible keys depending on client (HSN_code, hsn, hsn_code)
+            hsn_code = (product.get("HSN_code") or product.get("hsn") or product.get("hsn_code") or product.get("HSN") or "").strip()
+            location = (product.get("location") or product.get("loc") or "").strip()
+            status = (product.get("status") or product.get("state") or "active").strip()
 
             # Parse description lines (support both single field and old format)
             description_lines = []
@@ -997,8 +1095,8 @@ def add_products():
                             categoryid = cat_row[0] if isinstance(cat_row, tuple) else cat_row.get('categories_id')
                         else:
                             cur.execute(
-                                "INSERT INTO Categories (name, shopid, created_at) VALUES (%s, %s, %s)",
-                                (category_input, shopid, datetime.now())
+                                "INSERT INTO Categories (name, shopid, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
+                                (category_input, shopid, user, user, datetime.now(), datetime.now())
                             )
                             conn.commit()
                             categoryid = cur.lastrowid
@@ -1006,10 +1104,10 @@ def add_products():
             # Insert product
             cur.execute(
                 """
-                INSERT INTO Products (name, price, tax, stock, safe_stock, categoryid, shop_id)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO Products (name, price, tax, stock, safe_stock, categoryid, shop_id , HSN_code , location , status , created_by, updated_by, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (name, price, tax, stock, safe_stock, categoryid, shopid)
+                (name, price, tax, stock, safe_stock, categoryid, shopid, hsn_code, location, status, user, user, datetime.now(), datetime.now())
             )
             product_id = cur.lastrowid
 
@@ -1187,11 +1285,12 @@ def api_create_shop():
             return jsonify({"success": False, "message": "Shop name is required"}), 400
 
         shop_name = data.get('name').strip()
-        tax_id = data.get('tax_id', None)
+        tax_id = data.get('tax_id', "N/A")
         userid = session.get('user')
-        gstn = data.get('gstn', None)
-        address = data.get('address', None)
-        phone = data.get('phone', None)
+        gstn = data.get('gstn', "N/A")
+        address = data.get('address', "N/A")
+        phone = data.get('phone', "N/A")
+        print(f"Creating shop with name: {shop_name} for user: {userid} with tax_id: {tax_id} and gstn: {gstn} and address: {address} and phone: {phone}")
         
         if not userid:
             return jsonify({"success": False, "message": "User not authenticated"}), 401
@@ -1278,6 +1377,7 @@ def api_select_shop():
             return jsonify({"success": False, "message": "Shop ID is required"}), 400
         shop_id = data.get('shop_id')
         userid = session.get('user')
+
         if not userid:
             return jsonify({"success": False, "message": "User not authenticated"}), 401
         # Verify shop belongs to current user
@@ -1413,12 +1513,15 @@ def edit_product():
         # Update product
         cursor.execute(
             """UPDATE Products SET
-               name = %s, price = %s, tax = %s,
+               name = %s, HSN_code = %s, location = %s, status = %s, price = %s, tax = %s,
                stock = %s, safe_stock = %s,
                categoryid = %s
                WHERE product_id = %s AND shop_id = %s""",
             (
                 data.get("name"),
+                data.get("HSN_code"),
+                data.get("location"),
+                data.get("status"),
                 float(data.get("price", 0)),
                 float(data.get("tax", 0)),
                 int(data.get("stock", 0)),
@@ -1431,7 +1534,6 @@ def edit_product():
         conn.commit()
         cursor.close()
         conn.close()
-
         return jsonify({"success": True, "message": "Product updated successfully"}), 200
     except mysql.connector.Error as err:
         return jsonify({"success": False, "message": f"Database error: {err}"}), 500
@@ -3393,9 +3495,9 @@ def create_invoice():
             INSERT INTO Invoices (
                 invoice_number,
                 customer_name, customer_email, customer_phone,
-                customer_address, due_date, shop_id, subtotal, total_tax,
+                customer_address, due_date, shop_id, subtotal, total_tax,cgst,sgst,igst,
                 grand_total, status, created_by, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             invoice_number,
             data['customer']['name'],
@@ -3406,6 +3508,9 @@ def create_invoice():
             data.get('shop_id', 1),  # Default shop_id
             data['subtotal'],
             data['total_tax'],
+            data['total_tax']/2,
+            data['total_tax']/2,
+            0,
             data['grand_total'],
             data.get('status', 'draft'),
             session.get('user_id', 1),  # Get from session
