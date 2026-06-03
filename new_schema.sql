@@ -406,7 +406,7 @@ create table quotation_items(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     shopid INT NOT NULL,
     QID BIGINT UNSIGNED NOT NULL,
-    product_id BIGINT UNSIGNED NOT NULL,
+    product_id BIGINT UNSIGNED,
     quantity INT NOT NULL,
     unit_price DECIMAL(10,2) NOT NULL,
     tax_rate DECIMAL(5,2) NOT NULL,

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Quotations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { margin:0; font-family:'Inter',sans-serif; background:#f3f4f6; color:#0f172a; }
+        .page { max-width:1200px; margin: 24px auto; padding: 0 16px; }
+        .header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:24px; }
+        h1 { font-size:2rem; margin:0; }
+        .actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px; text-decoration:none; color:#fff; background:#2563eb; border:none; font-weight:600; }
+        .btn.secondary { background:#475569; }
+        table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 10px 25px rgba(15,23,42,.08); }
+        th,td { padding:14px 12px; border-bottom:1px solid #e2e8f0; text-align:left; }
+        th { background:#f8fafc; color:#334155; font-weight:700; }
+        tr:hover { background:#f8fafc; }
+        .status { display:inline-flex; padding:6px 12px; border-radius:999px; font-size:.82rem; font-weight:700; }
+        .status.draft { background:#f8fafc; color:#7c3aed; }
+        .status.sent { background:#ecfdf5; color:#15803d; }
+        .status.accepted { background:#eff6ff; color:#1d4ed8; }
+        .status.rejected { background:#fef2f2; color:#b91c1c; }
+        .empty { text-align:center; padding:40px; color:#475569; }
+        @media(max-width:800px){ .header{flex-direction:column;align-items:flex-start;} table{font-size:.9rem;} }
+        /* Flash Messages */
+        .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+        .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .flash-message.success { background: #22c55e; }
+        .flash-message.error { background: #ef4444; }
+        .flash-message.warning { background: #f59e0b; }
+        .flash-message.info { background: #3b82f6; }
+        .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+    </style>
+</head>
+<body>
+<div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>Saved Quotations</h1>
+            <p style="margin:8px 0 0; color:#475569;">View saved quotations and open a quotation detail page directly.</p>
+        </div>
+        <div class="actions">
+            <a class="btn" href="{{ url_for('quotations') }}"><i class="fas fa-plus"></i> New Quotation</a>
+            <a class="btn secondary" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    {% if quotations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Quotation</th>
+                    <th>Shop</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in quotations %}
+                    <tr>
+                        <td>#Q-{{ q.QID }}</td>
+                        <td>{{ q.shop_name or 'Unknown Shop' }}</td>
+                        <td>{{ q.customer_name or 'Unknown Customer' }}</td>
+                        <td>₹ {{ '%.2f' | format(q.grand_total or 0) }}</td>
+                        <td><span class="status {{ q.status }}">{{ q.status or 'draft' | upper }}</span></td>
+                        <td>{{ q.created_at.strftime('%Y-%m-%d %H:%M') if q.created_at else '-' }}</td>
+                        <td>
+                            <a class="btn secondary" href="{{ url_for('quotation_view', qid=q.QID) }}"><i class="fas fa-eye"></i> View</a>
+                            <a class="btn secondary" href="{{ url_for('convert_quotation_to_invoice', qid=q.QID) }}"><i class="fas fa-file-invoice"></i> Convert to Invoice</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">No quotations found yet. Create a new quotation to get started.</div>
+    {% endif %}
+</div>
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+</body>
+</html>

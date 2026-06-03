@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify
+from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify,abort
 import bcrypt, os, re, random, string
 from datetime import datetime,timedelta
 import json
@@ -1027,6 +1027,358 @@ def api_products():
         return jsonify({'success': True, 'products': products}), 200
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/quotations/<int:quotation_id>', methods=['PUT'])
+@login_required
+def update_quotation(quotation_id):
+    conn = None
+    cur = None
+    try:
+        conn, cur = get_db()
+        if not conn or not cur:
+            return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'success': False, 'message': 'Invalid request payload'}), 400
+
+        items = data.get('items') or []
+        if not items:
+            return jsonify({'success': False, 'message': 'Quotation must include at least one item'}), 400
+
+        customer = data.get('customer', {})
+        customer_name = customer.get('name', '').strip()
+        customer_email = customer.get('email', '').strip()
+        customer_phone = customer.get('phone', '').strip()
+        customer_address = customer.get('address', '').strip() or 'N/A'
+        customer_id_from_frontend = customer.get('id')
+        
+        if not customer_name:
+            return jsonify({'success': False, 'message': 'Customer name is required'}), 400
+
+        shopid = data.get('shopid')
+        if not shopid:
+            shopid = 1
+            
+        user_key = session.get('user') or session.get('username') or 'system'
+        
+        status = data.get('status', 'draft')
+        payment_terms = data.get('payment_terms') or ''
+        subtotal = float(data.get('subtotal') or 0)
+        total_tax = float(data.get('total_tax') or 0)
+        grand_total = float(data.get('grand_total') or 0)
+        cgst = round(total_tax / 2, 2)
+        sgst = round(total_tax / 2, 2)
+        igst = 0.0
+
+        conn.start_transaction()
+        
+        # Check if quotation exists
+        cur.execute("SELECT QID FROM Quotations WHERE QID = %s", (quotation_id,))
+        if not cur.fetchone():
+            conn.rollback()
+            return jsonify({'success': False, 'message': 'Quotation not found'}), 404
+
+        # Validate customer exists (NO AUTO-CREATE)
+        customer_id = None
+        
+        # If customer ID provided, verify it exists and belongs to shop
+        if customer_id_from_frontend:
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.customer_id = %s AND uc.shopid = %s
+            """, (customer_id_from_frontend, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = customer_id_from_frontend
+                # Update existing customer info (optional - can be removed if you don't want updates)
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_name, customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer with ID {customer_id_from_frontend} does not exist or does not belong to this shop'}), 400
+        
+        # If no customer ID but email provided, try to find by email
+        elif customer_email:
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.email = %s AND uc.shopid = %s
+            """, (customer_email, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
+                # Update existing customer info
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_name, customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer with email {customer_email} does not exist in this shop. Please select an existing customer.'}), 400
+        
+        else:
+            # No customer ID or email provided, try to find by name and phone
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.customer_name = %s AND uc.shopid = %s
+                LIMIT 1
+            """, (customer_name, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
+                # Update existing customer info
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer "{customer_name}" does not exist. Please select an existing customer from the search.'}), 400
+
+        # Update quotation
+        cur.execute("""
+            UPDATE Quotations 
+            SET customer_id = %s, shopid = %s, subtotal = %s, total_tax = %s, 
+                cgst = %s, sgst = %s, igst = %s, grand_total = %s, 
+                status = %s, payment_terms = %s, updated_at = NOW(), updated_by = %s 
+            WHERE QID = %s
+        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, 
+              status, payment_terms, user_key, quotation_id))
+
+        # Delete existing items
+        cur.execute("DELETE FROM quotation_items WHERE QID = %s", (quotation_id,))
+        
+        # Insert new items
+        for item in items:
+            product_id = item.get('product_id')
+            quantity = int(item.get('quantity') or 0)
+            unit_price = float(item.get('unit_price') or 0)
+            tax_rate = float(item.get('tax_rate') or 0)
+            tax_amount = float(item.get('tax_amount') or 0)
+            total = float(item.get('total') or 0)
+            
+            # Verify product exists (optional but recommended)
+            if product_id:
+                cur.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+                if not cur.fetchone():
+                    conn.rollback()
+                    return jsonify({'success': False, 'message': f'Product ID {product_id} does not exist'}), 400
+            
+            cur.execute("""
+                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (shopid, quotation_id, product_id, quantity, unit_price, tax_rate, tax_amount, total))
+
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Quotation updated successfully', 'quotation_id': quotation_id}), 200
+
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except:
+                pass
+        app.logger.error(f"Error updating quotation {quotation_id}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Database error: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+
+
+@app.route('/api/quotations', methods=['POST'])
+@login_required
+def create_quotation():
+    conn = None
+    cur = None
+    try:
+        conn, cur = get_db()
+        if not conn or not cur:
+            return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'success': False, 'message': 'Invalid request payload'}), 400
+
+        items = data.get('items') or []
+        if not items:
+            return jsonify({'success': False, 'message': 'Quotation must include at least one item'}), 400
+
+        customer = data.get('customer', {})
+        customer_name = customer.get('name', '').strip()
+        customer_email = customer.get('email', '').strip()
+        customer_phone = customer.get('phone', '').strip()
+        customer_address = customer.get('address', '').strip() or 'N/A'
+        customer_id_from_frontend = customer.get('id')
+
+        if not customer_name:
+            return jsonify({'success': False, 'message': 'Customer name is required'}), 400
+
+        shopid = data.get('shopid')
+        if not shopid:
+            shopid = 1
+            
+        user_key = session.get('user') or session.get('username') or 'system'
+        
+        status = data.get('status', 'draft')
+        payment_terms = data.get('payment_terms') or ''
+        subtotal = float(data.get('subtotal') or 0)
+        total_tax = float(data.get('total_tax') or 0)
+        grand_total = float(data.get('grand_total') or 0)
+        cgst = round(total_tax / 2, 2)
+        sgst = round(total_tax / 2, 2)
+        igst = 0.0
+
+        conn.start_transaction()
+        
+        # Validate customer exists (NO AUTO-CREATE)
+        customer_id = None
+        
+        # If customer ID provided, verify it exists and belongs to shop
+        if customer_id_from_frontend:
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.customer_id = %s AND uc.shopid = %s
+            """, (customer_id_from_frontend, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = customer_id_from_frontend
+                # Optional: Update customer info (can be removed)
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_name, customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer with ID {customer_id_from_frontend} does not exist or does not belong to this shop'}), 400
+        
+        # If no customer ID but email provided, try to find by email
+        elif customer_email:
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.email = %s AND uc.shopid = %s
+            """, (customer_email, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
+                # Optional: Update customer info
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_name, customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer with email {customer_email} does not exist in this shop. Please select an existing customer.'}), 400
+        
+        else:
+            # No customer ID or email, try to find by name
+            cur.execute("""
+                SELECT c.customer_id 
+                FROM customer c
+                INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE c.customer_name = %s AND uc.shopid = %s
+                LIMIT 1
+            """, (customer_name, shopid))
+            row = cur.fetchone()
+            if row:
+                customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
+                # Optional: Update customer info
+                cur.execute("""
+                    UPDATE customer 
+                    SET customer_mobile_number = %s, address1 = %s, 
+                        updated_at = NOW(), updated_by = %s 
+                    WHERE customer_id = %s
+                """, (customer_phone, customer_address, user_key, customer_id))
+            else:
+                conn.rollback()
+                return jsonify({'success': False, 'message': f'Customer "{customer_name}" does not exist. Please select an existing customer from the search.'}), 400
+
+        # Insert quotation
+        cur.execute("""
+            INSERT INTO Quotations (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, status, payment_terms, created_at, updated_at, created_by, updated_by) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s)
+        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, 
+              status, payment_terms, user_key, user_key))
+        
+        quotation_id = cur.lastrowid
+
+        # Insert items
+        for item in items:
+            product_id = item.get('product_id')
+            quantity = int(item.get('quantity') or 0)
+            unit_price = float(item.get('unit_price') or 0)
+            tax_rate = float(item.get('tax_rate') or 0)
+            tax_amount = float(item.get('tax_amount') or 0)
+            total = float(item.get('total') or 0)
+            
+            # Verify product exists
+            if product_id:
+                cur.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+                if not cur.fetchone():
+                    conn.rollback()
+                    return jsonify({'success': False, 'message': f'Product ID {product_id} does not exist'}), 400
+            
+            cur.execute("""
+                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (shopid, quotation_id, product_id, quantity, unit_price, tax_rate, tax_amount, total))
+
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Quotation created successfully', 'quotation_id': quotation_id}), 201
+
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except:
+                pass
+        app.logger.error(f"Error creating quotation: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Database error: {str(e)}'}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
 
 @app.route("/add-products", methods=["POST"])
 @login_required
@@ -3463,6 +3815,348 @@ def my_invoices():
         read_only=True
     )
 
+@app.route('/quotations')
+@admin_required
+def quotations():
+    """Render the quotation builder page with available shops."""
+    conn, cur = get_db()
+    shops = []
+    try:
+        cur.execute("SELECT shopid, name, Address FROM Shops ORDER BY shopid")
+        shops = cur.fetchall() or []
+    except Exception as e:
+        app.logger.error(f"Error loading shops for quotations: {e}")
+    finally:
+        conn.close()
+    return render_template('QTB.html', shops=shops)
+
+@app.route('/quotations/list')
+@admin_required
+def quotations_list():
+    conn, cursor = get_db()
+    quotations = []
+    try:
+        cursor.execute(
+            """
+            SELECT q.QID, q.subtotal, q.total_tax, q.cgst, q.sgst, q.igst, q.grand_total,
+                   q.status, q.payment_terms, q.created_at,
+                   c.customer_name, s.name AS shop_name
+            FROM Quotations q 
+            LEFT JOIN customer c ON q.customer_id = c.customer_id
+            LEFT JOIN Shops s ON q.shopid = s.shopid
+            where q.shopid = %s
+            ORDER BY q.created_at DESC
+            """
+            , (session.get('selected_shop_id') or 1,)
+        )
+        quotations = cursor.fetchall() or []
+    except Exception as e:
+        app.logger.error(f"Error loading quotation list: {e}")
+    finally:
+        conn.close()
+    return render_template('quotations.html', quotations=quotations)
+
+
+def _parse_int(value, default=1):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _build_invoice_payload(quotation, items):
+    due_date = datetime.now().date() + timedelta(days=15)
+    invoice_number = f"INV-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    customer_name = quotation.get('customer_name') or 'Customer'
+    customer_email = quotation.get('customer_email') or f'guest+{int(datetime.now().timestamp())}@example.com'
+    customer_phone = quotation.get('customer_mobile_number') or ''
+    customer_address = ', '.join([part for part in [quotation.get('address1'), quotation.get('address2'), quotation.get('city'), quotation.get('pincode')] if part])
+    shop_id = _parse_int(quotation.get('shopid') or session.get('selected_shop_id') or 1)
+    created_by = _parse_int(session.get('user_id') or session.get('user') or 1)
+
+    invoice_payload = {
+        'invoice_number': invoice_number,
+        'customer_name': customer_name,
+        'customer_email': customer_email,
+        'customer_phone': customer_phone,
+        'customer_address': customer_address,
+        'due_date': due_date,
+        'shop_id': shop_id,
+        'subtotal': float(quotation.get('subtotal') or 0),
+        'total_tax': float(quotation.get('total_tax') or 0),
+        'cgst': float(quotation.get('cgst') or 0),
+        'sgst': float(quotation.get('sgst') or 0),
+        'igst': float(quotation.get('igst') or 0),
+        'grand_total': float(quotation.get('grand_total') or 0),
+        'status': 'draft',
+        'created_by': created_by,
+        'updated_by': created_by,
+        'created_at': datetime.now(),
+        'updated_at': datetime.now()
+    }
+
+    item_payloads = []
+    for item in items:
+        item_payloads.append({
+            'product_id': item.get('product_id'),
+            'description': item.get('description') or item.get('product_name') or 'Item',
+            'quantity': _parse_int(item.get('quantity'), 0),
+            'unit_price': float(item.get('unit_price') or 0),
+            'tax_rate': float(item.get('tax_rate') or 0),
+            'tax_amount': float(item.get('tax_amount') or 0),
+            'total': float(item.get('total') or 0)
+        })
+
+    return invoice_payload, item_payloads
+
+
+@app.route('/quotation/<int:qid>/convert_to_invoice')
+@login_required
+def convert_quotation_to_invoice(qid):
+    conn, cursor = get_db()
+    try:
+        cursor.execute(
+            """
+            SELECT q.*, c.customer_name, c.email AS customer_email, c.customer_mobile_number,
+                   c.address1, c.address2, c.city, c.pincode, s.name AS shop_name
+            FROM Quotations q
+            LEFT JOIN customer c ON q.customer_id = c.customer_id
+            LEFT JOIN Shops s ON q.shopid = s.shopid
+            WHERE q.QID = %s
+            """,
+            (qid,)
+        )
+        quotation = cursor.fetchone()
+        if not quotation:
+            flash('Quotation not found.', 'error')
+            return redirect(url_for('quotations_list'))
+
+        # Prevent duplicate invoice generation for the same quotation
+        q_status = quotation.get('status')
+        if q_status and isinstance(q_status, str) and q_status.lower() == 'sent':
+            flash('An invoice has already been generated for this quotation.', 'info')
+            return redirect(url_for('quotation_view', qid=qid))
+
+        cursor.execute(
+            """
+            SELECT qi.*, p.name AS product_name
+            FROM quotation_items qi
+            LEFT JOIN Products p ON qi.product_id = p.product_id
+            WHERE qi.QID = %s
+            """,
+            (qid,)
+        )
+        items = cursor.fetchall() or []
+        if not items:
+            flash('Quotation has no items to convert.', 'error')
+            return redirect(url_for('quotation_view', qid=qid))
+
+        invoice_payload, item_payloads = _build_invoice_payload(quotation, items)
+        app.logger.debug('convert_quotation_to_invoice invoice_payload: %s', invoice_payload)
+        app.logger.debug('convert_quotation_to_invoice item_payloads: %s', item_payloads)
+
+        cursor.execute(
+            "INSERT INTO Invoices (invoice_number, customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (
+                invoice_payload['invoice_number'],
+                invoice_payload['customer_name'],
+                invoice_payload['customer_email'],
+                invoice_payload['customer_phone'],
+                invoice_payload['customer_address'],
+                invoice_payload['due_date'],
+                invoice_payload['shop_id'],
+                invoice_payload['subtotal'],
+                invoice_payload['total_tax'],
+                invoice_payload['cgst'],
+                invoice_payload['sgst'],
+                invoice_payload['igst'],
+                invoice_payload['grand_total'],
+                invoice_payload['status'],
+                invoice_payload['created_by'],
+                invoice_payload['updated_by'],
+                invoice_payload['created_at'],
+                invoice_payload['updated_at']
+            )
+        )
+        invoice_id = cursor.lastrowid
+        
+        for item in item_payloads:
+            cursor.execute(
+                "INSERT INTO Invoice_Items (invoice_id, product_id, description, quantity, unit_price, tax_rate, tax_amount, total) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    invoice_id,
+                    item['product_id'],
+                    item['description'],
+                    item['quantity'],
+                    item['unit_price'],
+                    item['tax_rate'],
+                    item['tax_amount'],
+                    item['total']
+                ))
+        cursor.execute("UPDATE Quotations SET status = %s, updated_at = %s WHERE QID = %s", ('sent', datetime.now(), qid))
+        cursor.execute("UPDATE products p JOIN quotation_items qi ON p.product_id = qi.product_id SET p.stock = GREATEST(p.stock - qi.quantity, 0) WHERE qi.QID = %s", (qid,))
+        conn.commit()
+
+        flash('Invoice generated from quotation successfully.', 'success')
+        if session.get('role') == 'user':
+            return redirect(url_for('my_invoices', invoice_id=invoice_id))
+        return redirect(url_for('billing_view', invoice_id=invoice_id))
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        app.logger.error(f"Error converting quotation {qid} to invoice: {e}")
+        flash('Unable to convert quotation to invoice.', 'error')
+        return redirect(url_for('quotation_view', qid=qid))
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/quotation/<int:qid>/convert_to_invoice_debug')
+@login_required
+def convert_quotation_to_invoice_debug(qid):
+    conn, cursor = get_db()
+    try:
+        cursor.execute(
+            """
+            SELECT q.*, c.customer_name, c.email AS customer_email, c.customer_mobile_number,
+                   c.address1, c.address2, c.city, c.pincode, s.name AS shop_name
+            FROM Quotations q
+            LEFT JOIN customer c ON q.customer_id = c.customer_id
+            LEFT JOIN Shops s ON q.shopid = s.shopid
+            WHERE q.QID = %s
+            """,
+            (qid,)
+        )
+        quotation = cursor.fetchone()
+        if not quotation:
+            return jsonify({'success': False, 'message': 'Quotation not found.'}), 404
+
+        cursor.execute(
+            """
+            SELECT qi.*, p.name AS product_name
+            FROM quotation_items qi
+            LEFT JOIN Products p ON qi.product_id = p.product_id
+            WHERE qi.QID = %s
+            """,
+            (qid,)
+        )
+        items = cursor.fetchall() or []
+        invoice_payload, item_payloads = _build_invoice_payload(quotation, items)
+        return jsonify({
+            'success': True,
+            'quotation': quotation,
+            'invoice_payload': invoice_payload,
+            'items': item_payloads
+        })
+    except Exception as e:
+        app.logger.error(f"Error building conversion debug for quotation {qid}: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/quotation/view/<int:qid>')
+@login_required
+def quotation_view_alias(qid):
+    return redirect(url_for('quotation_view', qid=qid))
+
+@app.route('/quotation/<int:qid>')
+@login_required
+def quotation_view(qid):
+    conn, cursor = get_db()
+    quotation = None
+    shop = {}
+    customer = {}
+    items = []
+
+    try:
+        cursor.execute(
+            """
+            SELECT q.*, s.name AS shop_name, s.Address AS shop_address, s.GSTN AS shop_gst,
+                   s.phone AS shop_phone, s.tax_id AS shop_tax_id
+            FROM Quotations q
+            LEFT JOIN Shops s ON q.shopid = s.shopid
+            WHERE q.QID = %s
+            """,
+            (qid,)
+        )
+        quotation = cursor.fetchone()
+        if not quotation:
+            abort(404)
+
+        cursor.execute("SELECT * FROM customer WHERE customer_id = %s", (quotation.get('customer_id'),))
+        customer = cursor.fetchone() or {}
+
+        shop = {
+            'shop_name': quotation.get('shop_name'),
+            'shop_address': quotation.get('shop_address'),
+            'shop_gst': quotation.get('shop_gst'),
+            'shop_phone': quotation.get('shop_phone'),
+            'shop_tax_id': quotation.get('shop_tax_id')
+        }
+
+        cursor.execute(
+            """
+            SELECT qi.*, p.name AS product_name
+            FROM quotation_items qi
+            LEFT JOIN Products p ON qi.product_id = p.product_id
+            WHERE qi.QID = %s
+            """,
+            (qid,)
+        )
+        items = cursor.fetchall() or []
+
+    except Exception as e:
+        app.logger.error(f"Error loading quotation {qid}: {e}")
+        abort(500)
+    finally:
+        conn.close()
+
+    def normalize_row(row):
+        if not row:
+            return row
+        for key in ['subtotal', 'total_tax', 'cgst', 'sgst', 'igst', 'grand_total', 'unit_price', 'tax_rate', 'tax_amount', 'total']:
+            if key in row and row[key] is not None:
+                try:
+                    row[key] = float(row[key])
+                except (TypeError, ValueError):
+                    pass
+        for key in ['created_at', 'updated_at']:
+            if key in row and isinstance(row[key], datetime):
+                row[key] = row[key].strftime('%Y-%m-%d %H:%M:%S')
+        return row
+
+    def normalize_customer_row(row):
+        row = normalize_row(row)
+        if not row:
+            return row
+        if 'GSTN' in row:
+            row['gstin'] = row.get('GSTN')
+        if 'customer_mobile_number' in row:
+            row['phone'] = row.get('customer_mobile_number')
+        if 'customer_name' in row:
+            row['name'] = row.get('customer_name')
+        if 'customer_email' in row:
+            row['email'] = row.get('customer_email')
+        address_parts = [row.get('address1'), row.get('address2'), row.get('city'), row.get('pincode')]
+        row['billing_address'] = ', '.join([part for part in address_parts if part])
+        return row
+
+    def normalize_shop_row(row):
+        row = normalize_row(row)
+        if not row:
+            return row
+        row['shop_email'] = row.get('shop_email') or ''
+        if 'shop_address' in row and row['shop_address'] is not None:
+            row['shop_address'] = row['shop_address']
+        return row
+
+    quotation = normalize_row(quotation)
+    customer = normalize_customer_row(customer)
+    shop = normalize_shop_row(shop)
+    items = [normalize_row(item) for item in items]
+
+    return render_template('Quotation.html', quotation=quotation, shop=shop, customer=customer, items=items)
 
 
 @app.route('/invoices')
@@ -3805,43 +4499,23 @@ def get_customers():
         if conn:
             conn.close()
 
-
-@app.route('/api/customers/search', methods=['GET'])
-def search_customers():
-    search_term = request.args.get('q', '')
-
-    if not search_term:
-        return get_customers()
-
+@app.route('/api/shops/<int:shopid>/customers/count', methods=['GET'])
+@login_required
+def shop_customers_count(shopid):
     conn, cur = get_db()
-    shopid = session.get("selected_shop_id")
     if not conn or not cur:
         return jsonify({'error': 'Database connection failed'}), 500
-
     try:
-        query = """
-            SELECT c.*
-            FROM customer c
-            JOIN user_customer uc ON c.customer_id = uc.customer_id
-            WHERE uc.shopid = %s AND (
-                c.customer_name LIKE %s
-                OR c.customer_mobile_number LIKE %s
-                OR c.email LIKE %s
-                OR c.city LIKE %s
-                OR c.Vilage LIKE %s
-                OR c.pincode LIKE %s
-            )
-            ORDER BY c.customer_id DESC
-        """
-        search_pattern = f"%{search_term}%"
-        cur.execute(query, (shopid,search_pattern, search_pattern, search_pattern,
-                           search_pattern, search_pattern, search_pattern))
-
-        customers = cur.fetchall()
-        return jsonify(customers)
-
-    except mysql.connector.Error as e:
-        print(f"Database error: {e}")
+        cur.execute('SELECT COUNT(*) AS cnt FROM user_customer WHERE shopid = %s', (shopid,))
+        row = cur.fetchone()
+        cnt = 0
+        if isinstance(row, dict):
+            cnt = row.get('cnt', 0)
+        elif row:
+            cnt = row[0]
+        return jsonify({'count': int(cnt)})
+    except Exception as e:
+        app.logger.error(f"Error counting customers for shop {shopid}: {e}")
         return jsonify({'error': str(e)}), 500
     finally:
         if conn:
@@ -3964,6 +4638,79 @@ def create_customer():
     finally:
         if conn:
             conn.close()
+
+@app.route('/api/customers/search', methods=['GET'])
+def search_customers():
+    search_term = request.args.get('q', '')
+    shopid = session.get("selected_shop_id")
+    
+    if not shopid:
+        return jsonify({'error': 'No shop selected'}), 400
+    
+    conn, cur = get_db()
+    if not conn or not cur:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        # If search term is numeric, try searching by customer_id directly
+        if search_term.isdigit():
+            query = """
+                SELECT c.*
+                FROM customer c
+                JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE uc.shopid = %s AND c.customer_id = %s
+                ORDER BY c.customer_id DESC
+            """
+            cur.execute(query, (shopid, int(search_term)))
+        else:
+            query = """
+                SELECT c.*
+                FROM customer c
+                JOIN user_customer uc ON c.customer_id = uc.customer_id
+                WHERE uc.shopid = %s AND (
+                    c.customer_name LIKE %s
+                    OR c.customer_mobile_number LIKE %s
+                    OR c.email LIKE %s
+                    OR c.city LIKE %s
+                    OR c.Vilage LIKE %s
+                    OR c.pincode LIKE %s
+                )
+                ORDER BY c.customer_id DESC
+            """
+            search_pattern = f"%{search_term}%"
+            cur.execute(query, (shopid, search_pattern, search_pattern, search_pattern,
+                               search_pattern, search_pattern, search_pattern))
+
+        customers = cur.fetchall()
+        # Convert to list of dicts if needed
+        if customers:
+            result = []
+            for row in customers:
+                if isinstance(row, dict):
+                    result.append(row)
+                else:
+                    # Handle tuple results
+                    result.append({
+                        'customer_id': row[0],
+                        'customer_name': row[1],
+                        'customer_mobile_number': row[2],
+                        'email': row[3],
+                        'address1': row[4],
+                        'address2': row[5],
+                        'city': row[6],
+                        'pincode': row[7],
+                        'Vilage': row[8]
+                    })
+            return jsonify(result)
+        return jsonify([])
+
+    except Exception as e:
+        print(f"Database error: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
 
 @app.route("/khatabook", methods=["GET", "POST"])
 @admin_required
