@@ -3956,9 +3956,10 @@ def convert_quotation_to_invoice(qid):
         app.logger.debug('convert_quotation_to_invoice item_payloads: %s', item_payloads)
 
         cursor.execute(
-            "INSERT INTO Invoices (invoice_number, customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO Invoices (invoice_number, QID , customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 invoice_payload['invoice_number'],
+                invoice_payload['QID'],
                 invoice_payload['customer_name'],
                 invoice_payload['customer_email'],
                 invoice_payload['customer_phone'],

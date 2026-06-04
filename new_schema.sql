@@ -246,6 +246,7 @@ CREATE TABLE Returns (
 
 CREATE TABLE IF NOT EXISTS Invoices (
     invoice_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    QID BIGINT UNSIGNED,
     invoice_number VARCHAR(50) NOT NULL,
     customer_name VARCHAR(100) NOT NULL,
     customer_email VARCHAR(100) NOT NULL,
@@ -270,6 +271,7 @@ CREATE TABLE IF NOT EXISTS Invoices (
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
     foreign key (shop_id) references Shops(shopid) on delete cascade
+    foreign key (QID) references Quotations(QID) on delete set null
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS Invoice_Items (
