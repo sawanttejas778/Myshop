@@ -49,6 +49,7 @@ CREATE TABLE Categories (
 -- Products table
 CREATE TABLE Products (
     product_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    SPID VARCHAR(255) NOT NULL default "N/A",
     categoryid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(100) NOT NULL,
     image VARCHAR(255),
@@ -56,10 +57,11 @@ CREATE TABLE Products (
     location VARCHAR(255) NOT NULL default "N/A",
     status varchar(255) not null default "active",
     price DECIMAL(10,2) NOT NULL,
+    Bprice DECIMAL(10,2) NOT NULL,
     tax DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     stock INT NOT NULL DEFAULT 0,
     safe_stock INT NOT NULL DEFAULT 0,
-    shop_id INT NOT NULL,
+    shop_id INT NOT NULL,   
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -540,3 +542,6 @@ create table supplier_invoice(
     INDEX idx_supplier_created_at (created_at),
     foreign key (shop_id) references Shops(shopid) on delete cascade
 );
+
+ALTER TABLE Products 
+ADD UNIQUE KEY uk_product_location_status (name, location, status, shop_id);

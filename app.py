@@ -434,7 +434,7 @@ def dashboard():
                         FROM Products p
                         LEFT JOIN Categories c ON p.categoryid = c.categories_id
                         LEFT JOIN rating r ON p.product_id = r.product_id
-                        WHERE p.categoryid = %s
+                        WHERE p.categoryid = %s AND p.status = "Active"
                         AND p.shop_id IN ({placeholders})
                         GROUP BY p.product_id, p.name, p.price, c.name, p.stock
                         ORDER BY p.product_id DESC
@@ -455,7 +455,7 @@ def dashboard():
                         FROM Products p
                         LEFT JOIN Categories c ON p.categoryid = c.categories_id
                         LEFT JOIN rating r ON p.product_id = r.product_id
-                        WHERE p.shop_id IN ({placeholders})
+                        WHERE p.shop_id IN ({placeholders}) AND p.status = "Active"
                         GROUP BY p.product_id, p.name, p.price, c.name, p.stock
                         ORDER BY p.product_id DESC
                         LIMIT %s
@@ -507,6 +507,7 @@ def dashboard():
                             LEFT JOIN Categories c ON p.categoryid = c.categories_id
                             WHERE p.categoryid = %s
                             AND p.shop_id IN ({placeholders})
+                            AND p.status = "Active"
                             ORDER BY p.product_id DESC
                             LIMIT %s
                         """
@@ -522,7 +523,7 @@ def dashboard():
                                 p.stock
                             FROM Products p
                             LEFT JOIN Categories c ON p.categoryid = c.categories_id
-                            WHERE p.shop_id IN ({placeholders})
+                            WHERE p.shop_id IN ({placeholders}) AND p.status = "Active"
                             ORDER BY p.product_id DESC
                             LIMIT %s
                         """
@@ -971,64 +972,6 @@ def api_export_products():
     except Exception as err:
         return jsonify({"success": False, "message": f"Error: {err}"}), 500
 
-
-@app.route('/api/products', methods=['GET'])
-@login_required
-def api_products():
-    conn, cur = get_db()
-    """Return products as JSON. Optional query param: category (id or name)."""
-    try:
-        category = request.args.get('category')
-        category_id = None
-        role = session.get("role")
-        if category:
-            if re.fullmatch(r"\d+", category.strip()):
-                category_id = int(category.strip())
-            else:
-                cur.execute("SELECT categories_id FROM Categories WHERE name = %s LIMIT 1", (category,))
-                row = cur.fetchone()
-                if row:
-                    category_id = row.get('categories_id')
-        if role == "admin" or role == "owner":
-            shopid = session.get("selected_shop_id")
-            if category_id:
-                cur.execute("SELECT product_id as id, name, image, price,stock,tax ,safe_stock FROM Products WHERE shop_id = %s AND categoryid = %s ORDER BY product_id DESC", (shopid,category_id))
-            else:
-                cur.execute("SELECT product_id as id, name, image, price,stock,tax ,safe_stock FROM Products WHERE shop_id = %s ORDER BY product_id DESC", (shopid,))
-        elif category_id:
-            cur.execute("SELECT product_id as id, name, image, price,stock,tax ,safe_stock FROM Products WHERE categoryid = %s ORDER BY product_id DESC", (category_id,))
-        else:
-            cur.execute("SELECT product_id as id, name, image, price,stock,tax ,safe_stock FROM Products ORDER BY product_id DESC")
-
-        rows = cur.fetchall()
-        products = []
-        for r in rows:
-            pid = r.get('id')
-            img = r.get('image')
-            img_path =f'static/uploads/{img}'
-            print(f"Processing product {pid} with image field: {img_path}")
-            filename = img_path if img and os.path.exists(os.path.join(app.root_path, img_path)) else None
-            if filename:
-                img_url = filename
-            else:
-                img_url = "static/logo.png"
-
-            products.append({
-                'id': pid,
-                'name': r.get('name'),
-                'price': float(r.get('price') or 0),
-                'image': img_url,
-                'stock': int(r.get('stock') or 0),
-                'tax': float(r.get('tax') or 0),
-                'safe_stock' : int(r.get('safe_stock') or 0)
-            })
-
-        conn.close()
-        return jsonify({'success': True, 'products': products}), 200
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-
 @app.route('/api/quotations/<int:quotation_id>', methods=['PUT'])
 @login_required
 def update_quotation(quotation_id):
@@ -1380,120 +1323,6 @@ def create_quotation():
             except:
                 pass
 
-@app.route("/add-products", methods=["POST"])
-@login_required
-def add_products():
-    conn, cur = get_db()
-    """API endpoint to save multiple products in bulk with descriptions."""
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
-
-        shopid = session.get("selected_shop_id")
-        if not shopid:
-            return jsonify({"success": False, "message": "No shop selected. Please select a shop before adding products."}), 400
-
-        saved_count = 0
-
-        for product in data:
-            name = product.get("name", "").strip()
-            if not name:
-                continue  # Skip products without a na
-
-            price = product.get("price", "0.00")
-            tax = product.get("tax", "0.00")
-            stock = product.get("stock", "0")
-            safe_stock = product.get("safe_stock", "0")
-            category_input = product.get("categoryid") or product.get("category", "")
-            description = product.get("description", "").strip()
-            user = session.get("user")
-            # Accept HSN from multiple possible keys depending on client (HSN_code, hsn, hsn_code)
-            hsn_code = (product.get("HSN_code") or product.get("hsn") or product.get("hsn_code") or product.get("HSN") or "").strip()
-            location = (product.get("location") or product.get("loc") or "").strip()
-            status = (product.get("status") or product.get("state") or "active").strip()
-
-            # Parse description lines (support both single field and old format)
-            description_lines = []
-
-            # Check for new single description field with line breaks
-            if description:
-                # Split by newlines and filter out empty lines
-                description_lines = [line.strip() for line in description.split('\n') if line.strip()]
-            else:
-                # Check for old format: description1, description2, etc.
-                for i in range(1, 6):
-                    desc_key = f"description{i}"
-                    if desc_key in product and product[desc_key]:
-                        desc_line = product[desc_key].strip()
-                        if desc_line:
-                            description_lines.append(desc_line)
-
-            # Process category
-            categoryid = None
-            if category_input:
-                category_input = str(category_input).strip()
-                if category_input:
-                    try:
-                        categoryid = int(category_input)
-                    except (ValueError, TypeError):
-                        # lookup by name for this shop; create if missing
-                        cur.execute(
-                            "SELECT categories_id FROM Categories WHERE name = %s AND shopid = %s",
-                            (category_input, shopid)
-                        )
-                        cat_row = cur.fetchone()
-                        if cat_row:
-                            categoryid = cat_row[0] if isinstance(cat_row, tuple) else cat_row.get('categories_id')
-                        else:
-                            cur.execute(
-                                "INSERT INTO Categories (name, shopid, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)",
-                                (category_input, shopid, user, user, datetime.now(), datetime.now())
-                            )
-                            conn.commit()
-                            categoryid = cur.lastrowid
-
-            # Insert product
-            cur.execute(
-                """
-                INSERT INTO Products (name, price, tax, stock, safe_stock, categoryid, shop_id , HSN_code , location , status , created_by, updated_by, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                (name, price, tax, stock, safe_stock, categoryid, shopid, hsn_code, location, status, user, user, datetime.now(), datetime.now())
-            )
-            product_id = cur.lastrowid
-
-            # Insert descriptions if any
-            if description_lines:
-                # Ensure we have exactly 5 description slots (pad with empty strings if needed)
-                desc_values = description_lines[:5]  # Take up to 5 lines
-                desc_values += [''] * (5 - len(desc_values))  # Pad with empty strings if less than 5
-
-                cur.execute(
-                    """
-                    INSERT INTO product_desc
-                    (product_id, description1, description2, description3, description4, description5)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    """,
-                    (product_id, *desc_values)
-                )
-
-            saved_count += 1
-
-        conn.commit()
-        conn.close()
-
-        return jsonify({
-            "success": True,
-            "message": f"Successfully saved {saved_count} product(s)",
-            "saved": saved_count
-        }), 200
-
-    except mysql.connector.Error as err:
-        return jsonify({"success": False, "message": f"Database error: {err}"}), 500
-    except Exception as err:
-        return jsonify({"success": False, "message": f"Error: {err}"}), 500
-
 @app.route('/add_to_cart/<int:product_id>', methods=['GET' , 'POST'])
 @login_required
 def add_to_cart(product_id):
@@ -1566,7 +1395,6 @@ def add_to_cart(product_id):
         return jsonify({"success": True, "cart_count": cart_count}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
 
 
 @app.route("/api/checkout-shop", methods=["POST"])
@@ -3943,7 +3771,7 @@ def convert_quotation_to_invoice(qid):
             FROM quotation_items qi
             LEFT JOIN Products p ON qi.product_id = p.product_id
             WHERE qi.QID = %s
-            """,
+            """,  
             (qid,)
         )
         items = cursor.fetchall() or []
@@ -3956,10 +3784,9 @@ def convert_quotation_to_invoice(qid):
         app.logger.debug('convert_quotation_to_invoice item_payloads: %s', item_payloads)
 
         cursor.execute(
-            "INSERT INTO Invoices (invoice_number, QID , customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO Invoices (invoice_number , customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at,QID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)",
             (
                 invoice_payload['invoice_number'],
-                invoice_payload['QID'],
                 invoice_payload['customer_name'],
                 invoice_payload['customer_email'],
                 invoice_payload['customer_phone'],
@@ -3976,14 +3803,15 @@ def convert_quotation_to_invoice(qid):
                 invoice_payload['created_by'],
                 invoice_payload['updated_by'],
                 invoice_payload['created_at'],
-                invoice_payload['updated_at']
+                invoice_payload['updated_at'],\
+                qid
             )
         )
         invoice_id = cursor.lastrowid
         
         for item in item_payloads:
             cursor.execute(
-                "INSERT INTO Invoice_Items (invoice_id, product_id, description, quantity, unit_price, tax_rate, tax_amount, total) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO Invoice_Items (invoice_id, product_id, description, quantity, unit_price, tax_rate, tax_amount, total) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     invoice_id,
                     item['product_id'],
@@ -3992,7 +3820,7 @@ def convert_quotation_to_invoice(qid):
                     item['unit_price'],
                     item['tax_rate'],
                     item['tax_amount'],
-                    item['total']
+                    item['total'],
                 ))
         cursor.execute("UPDATE Quotations SET status = %s, updated_at = %s WHERE QID = %s", ('sent', datetime.now(), qid))
         cursor.execute("UPDATE products p JOIN quotation_items qi ON p.product_id = qi.product_id SET p.stock = GREATEST(p.stock - qi.quantity, 0) WHERE qi.QID = %s", (qid,))
@@ -4811,6 +4639,342 @@ def api_khatabook_transactions(party_id):
         conn.close()
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/products', methods=['GET'])
+@login_required
+def api_products():
+    conn, cur = get_db()
+    """Return products as JSON. Optional query param: category (id or name), search (for SPID/name)."""
+    try:
+        category = request.args.get('category')
+        search_term = request.args.get('search', '').strip()  # NEW: search parameter for SPID/name
+        category_id = None
+        role = session.get("role")
+        
+        # Process category parameter (existing logic)
+        if category:
+            if re.fullmatch(r"\d+", category.strip()):
+                category_id = int(category.strip())
+            else:
+                cur.execute("SELECT categories_id FROM Categories WHERE name = %s LIMIT 1", (category,))
+                row = cur.fetchone()
+                if row:
+                    category_id = row.get('categories_id')
+        
+        # Build query based on role, category, and search term
+        if role == "admin" or role == "owner":
+            shopid = session.get("selected_shop_id")
+            if not shopid:
+                conn.close()
+                return jsonify({'success': False, 'message': 'No shop selected'}), 400
+            
+            # Base query
+            query = """
+                SELECT DISTINCT 
+                    p.product_id as id, 
+                    p.name, 
+                    p.image, 
+                    p.price, 
+                    p.stock, 
+                    p.tax, 
+                    p.safe_stock,
+                    p.SPID,
+                    p.HSN_code,
+                    p.location,
+                    p.status
+                FROM Products p
+                WHERE p.shop_id = %s AND p.status = "active"
+            """
+            params = [shopid]
+            
+            # Add category filter if provided
+            if category_id:
+                query += " AND p.categoryid = %s"
+                params.append(category_id)
+            
+            # Add search filter if provided (NEW)
+            if search_term:
+                query += """ AND (p.SPID LIKE %s OR p.name LIKE %s)"""
+                search_pattern = f"%{search_term}%"
+                params.extend([search_pattern, search_pattern])
+            
+            query += " ORDER BY p.product_id DESC"
+            cur.execute(query, params)
+            
+        else:
+            # Non-admin/owner role (existing logic)
+            query = """
+                SELECT DISTINCT 
+                    product_id as id, 
+                    name, 
+                    image, 
+                    price, 
+                    stock, 
+                    tax, 
+                    safe_stock,
+                    SPID,
+                    HSN_code,
+                    location,
+                    status
+                FROM Products
+                WHERE status = "active"
+            """
+            params = []
+            
+            if category_id:
+                query += " AND categoryid = %s"
+                params.append(category_id)
+            
+            if search_term:
+                query += " AND (SPID LIKE %s OR name LIKE %s)"
+                search_pattern = f"%{search_term}%"
+                params.extend([search_pattern, search_pattern])
+            
+            query += " ORDER BY product_id DESC"
+            cur.execute(query, params)
+        
+        rows = cur.fetchall()
+        products = []
+        
+        for r in rows:
+            pid = r.get('id')
+            img = r.get('image')
+            img_path = f'static/uploads/{img}' if img else None
+            print(f"Processing product {pid} with image field: {img_path}")
+            
+            # Check if image exists (existing logic)
+            filename = None
+            if img_path and os.path.exists(os.path.join(app.root_path, img_path)):
+                filename = img_path
+                img_url = filename
+            else:
+                img_url = "static/logo.png"
+            
+            products.append({
+                'id': pid,
+                'name': r.get('name'),
+                'price': float(r.get('price') or 0),
+                'image': img_url,
+                'stock': int(r.get('stock') or 0),
+                'tax': float(r.get('tax') or 0),
+                'safe_stock': int(r.get('safe_stock') or 0),
+                # NEW fields for search dropdown
+                'SPID': r.get('SPID'),
+                'HSN_code': r.get('HSN_code') or '',
+                'location': r.get('location') or '',
+                'status': r.get('status') or 'active'
+            })
+        
+        conn.close()
+        return jsonify({'success': True, 'products': products}), 200
+        
+    except Exception as e:
+        conn.close()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+
+@app.route("/add-products", methods=["POST"])
+@login_required
+def add_products():
+    conn, cur = get_db()
+    """Save products with buying price"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        shopid = session.get("selected_shop_id")
+        if not shopid:
+            return jsonify({"success": False, "message": "No shop selected"}), 400
+
+        saved_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for product in data:
+            name = product.get("name", "").strip()
+            if not name:
+                skipped_count += 1
+                continue
+
+            # Get selling price and buying price
+            selling_price = float(product.get("price", 0))
+            buying_price = float(product.get("bprice", product.get("Bprice", 0)))  # Support both field names
+            tax = float(product.get("tax", 0))
+            stock = int(product.get("stock", 0))
+            safe_stock = int(product.get("safe_stock", 0))
+            category_input = product.get("categoryid") or product.get("category", "")
+            description = product.get("description", "").strip()
+            user = session.get("user")
+            hsn_code = (product.get("HSN_code") or product.get("hsn") or product.get("hsn_code") or product.get("HSN") or "").strip()
+            location = (product.get("location") or product.get("loc") or "N/A").strip()
+            status = (product.get("status") or product.get("state") or "active").strip().lower()
+
+            # Calculate profit margin (optional - for logging)
+            profit_margin = selling_price - buying_price
+            profit_percentage = (profit_margin / buying_price * 100) if buying_price > 0 else 0
+
+            # Process category
+            categoryid = None
+            if category_input:
+                category_input = str(category_input).strip()
+                if category_input:
+                    try:
+                        categoryid = int(category_input)
+                    except (ValueError, TypeError):
+                        cur.execute(
+                            "SELECT categories_id FROM Categories WHERE name = %s AND shopid = %s",
+                            (category_input, shopid)
+                        )
+                        cat_row = cur.fetchone()
+                        if cat_row:
+                            categoryid = cat_row[0] if isinstance(cat_row, tuple) else cat_row.get('categories_id')
+                        else:
+                            cur.execute(
+                                """INSERT INTO Categories (name, shopid, created_by, updated_by) 
+                                   VALUES (%s, %s, %s, %s)""",
+                                (category_input, shopid, user, user)
+                            )
+                            conn.commit()
+                            categoryid = cur.lastrowid
+
+            # Check if product exists with same name + location + status
+            cur.execute("""
+                SELECT product_id, price, stock, Bprice 
+                FROM Products 
+                WHERE name = %s 
+                  AND location = %s 
+                  AND status = %s 
+                  AND shop_id = %s
+                LIMIT 1
+            """, (name, location, status, shopid))
+            
+            existing = cur.fetchone()
+
+            if existing:
+                # Product exists - UPDATE everything including buying price
+                product_id = existing[0] if isinstance(existing, tuple) else existing.get('product_id')
+                old_bprice = existing[3] if isinstance(existing, tuple) else existing.get('Bprice')
+                
+                # Update all fields (prices can change)
+                cur.execute("""
+                    UPDATE Products 
+                    SET price = %s,
+                        Bprice = %s,
+                        tax = %s,
+                        stock = stock + %s,
+                        safe_stock = %s,
+                        categoryid = %s,
+                        HSN_code = %s,
+                        location = %s,
+                        status = %s,
+                        updated_by = %s,
+                        updated_at = NOW()
+                    WHERE product_id = %s
+                """, (selling_price, buying_price, tax, stock, safe_stock, categoryid, 
+                      hsn_code, location, status, user, product_id))
+                
+                updated_count += 1
+                
+                # Optional: Log significant price changes
+                if old_bprice != buying_price:
+                    print(f"Buying price updated for {name}: ₹{old_bprice} → ₹{buying_price}")
+                
+            else:
+                # Check if same name exists for SPID generation
+                cur.execute("""
+                    SELECT SPID FROM Products 
+                    WHERE name = %s AND shop_id = %s 
+                    LIMIT 1
+                """, (name, shopid))
+                existing_spid = cur.fetchone()
+                
+                # Generate or reuse SPID
+                if existing_spid:
+                    spid = existing_spid[0] if isinstance(existing_spid, tuple) else existing_spid.get('SPID')
+                else:
+                    spid = generate_spid(name)
+                
+                # Insert new product with buying price
+                cur.execute("""
+                    INSERT INTO Products 
+                    (name, price, Bprice, tax, stock, safe_stock, categoryid, shop_id, 
+                     HSN_code, location, status, created_by, updated_by, SPID)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (name, selling_price, buying_price, tax, stock, safe_stock, categoryid, shopid,
+                      hsn_code, location, status, user, user, spid))
+                
+                product_id = cur.lastrowid
+                saved_count += 1
+
+            # Handle descriptions
+            if description:
+                description_lines = [line.strip() for line in description.split('\n') if line.strip()]
+                if description_lines:
+                    cur.execute("SELECT id FROM product_desc WHERE product_id = %s", (product_id,))
+                    desc_exists = cur.fetchone()
+                    
+                    desc_values = description_lines[:5]
+                    desc_values += [''] * (5 - len(desc_values))
+                    
+                    if desc_exists:
+                        cur.execute("""
+                            UPDATE product_desc 
+                            SET description1 = %s, description2 = %s, description3 = %s, 
+                                description4 = %s, description5 = %s
+                            WHERE product_id = %s
+                        """, (*desc_values, product_id))
+                    else:
+                        cur.execute("""
+                            INSERT INTO product_desc 
+                            (product_id, description1, description2, description3, description4, description5)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                        """, (product_id, *desc_values))
+
+        conn.commit()
+        
+        message = []
+        if saved_count > 0:
+            message.append(f"{saved_count} new product(s) created")
+        if updated_count > 0:
+            message.append(f"{updated_count} product(s) updated")
+        if skipped_count > 0:
+            message.append(f"{skipped_count} skipped")
+        
+        return jsonify({
+            "success": True,
+            "message": f"✓ {', '.join(message)}",
+            "saved": saved_count,
+            "updated": updated_count
+        }), 200
+
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({"success": False, "message": f"Database error: {err}"}), 500
+    except Exception as err:
+        conn.rollback()
+        return jsonify({"success": False, "message": f"Error: {err}"}), 500
+    finally:
+        conn.close()
+
+def generate_spid(name):
+    """Generate SPID from product name"""
+    import re
+    from datetime import datetime
+    
+    # Clean name
+    name = re.sub(r'[^a-zA-Z0-9\s]', '', name)
+    words = name.split()[:3]
+    spid_parts = []
+    
+    for word in words:
+        # Get first 3-4 letters
+        part = word[:4].upper()
+        spid_parts.append(part)
+    
+    base_spid = '-'.join(spid_parts) if spid_parts else 'NEW'
+    
+    # Add timestamp to ensure uniqueness
+    return f"{base_spid}-{datetime.now().strftime('%y%m%d%H%M')}"
 
 if __name__ == '__main__':
     app.run(debug = True,port=5500)

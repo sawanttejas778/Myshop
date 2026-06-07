@@ -44,72 +44,12 @@
       font-family: inherit;
     }
     textarea{min-height:80px;}
-    input[type=text]:focus, input[number]:focus, select:focus, textarea:focus{
+    input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus{
       border-color:var(--accent);
       background:rgba(0,209,178,0.05);
       outline:none;
     }
     
-    /* SPID Search Styles */
-    .spid-search-container {
-      position: relative;
-      grid-column: span 2;
-    }
-    .spid-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--panel);
-      border: 1px solid var(--accent);
-      border-top: none;
-      border-radius: 0 0 10px 10px;
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 1000;
-      display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-    }
-    .spid-dropdown.active {
-      display: block;
-    }
-    .spid-dropdown-item {
-      padding: 12px 15px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.2s;
-    }
-    .spid-dropdown-item:hover {
-      background: rgba(0,209,178,0.1);
-    }
-    .spid-dropdown-item.selected {
-      background: rgba(0,209,178,0.15);
-    }
-    .spid-code {
-      font-weight: bold;
-      color: var(--accent);
-      font-size: 12px;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .spid-name {
-      font-size: 14px;
-      color: #e6eef0;
-    }
-    .spid-details {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .spid-badge {
-      display: inline-block;
-      padding: 2px 6px;
-      background: rgba(0,209,178,0.15);
-      border-radius: 4px;
-      font-size: 10px;
-      margin-right: 8px;
-    }
-
     .category-search{position:relative}
     .category-dropdown{
       position:absolute;
@@ -320,17 +260,6 @@
     .category-modal-alert.show{display:block}
     .category-modal-alert.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80}
     .category-modal-alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ff6b9d}
-    .selected-product-info {
-      background: rgba(0,209,178,0.1);
-      border: 1px solid rgba(0,209,178,0.3);
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 10px;
-      display: none;
-    }
-    .selected-product-info.active {
-      display: block;
-    }
 
     /* Responsive Category Modal */
     @media (max-width:768px){
@@ -385,20 +314,8 @@
         <button class="btn" id="mobileImportBtn">📁 Import CSV/Excel</button>
       </div>
 
-      <!-- Grid Form Section - WITH SPID SEARCH -->
+      <!-- Grid Form Section - SIMPLIFIED with single description field -->
       <div class="form-container">
-        <!-- NEW: SPID Search Section -->
-        <div class="spid-search-container">
-          <label>🔍 Search Product by SPID or Name</label>
-          <input type="text" id="spidSearch" placeholder="Type SPID (e.g., WRLS-MSE-001) or product name..." autocomplete="off">
-          <div id="spidDropdown" class="spid-dropdown"></div>
-          <div id="selectedProductInfo" class="selected-product-info">
-            <strong>✓ Product Selected:</strong>
-            <span id="selectedProductDetails"></span>
-            <button type="button" class="btn" id="clearSelectedProduct" style="margin-left: 10px; padding: 4px 8px; font-size: 11px;">Clear</button>
-          </div>
-        </div>
-
         <div class="form-group">
           <label>Product Name</label>
           <input type="text" id="qName" placeholder="e.g., Wireless Mouse">
@@ -450,6 +367,7 @@
         </div>
         <div class="form-group">
           <label>Product Image</label>
+          <!-- image uploads disabled for bulk import -->
           <small class="small">Images are disabled for bulk import. Upload per-product via the product page if needed. Remember one more thing if you going for audit please maintain proper documentation/data create product with correct HSN, TAX and follow the guidelines.</small>
         </div>
         <div class="form-group" style="display:flex;gap:8px;align-items:flex-end">
@@ -461,11 +379,10 @@
 
       <div class="hint">
         💡 <strong>Tip:</strong> Fill the form above and click "Add to sheet", or import CSV/Excel file, or paste data directly. 
-        For descriptions: Enter text with line breaks - each line becomes a separate description bullet. status is INACTIVE or ACTIVE. Location can be A1, B2 etc. HSN code is a numeric code for tax classification. Safe stock is the minimum stock level before reordering.<br>
-        🔍 <strong>New:</strong> Search by SPID or product name to quickly load existing product details!
+        For descriptions: Enter text with line breaks - each line becomes a separate description bullet. status is INACTIVE or ACTIVE. Location can be A1, B2 etc. HSN code is a numeric code for tax classification. Safe stock is the minimum stock level before reordering.
       </div>
 
-      <!-- Products Table -->
+      <!-- Products Table - ADDED DESCRIPTION COLUMN -->
       <div class="sheet">
         <table id="productsTable">
           <thead>
@@ -570,127 +487,6 @@
     let nextTempId = -1;
     let categoriesData = [];
     let currentEditingRow = null;
-    let currentSelectedProduct = null;
-
-    // SPID Search Elements
-    const spidSearch = document.getElementById('spidSearch');
-    const spidDropdown = document.getElementById('spidDropdown');
-    const selectedProductInfo = document.getElementById('selectedProductInfo');
-    const selectedProductDetails = document.getElementById('selectedProductDetails');
-    const clearSelectedProduct = document.getElementById('clearSelectedProduct');
-
-    // SPID Search Function
-    let searchTimeout = null;
-
-// Replace the searchProducts function in the HTML with this:
-    async function searchProducts(query) {
-      if (!query.trim() || query.length < 2) {
-        spidDropdown.classList.remove('active');
-        return;
-      }
-
-      try {
-        // Use the existing /api/products endpoint with search parameter
-        const response = await fetch(`/api/products?search=${encodeURIComponent(query)}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.products && data.products.length > 0) {
-            spidDropdown.innerHTML = data.products.map(p => `
-              <div class="spid-dropdown-item" data-product='${JSON.stringify(p)}'>
-                <div class="spid-code">🔖 ${escapeHtml(p.SPID || 'No SPID')}</div>
-                <div class="spid-name">${escapeHtml(p.name)}</div>
-                <div class="spid-details">
-                  <span class="spid-badge">💰 ₹${p.price}</span>
-                  <span class="spid-badge">📊 Stock: ${p.stock || 0}</span>
-                  ${p.location ? `<span class="spid-badge">📍 ${escapeHtml(p.location)}</span>` : ''}
-                </div>
-              </div>
-            `).join('');
-            spidDropdown.classList.add('active');
-            
-            // Add click handlers
-            document.querySelectorAll('.spid-dropdown-item').forEach(item => {
-              item.addEventListener('click', () => {
-                const product = JSON.parse(item.dataset.product);
-                selectProduct(product);
-                spidDropdown.classList.remove('active');
-                spidSearch.value = product.SPID || product.name;
-              });
-            });
-          } else {
-            spidDropdown.innerHTML = '<div class="spid-dropdown-item" style="color: var(--muted);">No products found. Type to create new.</div>';
-            spidDropdown.classList.add('active');
-          }
-        }
-      } catch (err) {
-        console.error('Search failed:', err);
-      }
-    }
-
-    // Update selectProduct function to handle the product data structure
-    function selectProduct(product) {
-      currentSelectedProduct = product;
-      document.getElementById('qName').value = product.name;
-      document.getElementById('qPrice').value = product.price;
-      document.getElementById('qTax').value = product.tax || 0;
-      document.getElementById('qHSN').value = product.HSN_code || '';
-      document.getElementById('qLocation').value = product.location || '';
-      document.getElementById('qStatus').value = product.status || 'active';
-      
-      // Try to get category name if available
-      if (product.category_name) {
-        document.getElementById('qCategory').value = product.category_name;
-      }
-      
-      selectedProductDetails.innerHTML = `${escapeHtml(product.SPID || 'No SPID')} - ${escapeHtml(product.name)} (₹${product.price})`;
-      selectedProductInfo.classList.add('active');
-      
-      showFlashMessage(`Product "${product.name}" loaded. You can now add stock/location.`, 'success');
-    }
-
-    clearSelectedProduct.addEventListener('click', () => {
-      currentSelectedProduct = null;
-      selectedProductInfo.classList.remove('active');
-      spidSearch.value = '';
-    });
-
-    spidSearch.addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      const query = e.target.value;
-      searchTimeout = setTimeout(() => searchProducts(query), 300);
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.spid-search-container')) {
-        spidDropdown.classList.remove('active');
-      }
-    });
-
-    // Flash message helper
-    function showFlashMessage(message, type = 'success') {
-      const flashContainer = document.getElementById('flashContainer');
-      const flashMsg = document.createElement('div');
-      flashMsg.className = `flash-message ${type}`;
-      flashMsg.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${escapeHtml(message)}</span>
-        <button class="close-flash">&times;</button>
-      `;
-      flashContainer.appendChild(flashMsg);
-      
-      // Auto remove after 3 seconds
-      setTimeout(() => {
-        flashMsg.classList.add('fade-out');
-        setTimeout(() => flashMsg.remove(), 400);
-      }, 3000);
-      
-      // Close button handler
-      flashMsg.querySelector('.close-flash').addEventListener('click', () => {
-        flashMsg.classList.add('fade-out');
-        setTimeout(() => flashMsg.remove(), 400);
-      });
-    }
 
     // Description modal elements
     const descriptionModal = document.getElementById('descriptionModal');
@@ -1079,6 +875,7 @@
         tax: parseFloat(document.getElementById('qTax').value||0).toFixed(2),
         stock: document.getElementById('qStock').value||0,
         safe_stock: document.getElementById('qSafeStock').value||0,
+        // provide both `hsn` (used by makeRow) and `HSN_code` (used by backend normalize)
         hsn: document.getElementById('qHSN').value.trim() || '',
         HSN_code: document.getElementById('qHSN').value.trim() || '',
         location: document.getElementById('qLocation').value.trim(),
@@ -1089,25 +886,15 @@
       
       tableBody.appendChild(makeRow(obj));
       
-      // clear quick form but keep selected product if exists
-      if (!currentSelectedProduct) {
-        document.getElementById('qName').value = '';
-        document.getElementById('qPrice').value = '0.00';
-        document.getElementById('qTax').value = '0.00';
-        document.getElementById('qStock').value = '0';
-        document.getElementById('qSafeStock').value = '0';
-        document.getElementById('qDescription').value = '';
-        document.getElementById('qCategory').value = '';
-        document.getElementById('qCategory').dataset.id = '';
-        document.getElementById('qHSN').value = '';
-        document.getElementById('qLocation').value = '';
-      } else {
-        // Keep selected product loaded, just clear stock and location for next addition
-        document.getElementById('qStock').value = '0';
-        document.getElementById('qSafeStock').value = '0';
-        document.getElementById('qLocation').value = '';
-        document.getElementById('qDescription').value = '';
-      }
+      // clear quick form
+      document.getElementById('qName').value = '';
+      document.getElementById('qPrice').value = '0.00';
+      document.getElementById('qTax').value = '0.00';
+      document.getElementById('qStock').value = '0';
+      document.getElementById('qSafeStock').value = '0';
+      document.getElementById('qDescription').value = '';
+      document.getElementById('qCategory').value = '';
+      document.getElementById('qCategory').dataset.id = '';
     });
 
     document.getElementById('csvInput').addEventListener('change', async (e)=>{
@@ -1165,23 +952,22 @@
           body: JSON.stringify(productsArr)
         });
 
+        // Try to parse JSON body (server should return JSON error info)
         let data = null;
-        try { data = await res.json(); } catch (e) { }
+        try { data = await res.json(); } catch (e) { /* non-json response */ }
 
         if (!res.ok) {
+          // Prefer server-provided message when available
           const msg = data && data.message ? data.message : (`Upload failed (status ${res.status})`);
           alert(`❌ ${msg}`);
           console.error('Upload failed response:', res.status, data);
           return;
         }
 
+        // Success path
         if (data && data.success) {
           alert(`✓ ${data.message}`);
           tableBody.innerHTML = '';
-          // Clear selected product after successful save
-          currentSelectedProduct = null;
-          selectedProductInfo.classList.remove('active');
-          spidSearch.value = '';
         } else {
           const msg = data && data.message ? data.message : 'Unknown server response';
           alert(`✗ ${msg}`);
@@ -1196,11 +982,13 @@
 
     document.getElementById('exportCsvBtn').addEventListener('click', async ()=>{
       try {
+        // Fetch all products from the selected shop
         const res = await fetch('/api/export-products', {
           method: 'GET',
           credentials: 'include'
         });
         
+        // Try to parse JSON regardless of status
         let data;
         try {
           data = await res.json();
@@ -1256,11 +1044,6 @@
       document.getElementById('qDescription').value = '';
       document.getElementById('qCategory').value = '';
       document.getElementById('qCategory').dataset.id = '';
-      document.getElementById('qHSN').value = '';
-      document.getElementById('qLocation').value = '';
-      currentSelectedProduct = null;
-      selectedProductInfo.classList.remove('active');
-      spidSearch.value = '';
     });
 
     // Helpers: parse CSV/TSV
@@ -1291,6 +1074,7 @@
     function normalizeRow(r){
       const map = (keys)=>{for(const k of keys){if(r[k]!==undefined) return r[k]}return ''};
       
+      // Combine description fields from old format
       let description = '';
       for (let i = 1; i <= 5; i++) {
         const desc = map([`description${i}`, `desc${i}`, `line${i}`]);
@@ -1299,6 +1083,7 @@
         }
       }
       
+      // Also check for single description field
       const singleDesc = map(['description', 'desc']);
       if (singleDesc && singleDesc.trim() !== '') {
         description = singleDesc;
@@ -1312,8 +1097,10 @@
         stock: map(['stock','quantity','qty'])||'0',
         safe_stock: map(['safe_stock','safestock'])||'0',
         categoryid: map(['categoryid','category_id','category'])||'',
+        // Provide both lowercase `hsn` and `HSN_code` for compatibility
         HSN_code: hsnVal,
         hsn: hsnVal,
+        // Support location and status if present in CSV
         location: map(['location','loc','Location'])||'',
         status: map(['status','state'])||'Active',
         description: description.trim()
@@ -1327,7 +1114,7 @@
       return rows.map(tr=>{
         const obj={};
         Array.from(tr.querySelectorAll('input[data-field]')).forEach(inp=>obj[inp.dataset.field]=inp.value);
-        obj.imageData = '';
+        obj.imageData = ''; // Keep for backward compatibility
         return obj;
       });
     }
@@ -1369,6 +1156,7 @@
         });
       });
 
+      // Auto-remove flash messages after 3 seconds
       const messages = document.querySelectorAll('.flash-message');
       messages.forEach(msg => {
         setTimeout(() => {
@@ -1386,6 +1174,7 @@
 
 <!-- Category Modal Script -->
 <script>
+  // Category Modal Elements
   const categoryModalOverlay = document.getElementById('categoryModalOverlay');
   const categoryForm = document.getElementById('categoryForm');
   const categoryNameInput = document.getElementById('categoryName');
@@ -1394,11 +1183,13 @@
   const cancelCategoryModalBtn = document.getElementById('cancelCategoryModal');
   const categoryModalAlert = document.getElementById('categoryModalAlert');
 
+  // Open modal
   openCategoryModalBtn.addEventListener('click', () => {
     categoryModalOverlay.classList.add('active');
     categoryNameInput.focus();
   });
 
+  // Close modal functions
   function closeCategoryModal() {
     categoryModalOverlay.classList.remove('active');
     categoryForm.reset();
@@ -1408,12 +1199,14 @@
   closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
   cancelCategoryModalBtn.addEventListener('click', closeCategoryModal);
 
+  // Close when clicking overlay background
   categoryModalOverlay.addEventListener('click', (e) => {
     if (e.target === categoryModalOverlay) {
       closeCategoryModal();
     }
   });
 
+  // Handle form submission
   categoryForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -1437,12 +1230,18 @@
       let data = null;
       try {
         data = await response.json();
-      } catch (e) { }
+      } catch (e) {
+        /* ignore non-json */
+      }
 
       if (response.ok && data && data.success) {
         showCategoryAlert(`✓ ${data.message || 'Category created successfully!'}`, 'success');
         categoryForm.reset();
+
+        // Refresh category list in the main form
         loadCategories();
+
+        // Close modal after 1.5 seconds
         setTimeout(() => {
           closeCategoryModal();
         }, 1500);
@@ -1459,6 +1258,8 @@
   function showCategoryAlert(message, type) {
     categoryModalAlert.textContent = message;
     categoryModalAlert.classList.add('show', type);
+
+    // Remove error/success class after 5 seconds
     setTimeout(() => {
       categoryModalAlert.classList.remove('show', type);
     }, 5000);
