@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{shop_name}} - Vendor Management</title>
+    <style>
+        /* Global Reset & Dark Theme */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(145deg, #1a1a1a 0%, #000000 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .shop-name {
+            font-size: 1.2em;
+            color: #888;
+            margin-top: 5px;
+            border-left: 3px solid #444;
+            padding-left: 15px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .form-section {
+            background: #0a0a0a;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .form-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .required::after {
+            content: '*';
+            color: #ff4444;
+            margin-left: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #666;
+            background: #222;
+        }
+
+        .btn-submit {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #fff;
+            padding: 15px 40px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(145deg, #333 0%, #222 100%);
+            border-color: #666;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .list-section {
+            background: #0a0a0a;
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #333;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .list-title {
+            font-size: 1.8em;
+            color: #fff;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-container input {
+            padding-right: 45px;
+            background: #1a1a1a url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat right 15px center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #222;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            padding: 16px 10px;
+            text-align: left;
+            border-bottom: 2px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #222;
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        tr:hover {
+            background: #111;
+        }
+
+        .supplier-id {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .badge {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            border: 1px solid #444;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .spinner {
+            border: 4px solid #1a1a1a;
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 16px 24px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: #0a1f0a;
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .alert-error {
+            background: #1f0a0a;
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: #111;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-size: 1.8em;
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            h1 { font-size: 2em; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; }
+        }
+
+        /* Flash overlay */
+        .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+        .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .flash-message.success { background: #22c55e; }
+        .flash-message.error { background: #ef4444; }
+        .flash-message.warning { background: #f59e0b; }
+        .flash-message.info { background: #3b82f6; }
+        .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+        .close-flash { background: transparent; border: none; color: white; font-size: 1.2rem; margin-left: 12px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="flashOverlay" class="flash-overlay"></div>
+    <div class="flash-container" id="flashContainer">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="close-flash">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>VENDOR MANAGEMENT</h1>
+            <div class="shop-name">{{shop_name}}</div>
+            <div class="subtitle">Supplier & Vendor Relationship Portal</div>
+        </header>
+
+        <!-- Alert placeholders -->
+        <div id="alertSuccess" class="alert alert-success"></div>
+        <div id="alertError" class="alert alert-error"></div>
+
+        <!-- Create Vendor (Supplier) Form Section -->
+        <section class="form-section">
+            <h2 class="form-title">REGISTER NEW VENDOR</h2>
+            <form id="vendorForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name" class="required">Supplier Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Legal business name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="vendor@company.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+91 9876543210">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gstn" class="required">GST Number</label>
+                        <input type="text" id="gstn" name="gstn" placeholder="22AAAAA0000A1Z" maxlength="50" value="N/A">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_ifsc" class="required">Bank IFSC Code</label>
+                        <input type="text" id="bank_ifsc" name="bank_ifsc" required placeholder="SBIN0001234" value="N/A">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_account_number" class="required">Bank Account Number</label>
+                        <input type="text" id="bank_account_number" name="bank_account_number" required placeholder="Account number" value="N/A">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_name" class="required">Bank Name</label>
+                        <input type="text" id="bank_name" name="bank_name" required placeholder="Name of bank" value="N/A">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment_terms">Payment Terms</label>
+                        <input type="text" id="payment_terms" name="payment_terms" placeholder="Net 30 / 15% advance">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address" class="required">Full Address</label>
+                        <textarea id="address" name="address" required placeholder="Street, building, landmark..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city" class="required">City</label>
+                        <input type="text" id="city" name="city" required placeholder="City">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="state" class="required">State</label>
+                        <input type="text" id="state" name="state" required placeholder="State">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pincode" class="required">Pincode</label>
+                        <input type="text" id="pincode" name="pincode" required placeholder="6 digit code" maxlength="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country" class="required">Country</label>
+                        <input type="text" id="country" name="country" required placeholder="Country" value="India">
+                    </div>
+
+                    <!-- Hidden or optional fields: created_by/updated_by will be backend, but we can include shop context if needed. Actually supplier table has no shopid, but we can keep optional shop context? We'll not enforce shop selection as per schema, but to match customer style we might add a shop reference? schema supplier doesn't have shopid. I'll keep just the core fields matching table exactly. -->
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">CREATE VENDOR</button>
+            </form>
+        </section>
+
+        <!-- Vendor List Section -->
+        <section class="list-section">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-label">Total Suppliers</div>
+                    <div class="stat-value" id="totalSuppliers">{{supplier_count}}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Current Tenant</div>
+                    <div class="stat-value" id="currentShop">{{shop_name}}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Search Results</div>
+                    <div class="stat-value" id="searchResults">{{ supplier_count }}</div>
+                </div>
+            </div>
+
+            <div class="list-header">
+                <h2 class="list-title">VENDOR DIRECTORY</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by name, email, GST, phone...">
+                </div>
+            </div>
+
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading vendors...</div>
+            </div>
+
+            <div class="table-container" id="tableContainer">
+                <table id="supplierTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Pincode</th>
+                            <th>State</th>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>Address</th>
+                            <th>GSTIN</th>
+                            <th>Bank (IFSC)</th>
+                            <th>Bank Account</th>
+                            <th>Bank Name</th>
+                            <th>Payment Terms</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTableBody">
+                        <tr>
+                            <td colspan="10" class="no-data">No vendors found. Add your first vendor above.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let searchTimeout = null;
+
+        // Helper: flash message display (from backend flashes + manual)
+        function showAlert(type, message) {
+            const alertElement = document.getElementById(`alert${type === 'Success' ? 'Success' : 'Error'}`);
+            if (alertElement) {
+                alertElement.textContent = message;
+                alertElement.style.display = 'block';
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 5000);
+            }
+            // also push to flash container as fallback
+            const flashContainer = document.getElementById('flashContainer');
+            if (flashContainer) {
+                const flashDiv = document.createElement('div');
+                flashDiv.className = `flash-message ${type.toLowerCase()}`;
+                flashDiv.innerHTML = `<span>${message}</span><button class="close-flash">&times;</button>`;
+                flashContainer.appendChild(flashDiv);
+                setTimeout(() => {
+                    flashDiv.classList.add('fade-out');
+                    setTimeout(() => flashDiv.remove(), 300);
+                }, 4000);
+                const closeBtn = flashDiv.querySelector('.close-flash');
+                if (closeBtn) closeBtn.onclick = () => { flashDiv.classList.add('fade-out'); setTimeout(() => flashDiv.remove(), 200); };
+            }
+        }
+
+        // Fetch all suppliers (or search)
+        async function fetchSuppliers(searchTerm = '') {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const tableContainer = document.getElementById('tableContainer');
+            const tbody = document.getElementById('supplierTableBody');
+
+            loadingSpinner.style.display = 'block';
+            if (tableContainer) tableContainer.style.opacity = '0.5';
+
+            try {
+                let url = `${API_BASE_URL}/api/suppliers`;
+                if (searchTerm) {
+                    url = `${API_BASE_URL}/api/suppliers/search?q=${encodeURIComponent(searchTerm)}`;
+                }
+
+                const response = await fetch(url, { credentials: 'same-origin' });
+                const data = await response.json();
+
+                loadingSpinner.style.display = 'none';
+                if (tableContainer) tableContainer.style.opacity = '1';
+
+                let suppliers = [];
+                if (Array.isArray(data)) suppliers = data;
+                else if (data && typeof data === 'object') suppliers = data.data || [];
+
+                document.getElementById('totalSuppliers').textContent = suppliers.length;
+                document.getElementById('searchResults').textContent = suppliers.length;
+
+                if (suppliers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="10" class="no-data">No vendors found</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                suppliers.forEach(sup => {
+                    // map columns according to supplier table
+                    const supId = sup.supplier_id || sup.id || '';
+                    const name = sup.name || '';
+                    const email = sup.email || '-';
+                    const phone = sup.phone || '-';
+                    const pincode = sup.Pincode || sup.pincode || '';
+                    const state = sup.state || '';
+                    const city = sup.city || '';
+                    const country = sup.country || '';
+                    const address = sup.address || '';
+                    const gstn = sup.GSTN || sup.gstn || 'N/A';
+                    const bankIfsc = sup.Bank_IFSC || sup.bank_ifsc || 'N/A';
+                    const bankAccount = sup.Bank_Account_Number || sup.bank_account_number || 'N/A';
+                    const bankNameShort = sup.Bank_Name || sup.bank_name || 'N/A';
+                    const Payment_Terms = sup.Payment_Terms || sup.payment_terms || '-';
+                    const createdAt = sup.created_at ? new Date(sup.created_at).toLocaleString() : '';
+
+                    html += `
+                        <tr>
+                            <td><span class="supplier-id">#${supId}</span></td>
+                            <td><strong>${escapeHtml(name)}</strong></td>
+                            <td>${escapeHtml(email)}</td>
+                            <td>${escapeHtml(phone)}</td>
+                            <td>${escapeHtml(pincode)}</td>
+                            <td>${escapeHtml(state)}</td>
+                            <td>${escapeHtml(city)}</td>
+                            <td>${escapeHtml(country)}</td>
+                            <td>${escapeHtml(address.substring(0, 50))}${address.length > 50 ? '…' : ''}</td>
+                            <td><span class="badge">${escapeHtml(gstn)}</span></td>
+                            <td>${escapeHtml(bankIfsc)}</td>
+                            <td>${escapeHtml(bankAccount)}</td>
+                            <td>${escapeHtml(bankNameShort)}</td>
+                            <td>${escapeHtml(Payment_Terms)}</td>
+                            <td>${escapeHtml(createdAt)}</td>           
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching suppliers:', error);
+                loadingSpinner.style.display = 'none';
+                if (tableContainer) tableContainer.style.opacity = '1';
+                tbody.innerHTML = `<tr><td colspan="10" class="no-data">Error loading vendors: ${error.message}</td></tr>`;
+                showAlert('error', 'Failed to fetch suppliers');
+            }
+        }
+
+        // simple escape to avoid XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // Create new supplier (vendor)
+        document.getElementById('vendorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'CREATING...';
+
+            // collect data exactly matching supplier table fields
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim() || null,
+                phone: document.getElementById('phone').value.trim() || null,
+                Pincode: document.getElementById('pincode').value.trim(),
+                state: document.getElementById('state').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                country: document.getElementById('country').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                GSTN: document.getElementById('gstn').value.trim() || "N/A",
+                Bank_IFSC: document.getElementById('bank_ifsc').value.trim() || "N/A",
+                Bank_Account_Number: document.getElementById('bank_account_number').value.trim() || "N/A",
+                Bank_Name: document.getElementById('bank_name').value.trim() || "N/A",
+                Payment_Terms: document.getElementById('payment_terms').value.trim() || null,
+                // created_by and updated_by will be set by backend from session, but we can optionally send placeholder
+                // no shopid required as per schema
+            };
+
+            // validation: required name, address, city, state, pincode, country
+            if (!payload.name || !payload.address || !payload.city || !payload.state || !payload.Pincode || !payload.country) {
+                showAlert('error', 'Please fill all required fields: Name, Address, City, State, Pincode, Country');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'CREATE VENDOR';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/suppliers`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showAlert('success', 'Vendor created successfully!');
+                    document.getElementById('vendorForm').reset();
+                    // reset defaults for optional fields
+                    document.getElementById('gstn').value = 'N/A';
+                    document.getElementById('bank_ifsc').value = 'N/A';
+                    document.getElementById('bank_account_number').value = 'N/A';
+                    document.getElementById('bank_name').value = 'N/A';
+                    document.getElementById('country').value = 'India';
+                    document.getElementById('searchInput').value = '';
+                    await fetchSuppliers('');
+                } else {
+                    let errorMsg = 'Failed to create vendor';
+                    try {
+                        const errData = await response.json();
+                        errorMsg = errData.error || errData.message || errorMsg;
+                    } catch (e) {}
+                    showAlert('error', errorMsg);
+                }
+            } catch (error) {
+                console.error('POST error:', error);
+                showAlert('error', 'Network error: Could not create vendor');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'CREATE VENDOR';
+            }
+        });
+
+        // Search debounce
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const term = e.target.value.trim();
+            searchTimeout = setTimeout(() => {
+                fetchSuppliers(term);
+            }, 500);
+        });
+
+        // Initial data load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSuppliers('');
+            // optional: set default values for GST, Bank fields that have default N/A
+            const gstField = document.getElementById('gstn');
+            if (gstField && !gstField.value) gstField.value = 'N/A';
+            const ifscField = document.getElementById('bank_ifsc');
+            if (ifscField && !ifscField.value) ifscField.value = 'N/A';
+            const accField = document.getElementById('bank_account_number');
+            if (accField && !accField.value) accField.value = 'N/A';
+            const bankNameField = document.getElementById('bank_name');
+            if (bankNameField && !bankNameField.value) bankNameField.value = 'N/A';
+        });
+
+        // Flash overlay auto-dismiss logic (same as customer page)
+        (function setupFlashOverlay() {
+            const overlay = document.getElementById('flashOverlay');
+            if (overlay) {
+                const container = document.getElementById('flashContainer');
+                function refreshOverlay() {
+                    if (!overlay) return;
+                    const msgs = container ? container.querySelectorAll('.flash-message') : [];
+                    overlay.classList.toggle('active', msgs.length > 0);
+                }
+                function dismissMessage(msg) {
+                    if (!msg || msg.classList.contains('fade-out')) return;
+                    msg.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (msg.parentNode) msg.parentNode.removeChild(msg);
+                        refreshOverlay();
+                    }, 300);
+                }
+                if (container) {
+                    const messages = Array.from(container.querySelectorAll('.flash-message'));
+                    messages.forEach(msg => {
+                        setTimeout(() => dismissMessage(msg), 4000);
+                        const closeBtn = msg.querySelector('.close-flash');
+                        if (closeBtn) closeBtn.addEventListener('click', () => dismissMessage(msg));
+                    });
+                    refreshOverlay();
+                    container.addEventListener('click', (ev) => {
+                        if (ev.target.matches('.close-flash')) {
+                            const msgDiv = ev.target.closest('.flash-message');
+                            if (msgDiv) dismissMessage(msgDiv);
+                        }
+                    });
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

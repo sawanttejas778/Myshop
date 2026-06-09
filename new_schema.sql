@@ -348,6 +348,7 @@ create table purchase_reciepts(
 create table purchase_orders(
     PONO BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     PRID BIGINT UNSIGNED NOT NULL,
+    supplier_id BIGINT UNSIGNED NOT NULL,
     shopid INT NOT NULL,
     Status ENUM('Approved', 'Incomplete', 'rejected', 'received', 'pending') DEFAULT 'pending',
     INFONO VARCHAR(255) NOT NULL,
@@ -361,6 +362,7 @@ create table purchase_orders(
     updated_by VARCHAR(255) NOT NULL default "N/A",
     FOREIGN KEY (PRID) REFERENCES purchase_reciepts(receipt_id) ON DELETE CASCADE,
     FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
+    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 create table price_info(
@@ -518,10 +520,8 @@ create table IF NOT EXISTS PR_items(
 create table supplier_invoice(
     invoice_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     invoice_number VARCHAR(50) NOT NULL,
-    supplier_name VARCHAR(100) NOT NULL,
-    supplier_email VARCHAR(100),
-    supplier_phone VARCHAR(20),
-    supplier_address TEXT,
+    PONO BIGINT UNSIGNED NOT NULL,
+    supplier_id BIGINT UNSIGNED NOT NULL,
     due_date DATE NOT NULL,
     shop_id INT NOT NULL,
     subtotal DECIMAL(10,2) NOT NULL,
@@ -540,8 +540,34 @@ create table supplier_invoice(
     INDEX idx_supplier_email (supplier_email),
     INDEX idx_supplier_status (status),
     INDEX idx_supplier_created_at (created_at),
+    INDEX idx_supplier_PONO (PONO),
+    FOREIGN KEY (PONO) REFERENCES purchase_orders(PONO) ON DELETE CASCADE,
     foreign key (shop_id) references Shops(shopid) on delete cascade
-);
+    foreign key (supplier_id) references supplier(supplier_id) on delete cascade
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE Products 
 ADD UNIQUE KEY uk_product_location_status (name, location, status, shop_id);
+
+create table supplier(
+    supplier_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    shop_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    Pincode VARCHAR(10),
+    state  VARCHAR(100),
+    city VARCHAR(100),
+    country VARCHAR(100),
+    address TEXT,
+    GSTN VARCHAR(50) NOT NULL default "N/A",
+    Bank_IFSC VARCHAR(50) NOT NULL default "N/A",
+    Bank_Account_Number VARCHAR(50) NOT NULL default "N/A",
+    Bank_Name VARCHAR(244) NOT NULL default "N/A",
+    Payment_Terms VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by varchar(255) not null,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by varchar(255) not null,
+    foreign key (shop_id) references Shops(shopid) on delete cascade
+);

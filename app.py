@@ -4976,5 +4976,240 @@ def generate_spid(name):
     # Add timestamp to ensure uniqueness
     return f"{base_spid}-{datetime.now().strftime('%y%m%d%H%M')}"
 
+
+@app.route('/suppliers')
+@admin_required
+def suppliers():
+    conn, cur = get_db()
+    shop_id = session.get('selected_shop_id', None)
+    if not shop_id:
+        flash("Shop not selected", "error")
+        cur.close()
+        conn.close()
+        return redirect(url_for('admin_dashboard'))
+
+    cur.execute("SELECT name FROM shops WHERE shopid = %s", (shop_id,))
+    shop_row = cur.fetchone()
+    shop_name = shop_row.get('name') if shop_row else None
+
+    cur.execute("SELECT COUNT(*) AS supplier_count FROM supplier WHERE shop_id = %s", (shop_id,))
+    count_row = cur.fetchone()
+    count = count_row.get('supplier_count', 0) if count_row else 0
+
+    cur.close()
+    conn.close()
+    if not shop_name:
+        flash("Shop not found", "error")
+        return redirect(url_for('admin_dashboard'))
+    return render_template('create_supplier.html', shop_name=shop_name, supplier_count=count)
+
+
+
+@app.route('/api/suppliers', methods=['POST'])
+@admin_required
+def api_create_supplier():
+    shop_id = session.get('selected_shop_id', None)
+    if not shop_id:
+        return jsonify({"success": False, "error": "Shop not selected"}), 400
+    
+    data = request.get_json()
+    app.logger.debug(f"Creating supplier with data: {data}")
+    
+    # Get current user from session
+    current_user = session.get('username', 'admin')  # Adjust based on your auth system
+    
+    try:
+        conn, cur = get_db()
+        
+        # Insert into supplier table (singular, not suppliers)
+        cur.execute("""
+            INSERT INTO supplier (
+                name, email, phone, Pincode, state, city, country, address,
+                GSTN, Bank_IFSC, Bank_Account_Number, Bank_Name, Payment_Terms,
+                shop_id, created_by, updated_by
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            data.get('name'),
+            data.get('email'),
+            data.get('phone'),
+            data.get('Pincode'),
+            data.get('state'),
+            data.get('city'),
+            data.get('country'),
+            data.get('address'),
+            data.get('GSTN', 'N/A'),
+            data.get('Bank_IFSC', 'N/A'),
+            data.get('Bank_Account_Number', 'N/A'),
+            data.get('Bank_Name', 'N/A'),
+            data.get('Payment_Terms'),
+            shop_id,
+            current_user,
+            current_user
+        ))
+        
+        conn.commit()
+        app.logger.debug("Supplier created successfully")
+        conn.close()
+        
+        return jsonify({"success": True, "message": "Supplier created successfully"}), 201
+        
+    except mysql.connector.Error as e:
+        app.logger.error(f"Database error: {e}")
+        if conn:
+            conn.rollback()
+            conn.close()
+        return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        if conn:
+            conn.rollback()
+            conn.close()
+        return jsonify({"success": False, "error": f"Error: {str(e)}"}), 500
+
+
+@app.route('/api/suppliers', methods=['GET'])
+@admin_required
+def api_get_suppliers():
+    shop_id = session.get('selected_shop_id', None)
+    if not shop_id:
+        flash("Shop not selected", "error")
+        return redirect(url_for('admin_dashboard'))
+    
+    conn = None
+    cur = None
+    try:
+        conn, cur = get_db()
+        
+        # Debug: Check if table has data for this shop
+        cur.execute("SELECT COUNT(*) AS supplier_count FROM supplier WHERE shop_id = %s", (shop_id,))
+        count_row = cur.fetchone()
+        count = count_row.get('supplier_count', 0) if count_row else 0
+        app.logger.debug(f"Found {count} suppliers for shop_id {shop_id}")
+        
+        cur.execute("""
+            SELECT supplier_id, name, email, phone, Pincode, state, city, 
+                   country, address, GSTN, Bank_IFSC, Bank_Account_Number, 
+                   Bank_Name, Payment_Terms, created_at
+            FROM supplier 
+            WHERE shop_id = %s
+            ORDER BY created_at DESC
+        """, (shop_id,))
+        
+        suppliers = cur.fetchall()
+        
+        # Convert to list of dicts (cursor already returns dict rows)
+        sup = []
+        for s in suppliers:
+            sup.append({
+                'supplier_id': s.get('supplier_id', ''),
+                'name': s.get('name', '') or '',
+                'email': s.get('email', '') or '',
+                'phone': s.get('phone', '') or '',
+                'Pincode': s.get('Pincode', '') or '',
+                'state': s.get('state', '') or '',
+                'city': s.get('city', '') or '',
+                'country': s.get('country', '') or '',
+                'address': s.get('address', '') or '',
+                'GSTN': s.get('GSTN', 'N/A') or 'N/A',
+                'Bank_IFSC': s.get('Bank_IFSC', 'N/A') or 'N/A',
+                'Bank_Account_Number': s.get('Bank_Account_Number', 'N/A') or 'N/A',
+                'Bank_Name': s.get('Bank_Name', 'N/A') or 'N/A',
+                'Payment_Terms': s.get('Payment_Terms', '') or '',
+                'created_at': s.get('created_at').strftime('%Y-%m-%d %H:%M:%S') if s.get('created_at') else ''
+            })
+        
+        app.logger.debug(f"Returning {len(sup)} suppliers")
+        return jsonify(sup), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error fetching suppliers: {str(e)}")
+        return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+
+
+@app.route('/api/suppliers/search', methods=['GET'])
+@admin_required
+def api_search_suppliers():
+    shop_id = session.get('selected_shop_id', None)
+    if not shop_id:
+        flash("Shop not selected", "error")
+        return redirect(url_for('admin_dashboard'))
+    
+    search_term = request.args.get('q', '').strip()
+    
+    # If search term is empty, return all suppliers
+    if not search_term:
+        return api_get_suppliers()
+    
+    conn = None
+    cur = None
+    try:
+        conn, cur = get_db()
+        
+        # Search across multiple fields
+        cur.execute("""
+            SELECT supplier_id, name, email, phone, Pincode, state, city, 
+                   country, address, GSTN, Bank_IFSC, Bank_Account_Number, 
+                   Bank_Name, Payment_Terms, created_at
+            FROM supplier 
+            WHERE shop_id = %s 
+            AND (
+                name LIKE %s OR 
+                email LIKE %s OR 
+                phone LIKE %s OR 
+                GSTN LIKE %s OR
+                city LIKE %s OR
+                state LIKE %s
+            )
+            ORDER BY name
+        """, (
+            shop_id, 
+            f'%{search_term}%', 
+            f'%{search_term}%', 
+            f'%{search_term}%', 
+            f'%{search_term}%',
+            f'%{search_term}%',
+            f'%{search_term}%'
+        ))
+        
+        suppliers = cur.fetchall()
+        
+        # Convert to list of dicts (cursor already returns dict rows)
+        result = []
+        for sup in suppliers:
+            result.append({
+                'supplier_id': sup.get('supplier_id', ''),
+                'name': sup.get('name', '') or '',
+                'email': sup.get('email', '') or '',
+                'phone': sup.get('phone', '') or '',
+                'Pincode': sup.get('Pincode', '') or '',
+                'state': sup.get('state', '') or '',
+                'city': sup.get('city', '') or '',
+                'country': sup.get('country', '') or '',
+                'address': sup.get('address', '') or '',
+                'GSTN': sup.get('GSTN', 'N/A') or 'N/A',
+                'Bank_IFSC': sup.get('Bank_IFSC', 'N/A') or 'N/A',
+                'Bank_Account_Number': sup.get('Bank_Account_Number', 'N/A') or 'N/A',
+                'Bank_Name': sup.get('Bank_Name', 'N/A') or 'N/A',
+                'Payment_Terms': sup.get('Payment_Terms', '') or '',
+                'created_at': sup.get('created_at').strftime('%Y-%m-%d %H:%M:%S') if sup.get('created_at') else ''
+            })
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error searching suppliers: {str(e)}")
+        return jsonify({"success": False, "error": f"Search error: {str(e)}"}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 if __name__ == '__main__':
     app.run(debug = True,port=5500)
