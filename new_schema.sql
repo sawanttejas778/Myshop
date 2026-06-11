@@ -26,11 +26,11 @@ CREATE TABLE Shops (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    updated_by VARCHAR(255) NOT NULL on update default "N/A",
+    updated_by VARCHAR(255) NOT NULL default "N/A",
     INDEX idx_shops_userid (userid),
     INDEX idx_shops_name (name),
     FOREIGN KEY (userid) REFERENCES Users(userid) ON DELETE CASCADE
-) ENGINE=InnoDB;
+);
 
 -- Categories table
 CREATE TABLE Categories (
@@ -317,7 +317,7 @@ CREATE TABLE user_customer(
     customer_id BIGINT unsigned not null,
     email VARCHAR(255),
     shopid int,
-    FOREIGN KEY (email) REFERENCES Users(email)
+    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
 );
 
 ALTER TABLE Users
@@ -335,14 +335,15 @@ ON DELETE CASCADE;
 
 create table purchase_reciepts(
     receipt_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    quantity INT NOT NULL,
     shopid INT NOT NULL,
+    supplier_id BIGINT UNSIGNED NOT NULL,
     Reason TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
-    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
+    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
+    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 create table purchase_orders(
@@ -351,7 +352,6 @@ create table purchase_orders(
     supplier_id BIGINT UNSIGNED NOT NULL,
     shopid INT NOT NULL,
     Status ENUM('Approved', 'Incomplete', 'rejected', 'received', 'pending') DEFAULT 'pending',
-    INFONO VARCHAR(255) NOT NULL,
     tax DECIMAL(5,2) NOT NULL,
     QTY INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
@@ -361,26 +361,19 @@ create table purchase_orders(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
     FOREIGN KEY (PRID) REFERENCES purchase_reciepts(receipt_id) ON DELETE CASCADE,
-    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE
+    FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
     FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 create table price_info(
     price_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    INFO_NO VARCHAR(25) NOT NULL,
     product_id BIGINT UNSIGNED NOT NULL,
     shopid INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
-    price1 DECIMAL(10,2) ,
-    price2 DECIMAL(10,2) ,
-    price3 DECIMAL(10,2) ,
-    price4 DECIMAL(10,2) ,
-    price5 DECIMAL(10,2) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expired_at datetime DEFAULT NULL,
-    expired_at_2 datetime DEFAULT NULL,
-    expired_at_3 datetime DEFAULT NULL,
-    expired_at_4 datetime DEFAULT NULL,
-    expired_at_5 datetime DEFAULT NULL,
+    prev_exp datetime default NULL,
     created_by VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
@@ -560,7 +553,7 @@ create table supplier(
     city VARCHAR(100),
     country VARCHAR(100),
     address TEXT,
-    GSTN VARCHAR(50) NOT NULL default "N/A",
+    GSTN VARCHAR(50) unique NOT NULL default "N/A",
     Bank_IFSC VARCHAR(50) NOT NULL default "N/A",
     Bank_Account_Number VARCHAR(50) NOT NULL default "N/A",
     Bank_Name VARCHAR(244) NOT NULL default "N/A",

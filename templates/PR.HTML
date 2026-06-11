@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PR → Convert to PO | Purchase System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            font-weight: 700;
+            color: #0f3b5f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #e0f2fe;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .pr-card, .po-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .po-card {
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .po-card.visible {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            padding: 18px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-header h2 {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #5b6e8c;
+            letter-spacing: 0.5px;
+        }
+
+        .field input, .field select, .field textarea {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .field input:focus, .field select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 500px;
+        }
+
+        .items-table th {
+            background: #f8fafc;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .item-input {
+            width: 70px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: #fee2e2;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        .product-section {
+            margin: 16px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 16px;
+        }
+
+        .product-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .product-chip {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .product-chip:hover {
+            background: #e0f2fe;
+            border-color: #3b82f6;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 16px;
+            margin: 16px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .summary-row.total {
+            font-weight: 800;
+            font-size: 1.1rem;
+            border-top: 2px solid #cbd5e1;
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { background: #1e4a76; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-secondary { background: #e2e8f0; color: #334155; }
+
+        .po-status {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: #1e293b;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            animation: slideIn 0.3s ease;
+            max-width: calc(100% - 40px);
+        }
+
+        .flash-success { background: #10b981; }
+        .flash-error { background: #ef4444; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .header { padding: 16px; text-align: center; justify-content: center; }
+            .card-header { flex-direction: column; text-align: center; }
+            .card-body { padding: 16px; }
+            .form-grid { grid-template-columns: 1fr; gap: 12px; }
+            .btn-group { justify-content: center; }
+            .btn { padding: 10px 18px; font-size: 0.85rem; flex: 1; justify-content: center; }
+            .items-table th, .items-table td { padding: 8px 6px; font-size: 0.75rem; }
+            .item-input { width: 55px; font-size: 0.7rem; }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .product-chip, .remove-btn { min-height: 44px; }
+            .item-input { min-height: 38px; }
+        }
+
+        @media print {
+            .btn-group, .product-section, .no-print { display: none; }
+            .po-card { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-file-alt"></i> Purchase Requisition → PO</h1>
+        <div class="badge"><i class="fas fa-bolt"></i> One-click conversion</div>
+    </div>
+
+    <div class="main-content">
+        <!-- PR Card -->
+        <div class="pr-card">
+            <div class="card-header">
+                <h2><i class="fas fa-clipboard-list"></i> Purchase Requisition</h2>
+                <span id="prNumberDisplay" style="font-size:0.8rem; color:#5b6e8c;">PR-DRAFT</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field">
+                        <label><i class="fas fa-store"></i> Shop *</label>
+                        <select id="shopSelect">
+                            <option value="">Select shop</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label><i class="fas fa-truck"></i> Supplier *</label>
+                        <select id="supplierSelect">
+                            <option value="">Select supplier</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>PR Date</label>
+                        <input type="date" id="prDate">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Notes / Reason</label>
+                    <textarea rows="2" id="prReason" placeholder="Optional..."></textarea>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="items-table">
+                        <thead><tr><th>Product</th><th>Qty</th><th>Unit Price (₹) *<br><span style="font-size:0.6rem; font-weight:normal;">Enter negotiated price</span></th><th>Tax%</th><th>Total</th><th></th></tr></thead>
+                        <tbody id="prItemsBody"><tr><td colspan="6" style="text-align:center;">No items added. Click products below.</td></tr></tbody>
+                    </table>
+                </div>
+
+                <div class="product-section">
+                    <button type="button" id="toggleProductsBtn" class="btn btn-secondary" style="width:100%; justify-content:center;">
+                        <i class="fas fa-box"></i> + Add Products
+                    </button>
+                    <div id="productPanel" style="display: none; margin-top: 16px;">
+                        <input type="text" id="productSearch" placeholder="🔍 Search products..." style="width:100%; padding:10px; border-radius:40px; border:1px solid #cbd5e1; margin-bottom:12px;">
+                        <div id="productGrid" class="product-grid">Loading...</div>
+                        <div style="font-size:0.7rem; color:#f59e0b; margin-top:8px; text-align:center; background:#fffbeb; padding:6px; border-radius:8px;">
+                            <i class="fas fa-edit"></i> <strong>Note:</strong> Click any product, then ENTER the NEGOTIATED PRICE manually
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-row"><span>Subtotal</span><span id="prSubtotal">₹ 0.00</span></div>
+                    <div class="summary-row"><span>Tax Amount</span><span id="prTaxTotal">₹ 0.00</span></div>
+                    <div class="summary-row total"><span>PR Grand Total</span><span id="prGrandTotal">₹ 0.00</span></div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="savePrBtn"><i class="fas fa-save"></i> Save PR Draft</button>
+                    <button class="btn btn-success" id="convertToPoBtn"><i class="fas fa-exchange-alt"></i> Convert to PO ⚡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PO Preview Card -->
+        <div class="po-card" id="poCard">
+            <div class="card-header">
+                <h2><i class="fas fa-file-invoice"></i> Purchase Order Created</h2>
+                <span class="po-status">✓ CONFIRMED</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field"><label>PO Number</label><input type="text" id="poNumberDisplay" readonly style="background:#f1f5f9; font-weight:600;"></div>
+                    <div class="field"><label>Supplier</label><input type="text" id="poSupplier" readonly style="background:#f1f5f9;"></div>
+                    <div class="field"><label>Created At</label><input type="text" id="poDate" readonly style="background:#f1f5f9;"></div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="items-table">
+                        <thead><tr><th>Item</th><th>Qty</th><th>Unit Price (₹) *<br><span style="font-size:0.6rem; font-weight:normal;">Enter negotiated price</span></th><th>Tax</th><th>Amount</th></tr></thead>
+                        <tbody id="poPreviewBody"><tr><td colspan="5" style="text-align:center;">PO items will appear here</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-row total"><span>PO Total Amount</span><span id="poTotalPreview">₹ 0.00</span></div>
+                </div>
+                <div class="btn-group no-print">
+                    <button class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print PO</button>
+                    <button class="btn btn-primary" id="resetAndNewBtn"><i class="fas fa-plus-circle"></i> Create New PR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data stores
+    let shopsData = [];
+    let suppliersData = [];
+    let productsCatalog = [];
+    let prItems = [];
+    let nextItemId = 1;
+    let currentShopId = null;
+
+    // ========== API CALLS ==========
+    
+    // Load shops
+    async function loadShops() {
+        try {
+            const response = await fetch('/api/user-shops');
+            const data = await response.json();
+            if(data.success) {
+                shopsData = data.shops;
+                populateShops();
+                if(shopsData.length > 0 && !currentShopId) {
+                    await selectShop(shopsData[0].shopid);
+                }
+            }
+        } catch(e) {
+            console.error("Error loading shops:", e);
+            showFlash("Failed to load shops", "error");
+        }
+    }
+
+    // Select shop using your existing endpoint
+    async function selectShop(shopId) {
+        try {
+            const response = await fetch('/api/select-shop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ shop_id: parseInt(shopId) })
+            });
+            const data = await response.json();
+            
+            if(data.success) {
+                currentShopId = shopId;
+                showFlash(data.message, "success");
+                await Promise.all([loadSuppliers(), loadProducts()]);
+                // Reset PR items when shop changes
+                prItems = [];
+                renderPRTable();
+                return true;
+            }
+            return false;
+        } catch(e) {
+            console.error("Error selecting shop:", e);
+            showFlash("Failed to select shop", "error");
+            return false;
+        }
+    }
+
+    // Load suppliers using your /api/suppliers/search endpoint
+    async function loadSuppliers() {
+        if(!currentShopId) return;
+        
+        try {
+            const response = await fetch(`/api/suppliers/search?shop_id=${currentShopId}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            // Handle dynamic response format
+            let suppliers = [];
+            if(data.success && data.suppliers) {
+                suppliers = data.suppliers;
+            } else if(Array.isArray(data)) {
+                suppliers = data;
+            } else if(data.data && Array.isArray(data.data)) {
+                suppliers = data.data;
+            }
+            
+            suppliersData = suppliers;
+            populateSuppliers();
+        } catch(e) {
+            console.error("Error loading suppliers:", e);
+            suppliersData = [];
+            populateSuppliers();
+        }
+    }
+
+    // Load products using your /api/products endpoint
+    async function loadProducts() {
+        if(!currentShopId) {
+            document.getElementById('productGrid').innerHTML = '<span>Select a shop first</span>';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/products?shop_id=${currentShopId}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            
+            // Handle dynamic response format
+            let products = [];
+            if(data.success && data.products) {
+                products = data.products;
+            } else if(Array.isArray(data)) {
+                products = data;
+            } else if(data.data && Array.isArray(data.data)) {
+                products = data.data;
+            }
+            
+            // Normalize product data to our format
+            productsCatalog = products.map(p => ({
+                product_id: p.product_id || p.id,
+                name: p.name || p.product_name,
+                // price: NOT USED ANYMORE - owner enters manually
+                tax: parseFloat(p.tax || p.tax_rate || 0),
+                stock: parseInt(p.stock || p.quantity || 0)
+            }));
+            
+            renderProductGrid();
+        } catch(e) {
+            console.error("Error loading products:", e);
+            productsCatalog = [];
+            renderProductGrid();
+        }
+    }
+
+    // Populate shop dropdown
+    function populateShops() {
+        const sel = document.getElementById('shopSelect');
+        sel.innerHTML = '<option value="">Select shop</option>';
+        shopsData.forEach(shop => {
+            sel.innerHTML += `<option value="${shop.shopid}">${shop.name}</option>`;
+        });
+        if(currentShopId) sel.value = currentShopId;
+    }
+
+    // Populate supplier dropdown
+    function populateSuppliers() {
+        const sel = document.getElementById('supplierSelect');
+        sel.innerHTML = '<option value="">Select supplier</option>';
+        suppliersData.forEach(sup => {
+            const id = sup.supplier_id || sup.id;
+            const name = sup.name || sup.supplier_name;
+            sel.innerHTML += `<option value="${id}">${name}</option>`;
+        });
+    }
+
+    // Render product grid
+    function renderProductGrid(filter = "") {
+        const container = document.getElementById('productGrid');
+        if(!productsCatalog.length) {
+            container.innerHTML = "<span>No products available</span>";
+            return;
+        }
+        
+        let filtered = productsCatalog;
+        if(filter) {
+            filtered = productsCatalog.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+        }
+        
+        if(!filtered.length) {
+            container.innerHTML = "<span>No matching products</span>";
+            return;
+        }
+        
+        container.innerHTML = "";
+        filtered.forEach(p => {
+            const chip = document.createElement('div');
+            chip.className = "product-chip";
+            chip.innerHTML = `<strong>${escapeHtml(p.name)}</strong> <span style="font-size:0.7rem; color:#f59e0b;">(Click to add, enter price)</span>`;
+            chip.onclick = () => addToPR(p);
+            container.appendChild(chip);
+        });
+    }
+
+
+    function addToPR(product) {
+    // Ask for negotiated price
+    let negotiatedPrice = prompt(`Enter negotiated price for ${product.name}:`, "0");
+    
+    if(negotiatedPrice === null) return;
+    
+    negotiatedPrice = parseFloat(negotiatedPrice);
+    if(isNaN(negotiatedPrice) || negotiatedPrice <= 0) {
+        showFlash("Please enter a valid price", "error");
+        return;
+    }
+    
+    const existing = prItems.find(i => i.productId === product.product_id);
+    if(existing) {
+        existing.quantity += 1;
+        existing.unitPrice = negotiatedPrice;  // ← MANUAL PRICE
+        recalcItem(existing);
+    } else {
+        prItems.push({
+            id: nextItemId++,
+            productId: product.product_id,
+            name: product.name,
+            quantity: 1,
+            unitPrice: negotiatedPrice,  // ← MANUAL PRICE, NOT from product
+            taxRate: product.tax || 0,
+            taxAmount: (1 * negotiatedPrice * (product.tax || 0) / 100),
+            total: negotiatedPrice * (1 + (product.tax || 0)/100)
+        });
+    }
+    renderPRTable();
+    showFlash(`${product.name} added at ₹${negotiatedPrice}`, "success");
+    }
+
+    function recalcItem(item) {
+        item.taxAmount = (item.quantity * item.unitPrice) * item.taxRate / 100;
+        item.total = (item.quantity * item.unitPrice) + item.taxAmount;
+    }
+
+    function renderPRTable() {
+        const tbody = document.getElementById('prItemsBody');
+        if(!prItems.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No items added. Click products above.</td></tr>';
+            updatePRTotals();
+            return;
+        }
+        tbody.innerHTML = "";
+        prItems.forEach(item => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerHTML = `<strong>${escapeHtml(item.name)}</strong>`;
+            row.insertCell(1).innerHTML = `<input type="number" class="item-input" value="${item.quantity}" min="0.5" step="1" onchange="updateQty(${item.id}, this.value)">`;
+            row.insertCell(2).innerHTML = `<input type="number" class="item-input" value="${item.unitPrice}" step="0.01" onchange="updatePrice(${item.id}, this.value)" style="border:2px solid #f59e0b; background:#fffbeb;">`;
+            row.insertCell(3).innerHTML = `<input type="number" class="item-input" value="${item.taxRate}" step="0.5" onchange="updateTax(${item.id}, this.value)">`;
+            row.insertCell(4).innerHTML = `₹ ${item.total.toFixed(2)}`;
+            row.insertCell(5).innerHTML = `<button class="remove-btn" onclick="removeItem(${item.id})"><i class="fas fa-trash"></i></button>`;
+        });
+        updatePRTotals();
+    }
+
+    window.updateQty = (id, val) => {
+        let it = prItems.find(i => i.id == id);
+        if(it) { it.quantity = parseFloat(val) || 1; recalcItem(it); renderPRTable(); }
+    };
+    window.updatePrice = (id, val) => {
+        let it = prItems.find(i => i.id == id);
+        if(it) { it.unitPrice = parseFloat(val) || 0; recalcItem(it); renderPRTable(); }
+    };
+    window.updateTax = (id, val) => {
+        let it = prItems.find(i => i.id == id);
+        if(it) { it.taxRate = parseFloat(val) || 0; recalcItem(it); renderPRTable(); }
+    };
+    window.removeItem = (id) => {
+        prItems = prItems.filter(i => i.id != id);
+        renderPRTable();
+    };
+
+    function updatePRTotals() {
+        let subtotal = 0, tax = 0;
+        prItems.forEach(i => {
+            subtotal += i.quantity * i.unitPrice;
+            tax += i.taxAmount;
+        });
+        document.getElementById('prSubtotal').innerText = `₹ ${subtotal.toFixed(2)}`;
+        document.getElementById('prTaxTotal').innerText = `₹ ${tax.toFixed(2)}`;
+        document.getElementById('prGrandTotal').innerText = `₹ ${(subtotal+tax).toFixed(2)}`;
+    }
+
+    // Convert to PO using your API
+    async function convertToPO() {
+        const shopId = document.getElementById('shopSelect').value;
+        const supplierId = document.getElementById('supplierSelect').value;
+        
+        if(!shopId) { showFlash("Select a shop", "error"); return; }
+        if(!supplierId) { showFlash("Select a supplier", "error"); return; }
+        if(prItems.length === 0) { showFlash("Add at least one item", "error"); return; }
+
+        const payload = {
+            shopid: parseInt(shopId),
+            supplier_id: parseInt(supplierId),
+            items: prItems.map(i => ({
+                product_id: i.productId,
+                quantity: i.quantity,
+                unit_price: i.unitPrice,
+                tax_rate: i.taxRate,
+                tax_amount: i.taxAmount,
+                total: i.total
+            })),
+            notes: document.getElementById('prReason').value
+        };
+
+        try {
+            const res = await fetch('/api/purchase-orders/convert-from-pr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(res.ok && data.success) {
+                showPOCard(data);
+                showFlash(`✅ ${data.po_number || `PO-${data.po_id}`} created!`, "success");
+            } else {
+                showFlash(data.message || "PO creation failed", "error");
+            }
+        } catch(err) {
+            console.error(err);
+            showFlash("Network error. PO could not be created.", "error");
+        }
+    }
+
+    function showPOCard(poData) {
+        const poCard = document.getElementById('poCard');
+        poCard.classList.add('visible');
+        
+        document.getElementById('poNumberDisplay').value = poData.po_number || `PO-${Date.now()}`;
+        const supplierName = document.getElementById('supplierSelect').options[document.getElementById('supplierSelect').selectedIndex]?.text || "Supplier";
+        document.getElementById('poSupplier').value = poData.supplier_name || supplierName;
+        document.getElementById('poDate').value = poData.created_at || new Date().toLocaleString();
+        
+        const itemsBody = document.getElementById('poPreviewBody');
+        const items = poData.items || prItems;
+        if(!items.length) {
+            itemsBody.innerHTML = '<tr><td colspan="5">No items</td></tr>';
+        } else {
+            itemsBody.innerHTML = "";
+            let total = 0;
+            items.forEach(item => {
+                const row = itemsBody.insertRow();
+                const lineTotal = item.total || (item.quantity * item.unitPrice * (1 + item.taxRate/100));
+                total += lineTotal;
+                row.insertCell(0).innerHTML = item.name;
+                row.insertCell(1).innerHTML = item.quantity;
+                row.insertCell(2).innerHTML = `₹ ${(item.unitPrice || 0).toFixed(2)}`;
+                row.insertCell(3).innerHTML = `${item.taxRate || 0}%`;
+                row.insertCell(4).innerHTML = `₹ ${lineTotal.toFixed(2)}`;
+            });
+            document.getElementById('poTotalPreview').innerText = `₹ ${total.toFixed(2)}`;
+        }
+        
+        poCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetForm() {
+        prItems = [];
+        renderPRTable();
+        document.getElementById('prReason').value = "";
+        document.getElementById('prDate').valueAsDate = new Date();
+        document.getElementById('poCard').classList.remove('visible');
+        showFlash("Form reset. Ready for new PR.", "success");
+    }
+
+    function showFlash(msg, type) {
+        const flash = document.createElement('div');
+        flash.className = `flash-message flash-${type}`;
+        flash.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 3000);
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    // Event listeners
+    document.getElementById('convertToPoBtn').addEventListener('click', convertToPO);
+    document.getElementById('savePrBtn').addEventListener('click', createPR);
+    async function createPR() {
+        const shopId = document.getElementById('shopSelect').value;
+        const supplierId = document.getElementById('supplierSelect').value;
+        
+        if(!shopId) { showFlash("Select a shop", "error"); return; }
+        if(!supplierId) { showFlash("Select a supplier", "error"); return; }
+        if(prItems.length === 0) { showFlash("Add at least one item", "error"); return; }
+
+        const payload = {
+            shopid: parseInt(shopId),
+            supplier_id: parseInt(supplierId),
+            reason: document.getElementById('prReason').value,
+            pr_date: document.getElementById('prDate').value,
+            items: prItems.map(i => ({
+                product_id: i.productId,
+                product_name: i.name,
+                quantity: i.quantity,
+                unit_price: i.unitPrice,
+                tax_rate: i.taxRate,
+                tax_amount: i.taxAmount,
+                total: i.total
+            })),
+            subtotal: parseFloat(document.getElementById('prSubtotal').innerText.replace('₹', '')),
+            tax_amount: parseFloat(document.getElementById('prTaxTotal').innerText.replace('₹', '')),
+            grand_total: parseFloat(document.getElementById('prGrandTotal').innerText.replace('₹', ''))
+        };
+
+        try {
+            const response = await fetch('/api/create_pr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok && data.success) {
+                showFlash(`✅ ${data.message || 'PR created successfully'}`, "success");
+                if(data.pr_number) document.getElementById('prNumberDisplay').innerText = data.pr_number;
+            } else {
+                showFlash(data.message || "Failed to create PR", "error");
+            }
+        } catch(err) {
+            console.error(err);
+            showFlash("Network error. PR not created.", "error");
+        }
+    }
+    document.getElementById('resetAndNewBtn')?.addEventListener('click', resetForm);
+    document.getElementById('toggleProductsBtn').addEventListener('click', () => {
+        const panel = document.getElementById('productPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        if(panel.style.display === 'block' && productsCatalog.length) renderProductGrid();
+    });
+    document.getElementById('productSearch')?.addEventListener('input', (e) => renderProductGrid(e.target.value));
+    document.getElementById('prDate').valueAsDate = new Date();
+    
+    // Shop change handler
+    document.getElementById('shopSelect').addEventListener('change', async (e) => {
+        const shopId = parseInt(e.target.value);
+        if(shopId) {
+            await selectShop(shopId);
+        }
+    });
+
+    // Initialize
+    loadShops();
+    renderPRTable();
+</script>
+</body>
+</html>

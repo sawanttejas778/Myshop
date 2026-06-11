@@ -349,3 +349,810 @@
 2026-06-09 22:43:38,908 [DEBUG] app: Found 1 suppliers for shop_id 2
 2026-06-09 22:43:38,908 [DEBUG] app: Returning 1 suppliers
 2026-06-09 22:43:38,908 [INFO] werkzeug: 127.0.0.1 - - [09/Jun/2026 22:43:38] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-10 18:58:44,361 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-06-10 18:58:44,362 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-06-10 18:58:44,365 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 18:58:45,284 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 18:58:45,285 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 19:00:18,424 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-10 19:00:18,527 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 19:00:19,484 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 19:00:19,484 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 19:01:15,794 [DEBUG] app: REQ GET / from 127.0.0.1
+2026-06-10 19:01:15,796 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:15] "[32mGET / HTTP/1.1[0m" 302 -
+2026-06-10 19:01:15,816 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-06-10 19:01:15,816 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:15] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-06-10 19:01:15,830 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 19:01:16,566 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:16] "GET /login HTTP/1.1" 200 -
+2026-06-10 19:01:16,639 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 19:01:16,852 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:16] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 19:01:16,887 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:01:16,889 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:16] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:01:25,154 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-10 19:01:26,557 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:26] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-10 19:01:26,570 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 19:01:26,872 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:26] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 19:01:27,479 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:01:27,501 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:27] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:01:27,576 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:01:27,576 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:27] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:01:31,637 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:01:31,637 [DEBUG] app: Request JSON: {'shop_id': '2'}
+2026-06-10 19:01:31,661 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:31] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:01:31,674 [DEBUG] app: REQ GET /api/dashboard-stats/2 from 127.0.0.1
+2026-06-10 19:01:31,776 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:31] "GET /api/dashboard-stats/2 HTTP/1.1" 200 -
+2026-06-10 19:01:33,218 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:01:33,236 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:33] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:01:33,598 [DEBUG] app: REQ GET /api/shops from 127.0.0.1
+2026-06-10 19:01:33,604 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:01:33,608 [DEBUG] app: REQ GET /api/suppliers from 127.0.0.1
+2026-06-10 19:01:33,629 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:33] "GET /api/products HTTP/1.1" 200 -
+2026-06-10 19:01:33,647 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:01:33,657 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:01:33,658 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:33] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-10 19:01:33,737 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:33] "[35m[1mGET /api/shops HTTP/1.1[0m" 500 -
+2026-06-10 19:01:34,084 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:01:34,084 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:34] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:01:58,388 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:01:58,388 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:01:58] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:02:02,312 [DEBUG] app: REQ GET /quotations from 127.0.0.1
+2026-06-10 19:02:02,469 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:02] "GET /quotations HTTP/1.1" 200 -
+2026-06-10 19:02:02,598 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:02:02,598 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:02] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:02:16,720 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:02:16,724 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:16] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:02:18,909 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:02:18,914 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:18] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:02:18,960 [DEBUG] app: REQ GET /api/shops from 127.0.0.1
+2026-06-10 19:02:18,960 [DEBUG] app: REQ GET /api/suppliers from 127.0.0.1
+2026-06-10 19:02:18,962 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:02:18,987 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:18] "[35m[1mGET /api/shops HTTP/1.1[0m" 500 -
+2026-06-10 19:02:18,991 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:02:18,991 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:18] "GET /api/products HTTP/1.1" 200 -
+2026-06-10 19:02:18,994 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:02:18,996 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:18] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-10 19:02:19,012 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:02:19,018 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:02:19] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:20:48,454 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-06-10 19:20:48,454 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-06-10 19:20:48,456 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 19:20:48,950 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 19:20:48,950 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 19:21:17,584 [DEBUG] app: REQ GET / from 127.0.0.1
+2026-06-10 19:21:17,584 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:17] "[32mGET / HTTP/1.1[0m" 302 -
+2026-06-10 19:21:17,598 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-06-10 19:21:17,600 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:17] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-06-10 19:21:17,607 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 19:21:17,916 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:17] "GET /login HTTP/1.1" 200 -
+2026-06-10 19:21:17,931 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 19:21:17,995 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:17] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 19:21:19,978 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-06-10 19:21:19,979 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:19] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-06-10 19:21:19,990 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 19:21:20,007 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:20] "GET /login HTTP/1.1" 200 -
+2026-06-10 19:21:20,054 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 19:21:20,054 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:20] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 19:21:20,149 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:21:20,150 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:20] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:21:28,185 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-10 19:21:28,549 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:28] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-10 19:21:28,554 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 19:21:28,594 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:28] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 19:21:28,835 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:21:28,848 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:28] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:21:28,902 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:21:28,902 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:28] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:21:33,315 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:21:33,316 [DEBUG] app: Request JSON: {'shop_id': '2'}
+2026-06-10 19:21:33,335 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:33] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:21:33,341 [DEBUG] app: REQ GET /api/dashboard-stats/2 from 127.0.0.1
+2026-06-10 19:21:33,376 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:33] "GET /api/dashboard-stats/2 HTTP/1.1" 200 -
+2026-06-10 19:21:34,363 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:21:34,425 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:34] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:21:34,489 [DEBUG] app: REQ GET /api/select-shop from 127.0.0.1
+2026-06-10 19:21:34,491 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:21:34,492 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:21:34,512 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:21:34,513 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:21:34,514 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:34] "GET /api/suppliers/search HTTP/1.1" 200 -
+2026-06-10 19:21:34,517 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:34] "GET /api/products HTTP/1.1" 200 -
+2026-06-10 19:21:34,519 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:34] "[35m[1mGET /api/select-shop HTTP/1.1[0m" 500 -
+2026-06-10 19:21:34,578 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:21:34,579 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:21:34] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:23:42,743 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:23:42,798 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:23:42] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:23:42,852 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:23:42,852 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:23:42] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:28:58,561 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:28:58,561 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:28:58] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:28:58,669 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:28:58,669 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:28:58] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:30:11,300 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:30:11,377 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:11] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:30:11,410 [DEBUG] app: REQ GET /api/shops from 127.0.0.1
+2026-06-10 19:30:11,416 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:11] "[35m[1mGET /api/shops HTTP/1.1[0m" 500 -
+2026-06-10 19:30:11,433 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:30:11,433 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:11] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:30:30,280 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:30:30,281 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:30] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:30:30,308 [DEBUG] app: REQ GET /api/shops from 127.0.0.1
+2026-06-10 19:30:30,314 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:30] "[35m[1mGET /api/shops HTTP/1.1[0m" 500 -
+2026-06-10 19:30:30,329 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:30:30,330 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:30] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:30:32,375 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 19:30:32,402 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:32] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 19:30:32,546 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:30:32,560 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:32] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:30:32,577 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:30:32,577 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:32] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:30:34,553 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 19:30:34,563 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:34] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 19:30:34,668 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:30:34,683 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:34] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:30:34,696 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:30:34,697 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:34] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:30:37,378 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:30:37,379 [DEBUG] app: Request JSON: {'shop_id': '2'}
+2026-06-10 19:30:37,395 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:37] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:30:37,406 [DEBUG] app: REQ GET /api/dashboard-stats/2 from 127.0.0.1
+2026-06-10 19:30:37,421 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:37] "GET /api/dashboard-stats/2 HTTP/1.1" 200 -
+2026-06-10 19:30:41,883 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:30:41,884 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:41] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:30:41,911 [DEBUG] app: REQ GET /api/shops from 127.0.0.1
+2026-06-10 19:30:41,918 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:41] "[35m[1mGET /api/shops HTTP/1.1[0m" 500 -
+2026-06-10 19:30:41,926 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:30:41,927 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:30:41] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:33:04,899 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:33:04,987 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:04] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:33:05,011 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:33:05,024 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:05] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:33:05,039 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:33:05,039 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:05] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:33:05,042 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:33:05,042 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:33:05,056 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:05] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:33:05,062 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:33:05,063 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:33:05,075 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:33:05,075 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:33:05,076 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:05] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:33:05,077 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:05] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:33:11,603 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:33:11,603 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-10 19:33:11,611 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:11] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:33:11,617 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:33:11,618 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:33:11,627 [DEBUG] app: Found 0 suppliers for shop_id 1
+2026-06-10 19:33:11,627 [DEBUG] app: Returning 0 suppliers
+2026-06-10 19:33:11,628 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:11] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 19:33:11,628 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:11] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 19:33:18,751 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:33:18,752 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:33:18,761 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:18] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:33:18,765 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:33:18,767 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:33:18,778 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:33:18,779 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:18] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:33:18,779 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:33:18,780 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:33:18] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:43:43,434 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:43:43,557 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:43:43,588 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:43:43,611 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:43:43,622 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:43:43,622 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:43:43,635 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:43:43,637 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:43:43,645 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:43:43,655 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:43:43,656 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:43:43,662 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:43:43,663 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:43:43,664 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:43:43,665 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:43] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:43:46,487 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:43:46,488 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:43:46,499 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:46] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:43:46,506 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:43:46,506 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:43:46,518 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:46] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:43:46,519 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:43:46,519 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:43:46,520 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:43:46] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:48:00,399 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 19:48:00,534 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 19:48:00,563 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 19:48:00,577 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 19:48:00,594 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 19:48:00,596 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 19:48:00,607 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:48:00,607 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:48:00,618 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:48:00,625 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:48:00,626 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:48:00,637 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:48:00,639 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:48:00,640 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:48:00,641 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:00] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:48:03,165 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 19:48:03,165 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 19:48:03,176 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:03] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 19:48:03,181 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 19:48:03,184 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 19:48:03,193 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 19:48:03,193 [DEBUG] app: Returning 1 suppliers
+2026-06-10 19:48:03,193 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:03] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:48:03,193 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:03] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 19:48:24,362 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-10 19:48:24,363 [DEBUG] app: Request JSON: {'shopid': 2, 'supplier_id': 1, 'reason': '', 'pr_date': '2026-06-10', 'items': [{'product_id': 8, 'product_name': 'Mouse', 'quantity': 1, 'unit_price': 300, 'tax_rate': 18, 'tax_amount': 54, 'total': 354}], 'subtotal': 300, 'tax_amount': 54, 'grand_total': 354}
+2026-06-10 19:48:24,368 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 19:48:24] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-10 20:02:17,728 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-10 20:02:17,927 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 20:02:18,832 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 20:02:18,837 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 20:04:30,588 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-10 20:04:30,657 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 20:04:31,088 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 20:04:31,088 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 20:05:18,032 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 20:05:18,035 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:18] "[32mGET /PRPO HTTP/1.1[0m" 302 -
+2026-06-10 20:05:18,043 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 20:05:18,357 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:18] "GET /login HTTP/1.1" 200 -
+2026-06-10 20:05:18,411 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 20:05:18,494 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:18] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 20:05:18,513 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 20:05:18,513 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:18] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 20:05:26,363 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-10 20:05:26,765 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:26] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-10 20:05:26,772 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 20:05:26,809 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:26] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 20:05:26,973 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 20:05:26,983 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:26] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 20:05:27,017 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 20:05:27,017 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:27] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 20:05:30,695 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 20:05:30,695 [DEBUG] app: Request JSON: {'shop_id': '2'}
+2026-06-10 20:05:30,708 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:30] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 20:05:30,713 [DEBUG] app: REQ GET /api/dashboard-stats/2 from 127.0.0.1
+2026-06-10 20:05:30,736 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:30] "GET /api/dashboard-stats/2 HTTP/1.1" 200 -
+2026-06-10 20:05:31,870 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 20:05:31,879 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:31] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 20:05:31,916 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 20:05:31,926 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:31] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 20:05:31,936 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 20:05:31,936 [DEBUG] app: Request JSON: {'shop_id': 2}
+2026-06-10 20:05:31,948 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:31] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 20:05:31,987 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 20:05:31,990 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 20:05:31,992 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 20:05:31,993 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:31] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 20:05:32,004 [DEBUG] app: Found 1 suppliers for shop_id 2
+2026-06-10 20:05:32,005 [DEBUG] app: Returning 1 suppliers
+2026-06-10 20:05:32,006 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:32] "GET /api/suppliers/search?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 20:05:32,009 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 20:05:32] "GET /api/products?shop_id=2 HTTP/1.1" 200 -
+2026-06-10 21:55:54,720 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-06-10 21:55:54,720 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-06-10 21:55:54,720 [INFO] werkzeug:  * Restarting with stat
+2026-06-10 21:55:55,449 [WARNING] werkzeug:  * Debugger is active!
+2026-06-10 21:55:55,466 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-10 21:56:07,146 [DEBUG] app: REQ GET / from 127.0.0.1
+2026-06-10 21:56:07,148 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:07] "[32mGET / HTTP/1.1[0m" 302 -
+2026-06-10 21:56:07,174 [DEBUG] app: REQ GET /dashboard from 127.0.0.1
+2026-06-10 21:56:07,175 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:07] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2026-06-10 21:56:07,179 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 21:56:07,593 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:07] "GET /login HTTP/1.1" 200 -
+2026-06-10 21:56:07,620 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 21:56:07,781 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:07] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 21:56:07,809 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:56:07,810 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:07] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:56:36,760 [DEBUG] app: REQ POST /sign_up from 127.0.0.1
+2026-06-10 21:56:43,035 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:43] "[32mPOST /sign_up HTTP/1.1[0m" 302 -
+2026-06-10 21:56:43,045 [DEBUG] app: REQ GET /verify_otp from 127.0.0.1
+2026-06-10 21:56:43,074 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:43] "GET /verify_otp HTTP/1.1" 200 -
+2026-06-10 21:56:43,137 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:56:43,137 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:56:43] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:57:32,941 [DEBUG] app: REQ POST /verify_otp from 127.0.0.1
+2026-06-10 21:57:32,968 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:32] "[32mPOST /verify_otp HTTP/1.1[0m" 302 -
+2026-06-10 21:57:32,983 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-10 21:57:33,006 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:33] "GET /login HTTP/1.1" 200 -
+2026-06-10 21:57:33,031 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-10 21:57:33,034 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:33] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-10 21:57:33,065 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:57:33,067 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:33] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:57:44,993 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-10 21:57:45,940 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:45] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-10 21:57:45,950 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 21:57:46,099 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:46] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 21:57:50,331 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 21:57:50,360 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:50] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 21:57:50,410 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:57:50,410 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:57:50] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:58:38,783 [DEBUG] app: REQ POST /api/shops from 127.0.0.1
+2026-06-10 21:58:38,783 [DEBUG] app: Request JSON: {'name': 'My Shop', 'tax_id': 'MCYPS1100H', 'gstn': '27MCYPS1100H1ZY', 'address': '123 Main st, Kalamwadi Sangli Walwa Maharashtra 415406', 'phone': '+918080968010'}
+2026-06-10 21:58:38,802 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:38] "[35m[1mPOST /api/shops HTTP/1.1[0m" 201 -
+2026-06-10 21:58:40,327 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-10 21:58:40,353 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:40] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-10 21:58:40,502 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 21:58:40,521 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:58:40,523 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:40] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:58:40,526 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:40] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 21:58:42,362 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 21:58:42,362 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-06-10 21:58:42,385 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:42] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 21:58:42,393 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-06-10 21:58:42,434 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:42] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-06-10 21:58:46,924 [DEBUG] app: REQ GET /quotations from 127.0.0.1
+2026-06-10 21:58:47,143 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:47] "GET /quotations HTTP/1.1" 200 -
+2026-06-10 21:58:47,293 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:58:47,293 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:47] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:58:51,743 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 21:58:51,743 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-10 21:58:51,759 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:51] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 21:58:51,774 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 21:58:51,794 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:51] "GET /api/products HTTP/1.1" 200 -
+2026-06-10 21:58:54,227 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:58:54,227 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:54] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:58:58,188 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-10 21:58:58,373 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "GET /PRPO HTTP/1.1" 200 -
+2026-06-10 21:58:58,391 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-10 21:58:58,410 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-10 21:58:58,422 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 21:58:58,422 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-10 21:58:58,443 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:58:58,443 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-10 21:58:58,448 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 21:58:58,463 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 21:58:58,468 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 21:58:58,483 [DEBUG] app: Found 0 suppliers for shop_id 1
+2026-06-10 21:58:58,489 [DEBUG] app: Returning 0 suppliers
+2026-06-10 21:58:58,492 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 21:58:58,493 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:58:58] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 21:59:01,489 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-10 21:59:01,495 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-10 21:59:01,545 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:59:01] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-10 21:59:01,569 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-10 21:59:01,575 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-10 21:59:01,597 [DEBUG] app: Found 0 suppliers for shop_id 1
+2026-06-10 21:59:01,602 [DEBUG] app: Returning 0 suppliers
+2026-06-10 21:59:01,602 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:59:01] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 21:59:01,604 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:59:01] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-10 21:59:13,141 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-10 21:59:13,143 [INFO] werkzeug: 127.0.0.1 - - [10/Jun/2026 21:59:13] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:02:44,962 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5500
+2026-06-11 19:02:44,962 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2026-06-11 19:02:44,967 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:02:46,248 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:02:46,256 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:02:59,101 [DEBUG] app: REQ GET /billing from 127.0.0.1
+2026-06-11 19:02:59,113 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:02:59] "[32mGET /billing HTTP/1.1[0m" 302 -
+2026-06-11 19:02:59,160 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:02:59,874 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:02:59] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:02:59,898 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:03:00,239 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:00] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:03:00,271 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:03:00,273 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:00] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:03:26,674 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:03:27,409 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:03:27,807 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:27] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:03:28,292 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:28] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:03:28,307 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:03:28,528 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:28] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-11 19:03:29,531 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:03:29,568 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:29] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:03:29,700 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:03:29,702 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:29] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:03:34,519 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:03:34,519 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-06-11 19:03:34,549 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:34] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:03:34,560 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-06-11 19:03:34,633 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:34] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-06-11 19:03:42,334 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-06-11 19:03:42,529 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:42] "GET /products HTTP/1.1" 200 -
+2026-06-11 19:03:42,557 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-06-11 19:03:42,591 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:42] "GET /api/categories HTTP/1.1" 200 -
+2026-06-11 19:03:42,704 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:03:42,706 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:42] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:03:48,410 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:03:48,436 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:48] "GET /api/products?search=Mo HTTP/1.1" 200 -
+2026-06-11 19:03:49,440 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:03:49,460 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:03:49] "GET /api/products?search=Mouse HTTP/1.1" 200 -
+2026-06-11 19:05:09,144 [DEBUG] app: REQ POST /api/categories from 127.0.0.1
+2026-06-11 19:05:09,144 [DEBUG] app: Request JSON: {'name': 'Computor accesories'}
+2026-06-11 19:05:09,212 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:05:09] "[35m[1mPOST /api/categories HTTP/1.1[0m" 201 -
+2026-06-11 19:05:09,227 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-06-11 19:05:09,245 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:05:09] "GET /api/categories HTTP/1.1" 200 -
+2026-06-11 19:05:29,044 [DEBUG] app: REQ POST /add-products from 127.0.0.1
+2026-06-11 19:05:29,121 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:05:29] "[35m[1mPOST /add-products HTTP/1.1[0m" 500 -
+2026-06-11 19:08:54,566 [DEBUG] app: REQ POST /add-products from 127.0.0.1
+2026-06-11 19:08:54,607 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:08:54] "[35m[1mPOST /add-products HTTP/1.1[0m" 500 -
+2026-06-11 19:10:06,731 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:10:06,975 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:10:08,168 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:10:08,171 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:10:19,142 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-06-11 19:10:19,146 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:19] "[32mGET /products HTTP/1.1[0m" 302 -
+2026-06-11 19:10:19,156 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:10:19,607 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:19] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:10:19,633 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:10:19,780 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:19] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:10:19,806 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:10:19,806 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:19] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:10:23,929 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:10:24,817 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:24] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:10:24,829 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:10:24,889 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:24] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-11 19:10:25,071 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:10:25,093 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:25] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:10:25,120 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:10:25,120 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:25] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:10:28,982 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:10:28,982 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-06-11 19:10:29,003 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:28] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:10:29,008 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-06-11 19:10:29,045 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:29] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-06-11 19:10:32,365 [DEBUG] app: REQ GET /products from 127.0.0.1
+2026-06-11 19:10:32,413 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:32] "GET /products HTTP/1.1" 200 -
+2026-06-11 19:10:32,436 [DEBUG] app: REQ GET /api/categories from 127.0.0.1
+2026-06-11 19:10:32,453 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:32] "GET /api/categories HTTP/1.1" 200 -
+2026-06-11 19:10:32,469 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:10:32,469 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:32] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:10:54,358 [DEBUG] app: REQ POST /add-products from 127.0.0.1
+2026-06-11 19:10:54,385 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:10:54] "POST /add-products HTTP/1.1" 200 -
+2026-06-11 19:11:04,381 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:04,381 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:04] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:11:06,325 [DEBUG] app: REQ GET /quotations from 127.0.0.1
+2026-06-11 19:11:06,473 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:06] "GET /quotations HTTP/1.1" 200 -
+2026-06-11 19:11:06,670 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:06,670 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:06] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:11:11,321 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:11,323 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:11] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:11:13,053 [DEBUG] app: REQ GET /customer from 127.0.0.1
+2026-06-11 19:11:13,229 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:13] "GET /customer HTTP/1.1" 200 -
+2026-06-11 19:11:13,249 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:11:13,253 [DEBUG] app: REQ GET /api/customers from 127.0.0.1
+2026-06-11 19:11:13,269 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:13] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:11:13,313 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:13,313 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:13] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:11:13,327 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:13] "GET /api/customers HTTP/1.1" 200 -
+2026-06-11 19:11:43,041 [DEBUG] app: REQ POST /api/customers from 127.0.0.1
+2026-06-11 19:11:43,043 [DEBUG] app: Request JSON: {'customer_name': 'Tejas Atmaram Sawant', 'customer_mobile_number': '+918080968010', 'address1': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'address2': 'Sangli', 'city': 'Sangli', 'pincode': '415406', 'Vilage': 'Kalamwadi', 'email': 'sawanttejas778@gmail.com', 'customer_gstn': 'AZMCYPS1100H12Z', 'customer_bank_ifsc': 'IBKL0001364', 'customer_bank_account_number': '1622101100002001', 'customer_bank_name': 'BOI', 'shopid': 1}
+2026-06-11 19:11:43,043 [DEBUG] app: REQ POST /api/customers
+2026-06-11 19:11:43,043 [DEBUG] app: Request data: {'customer_name': 'Tejas Atmaram Sawant', 'customer_mobile_number': '+918080968010', 'address1': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'address2': 'Sangli', 'city': 'Sangli', 'pincode': '415406', 'Vilage': 'Kalamwadi', 'email': 'sawanttejas778@gmail.com', 'customer_gstn': 'AZMCYPS1100H12Z', 'customer_bank_ifsc': 'IBKL0001364', 'customer_bank_account_number': '1622101100002001', 'customer_bank_name': 'BOI', 'shopid': 1}
+2026-06-11 19:11:43,060 [DEBUG] app: Using shop_id: 1
+2026-06-11 19:11:43,060 [DEBUG] app: Executing insert query with values: ('Tejas Atmaram Sawant', '+918080968010', 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'Sangli', 'Sangli', '415406', 'Kalamwadi', 'sawanttejas778@gmail.com', 'AZMCYPS1100H12Z', 'IBKL0001364', '1622101100002001', 'BOI', 1, 1)
+2026-06-11 19:11:43,069 [DEBUG] app: New customer created with ID: 1
+2026-06-11 19:11:43,077 [DEBUG] app: Linked customer 1 to user sawanttejas778@gmail.com for shop 1
+2026-06-11 19:11:43,077 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:43] "[35m[1mPOST /api/customers HTTP/1.1[0m" 201 -
+2026-06-11 19:11:43,088 [DEBUG] app: REQ GET /api/customers from 127.0.0.1
+2026-06-11 19:11:43,105 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:43] "GET /api/customers HTTP/1.1" 200 -
+2026-06-11 19:11:46,096 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:46,096 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:46] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:11:51,524 [DEBUG] app: REQ GET /suppliers from 127.0.0.1
+2026-06-11 19:11:51,610 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:51] "GET /suppliers HTTP/1.1" 200 -
+2026-06-11 19:11:51,642 [DEBUG] app: REQ GET /api/suppliers from 127.0.0.1
+2026-06-11 19:11:51,657 [DEBUG] app: Found 0 suppliers for shop_id 1
+2026-06-11 19:11:51,661 [DEBUG] app: Returning 0 suppliers
+2026-06-11 19:11:51,661 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:51] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-11 19:11:51,678 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:11:51,678 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:11:51] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:12:16,673 [DEBUG] app: REQ POST /api/suppliers from 127.0.0.1
+2026-06-11 19:12:16,673 [DEBUG] app: Request JSON: {'name': 'Tejas Atmaram Sawant', 'email': 'sawanttejas778@gmail.com', 'phone': '+918080968010', 'Pincode': '415406', 'state': 'Maharashtra', 'city': 'Sangli', 'country': 'India', 'address': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'GSTN': '27ABCDS4569T1ZS', 'Bank_IFSC': 'SBIN0003374', 'Bank_Account_Number': '1622101100256', 'Bank_Name': 'N/A', 'Payment_Terms': None}
+2026-06-11 19:12:16,673 [DEBUG] app: Creating supplier with data: {'name': 'Tejas Atmaram Sawant', 'email': 'sawanttejas778@gmail.com', 'phone': '+918080968010', 'Pincode': '415406', 'state': 'Maharashtra', 'city': 'Sangli', 'country': 'India', 'address': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'GSTN': '27ABCDS4569T1ZS', 'Bank_IFSC': 'SBIN0003374', 'Bank_Account_Number': '1622101100256', 'Bank_Name': 'N/A', 'Payment_Terms': None}
+2026-06-11 19:12:16,693 [DEBUG] app: Supplier created successfully
+2026-06-11 19:12:16,697 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:12:16] "[35m[1mPOST /api/suppliers HTTP/1.1[0m" 201 -
+2026-06-11 19:12:16,702 [DEBUG] app: REQ GET /api/suppliers from 127.0.0.1
+2026-06-11 19:12:16,721 [DEBUG] app: Found 1 suppliers for shop_id 1
+2026-06-11 19:12:16,722 [DEBUG] app: Returning 1 suppliers
+2026-06-11 19:12:16,724 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:12:16] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-11 19:13:11,861 [DEBUG] app: REQ POST /api/suppliers from 127.0.0.1
+2026-06-11 19:13:11,861 [DEBUG] app: Request JSON: {'name': 'Tejas Atmaram Sawant', 'email': 'sawanttejas778@gmail.com', 'phone': '+918080968010', 'Pincode': '415406', 'state': 'Maharashtra', 'city': 'Sangli', 'country': 'India', 'address': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'GSTN': '27ABCDS4569T1ZS', 'Bank_IFSC': 'SBIN0001356', 'Bank_Account_Number': '16221011136454', 'Bank_Name': 'SBI', 'Payment_Terms': '30 Days'}
+2026-06-11 19:13:11,861 [DEBUG] app: Creating supplier with data: {'name': 'Tejas Atmaram Sawant', 'email': 'sawanttejas778@gmail.com', 'phone': '+918080968010', 'Pincode': '415406', 'state': 'Maharashtra', 'city': 'Sangli', 'country': 'India', 'address': 'SHINDE GALLI, AT / POST - KALAMWADI, TALUKA - WALWA, DISTRICT - SANGLI', 'GSTN': '27ABCDS4569T1ZS', 'Bank_IFSC': 'SBIN0001356', 'Bank_Account_Number': '16221011136454', 'Bank_Name': 'SBI', 'Payment_Terms': '30 Days'}
+2026-06-11 19:13:11,890 [DEBUG] app: Supplier created successfully
+2026-06-11 19:13:11,892 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:13:11] "[35m[1mPOST /api/suppliers HTTP/1.1[0m" 201 -
+2026-06-11 19:13:11,898 [DEBUG] app: REQ GET /api/suppliers from 127.0.0.1
+2026-06-11 19:13:11,912 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:13:11,919 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:13:11,919 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:13:11] "GET /api/suppliers HTTP/1.1" 200 -
+2026-06-11 19:15:02,736 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:15:02,738 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:02] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:15:09,451 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:15:09,560 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "GET /PRPO HTTP/1.1" 200 -
+2026-06-11 19:15:09,598 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:15:09,614 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:15:09,652 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:15:09,654 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:15:09,663 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:15:09,665 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:15:09,677 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:15:09,692 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:15:09,696 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:15:09,711 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:15:09,711 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:15:09,711 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:15:09,725 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:09] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:15:13,215 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:15:13,215 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:15:13,241 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:13] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:15:13,247 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:15:13,248 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:15:13,271 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:13] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:15:13,273 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:15:13,277 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:15:13,277 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:13] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:15:52,632 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:15:52,636 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': 'Payment terms - 30 days', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 25, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 362.5, 'total': 7612.5}], 'subtotal': 7250, 'tax_amount': 362.5, 'grand_total': 7612.5}
+2026-06-11 19:15:52,653 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:52] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-11 19:15:54,156 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:15:54,156 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': 'Payment terms - 30 days', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 25, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 362.5, 'total': 7612.5}], 'subtotal': 7250, 'tax_amount': 362.5, 'grand_total': 7612.5}
+2026-06-11 19:15:54,175 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:15:54] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-11 19:20:41,385 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:20:41,451 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:20:42,398 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:20:42,400 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:20:56,711 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:20:56,713 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:20:56] "[32mGET /PRPO HTTP/1.1[0m" 302 -
+2026-06-11 19:20:56,725 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:20:56,963 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:20:56] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:20:56,985 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:20:57,097 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:20:57] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:20:57,118 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:20:57,118 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:20:57] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:21:02,534 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:21:02,562 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:02] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:21:02,563 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:21:02,590 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:02] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:21:02,598 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:21:02,615 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:02] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:21:02,655 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:21:02,655 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:02] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:21:07,187 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:21:07,203 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:07] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:21:07,215 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:21:07,235 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:07] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:21:07,253 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:21:07,255 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:07] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:21:07,291 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:21:07,291 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:07] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:21:26,058 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:21:26,149 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:21:27,072 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:21:27,076 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:21:28,429 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:21:28,816 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:28] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:21:28,823 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:21:28,909 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:28] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-11 19:21:29,047 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:21:29,061 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:29] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:21:29,086 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:21:29,086 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:29] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:21:33,216 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:21:33,216 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-06-11 19:21:33,235 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:33] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:21:33,245 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-06-11 19:21:33,274 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:33] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-06-11 19:21:35,623 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:21:35,645 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "GET /PRPO HTTP/1.1" 200 -
+2026-06-11 19:21:35,670 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:21:35,691 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:21:35,703 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:21:35,703 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:21:35,716 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:21:35,749 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:21:35,755 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:21:35,759 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:21:35,760 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:21:35,778 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:21:35,778 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:21:35,778 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:21:35,778 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:35] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:21:37,982 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:21:37,982 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:21:37,995 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:37] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:21:38,010 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:21:38,015 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:21:38,031 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:21:38,031 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:21:38,031 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:38] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:21:38,038 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:38] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:21:54,389 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:21:54,389 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': '', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'subtotal': 290, 'tax_amount': 14.5, 'grand_total': 304.5}
+2026-06-11 19:21:54,422 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:54] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-11 19:21:59,840 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:21:59,840 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': '', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'subtotal': 290, 'tax_amount': 14.5, 'grand_total': 304.5}
+2026-06-11 19:21:59,865 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:21:59] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-11 19:28:52,986 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:28:52,988 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:52] "GET /PRPO HTTP/1.1" 200 -
+2026-06-11 19:28:53,015 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:28:53,044 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:28:53,045 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:53] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:28:53,063 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:53] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:28:53,071 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:28:53,072 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:28:53,086 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:53] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:28:53,091 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:28:53,094 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:28:53,108 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:28:53,110 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:28:53,110 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:53] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:28:53,115 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:53] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:28:57,000 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:28:57,001 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:28:57,009 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:57] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:28:57,015 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:28:57,015 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:28:57,026 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:57] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:28:57,027 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:28:57,030 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:28:57,031 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:28:57] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:29:12,970 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:29:12,970 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': '', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'subtotal': 290, 'tax_amount': 14.5, 'grand_total': 304.5}
+2026-06-11 19:29:13,008 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:29:13] "[35m[1mPOST /api/create_pr HTTP/1.1[0m" 500 -
+2026-06-11 19:29:42,555 [DEBUG] app: REQ POST /api/create_pr from 127.0.0.1
+2026-06-11 19:29:42,555 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'reason': '', 'pr_date': '2026-06-11', 'items': [{'product_id': 3, 'product_name': 'Mouse', 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'subtotal': 290, 'tax_amount': 14.5, 'grand_total': 304.5}
+2026-06-11 19:29:42,581 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:29:42] "POST /api/create_pr HTTP/1.1" 200 -
+2026-06-11 19:33:03,192 [DEBUG] app: REQ POST /api/purchase-orders/convert-from-pr from 127.0.0.1
+2026-06-11 19:33:03,193 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'items': [{'product_id': 3, 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'notes': ''}
+2026-06-11 19:33:03,303 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:33:03] "[35m[1mPOST /api/purchase-orders/convert-from-pr HTTP/1.1[0m" 500 -
+2026-06-11 19:35:08,653 [DEBUG] app: REQ POST /api/purchase-orders/convert-from-pr from 127.0.0.1
+2026-06-11 19:35:08,653 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'items': [{'product_id': 3, 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'notes': ''}
+2026-06-11 19:35:08,658 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:35:08] "[35m[1mPOST /api/purchase-orders/convert-from-pr HTTP/1.1[0m" 500 -
+2026-06-11 19:36:53,320 [DEBUG] app: REQ POST /api/purchase-orders/convert-from-pr from 127.0.0.1
+2026-06-11 19:36:53,320 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'items': [{'product_id': 3, 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'notes': ''}
+2026-06-11 19:36:53,326 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:36:53] "[35m[1mPOST /api/purchase-orders/convert-from-pr HTTP/1.1[0m" 500 -
+2026-06-11 19:36:57,029 [DEBUG] app: REQ GET /.well-known/appspecific/com.chrome.devtools.json from 127.0.0.1
+2026-06-11 19:36:57,035 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:36:57] "[35m[1mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 500 -
+2026-06-11 19:37:09,684 [DEBUG] app: REQ POST /api/purchase-orders/convert-from-pr from 127.0.0.1
+2026-06-11 19:37:09,684 [DEBUG] app: Request JSON: {'shopid': 1, 'supplier_id': 2, 'items': [{'product_id': 3, 'quantity': 1, 'unit_price': 290, 'tax_rate': 5, 'tax_amount': 14.5, 'total': 304.5}], 'notes': ''}
+2026-06-11 19:37:09,690 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:37:09] "[35m[1mPOST /api/purchase-orders/convert-from-pr HTTP/1.1[0m" 500 -
+2026-06-11 19:39:07,039 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:39:07,323 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:39:08,349 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:39:08,354 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:39:16,312 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:39:16,312 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:16] "[32mGET /PRPO HTTP/1.1[0m" 302 -
+2026-06-11 19:39:16,331 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:39:16,721 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:16] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:39:16,743 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:39:16,862 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:16] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:39:16,881 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:39:16,881 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:16] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:39:22,912 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:39:23,800 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:23] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:39:23,807 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:39:23,891 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:23] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-11 19:39:24,091 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:39:24,122 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:24] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:39:24,157 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:39:24,157 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:24] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:39:30,546 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:39:30,548 [DEBUG] app: Request JSON: {'shop_id': '1'}
+2026-06-11 19:39:30,570 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:30] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:39:30,574 [DEBUG] app: REQ GET /api/dashboard-stats/1 from 127.0.0.1
+2026-06-11 19:39:30,623 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:30] "GET /api/dashboard-stats/1 HTTP/1.1" 200 -
+2026-06-11 19:39:34,072 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:39:34,083 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "GET /PRPO HTTP/1.1" 200 -
+2026-06-11 19:39:34,128 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:39:34,147 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:39:34,218 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:39:34,221 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:39:34,226 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:39:34,226 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:39:34,247 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:39:34,258 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:39:34,262 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:39:34,282 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:39:34,282 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:39:34,291 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:39:34,291 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:34] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:39:40,766 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:39:40,766 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:39:40,791 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:40] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:39:40,802 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:39:40,807 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:39:40,826 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:39:40,828 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:39:40,831 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:40] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:39:40,834 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:39:40] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:40:28,571 [DEBUG] app: REQ GET /api/purchase-orders/convert-from-pr/2 from 127.0.0.1
+2026-06-11 19:40:28,589 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:28] "[35m[1mGET /api/purchase-orders/convert-from-pr/2 HTTP/1.1[0m" 500 -
+2026-06-11 19:40:28,731 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:28] "GET /api/purchase-orders/convert-from-pr/2?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2026-06-11 19:40:28,748 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:28] "GET /api/purchase-orders/convert-from-pr/2?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2026-06-11 19:40:28,815 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:28] "GET /api/purchase-orders/convert-from-pr/2?__debugger__=yes&cmd=resource&f=console.png&s=pqqOD2xrSG95QeKs0qAc HTTP/1.1" 200 -
+2026-06-11 19:40:28,848 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:28] "GET /api/purchase-orders/convert-from-pr/2?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2026-06-11 19:40:39,883 [DEBUG] app: REQ GET /PRPO from 127.0.0.1
+2026-06-11 19:40:39,883 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:39] "GET /PRPO HTTP/1.1" 200 -
+2026-06-11 19:40:39,930 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:40:39,948 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:39] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:40:39,954 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:40:39,954 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:39] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:40:39,957 [DEBUG] app: REQ POST /api/select-shop from 127.0.0.1
+2026-06-11 19:40:39,957 [DEBUG] app: Request JSON: {'shop_id': 1}
+2026-06-11 19:40:39,978 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:39] "POST /api/select-shop HTTP/1.1" 200 -
+2026-06-11 19:40:39,991 [DEBUG] app: REQ GET /api/suppliers/search from 127.0.0.1
+2026-06-11 19:40:39,994 [DEBUG] app: REQ GET /api/products from 127.0.0.1
+2026-06-11 19:40:40,014 [DEBUG] app: Found 2 suppliers for shop_id 1
+2026-06-11 19:40:40,019 [DEBUG] app: Returning 2 suppliers
+2026-06-11 19:40:40,021 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:40] "GET /api/suppliers/search?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:40:40,022 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:40] "GET /api/products?shop_id=1 HTTP/1.1" 200 -
+2026-06-11 19:40:43,002 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:40:43,004 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:40:43] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:42:29,350 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:42:30,169 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:42:33,202 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:42:33,211 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:42:43,258 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:42:43,412 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:42:44,776 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:42:44,783 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:44:12,302 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:44:12,302 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:12] "[32mGET /admin_dashboard HTTP/1.1[0m" 302 -
+2026-06-11 19:44:12,331 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:44:12,899 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:12] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:44:12,932 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:44:13,072 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:13] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:44:13,083 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:44:13,083 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:13] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:44:19,871 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:44:20,879 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:20] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:44:20,891 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:44:21,141 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:21] "[35m[1mGET /admin_dashboard HTTP/1.1[0m" 500 -
+2026-06-11 19:44:21,171 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:21] "GET /admin_dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2026-06-11 19:44:21,171 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:21] "GET /admin_dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2026-06-11 19:44:21,190 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:21] "GET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png&s=RypLDZVk7vCuaHXo0MMq HTTP/1.1" 200 -
+2026-06-11 19:44:21,268 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:44:21] "GET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2026-06-11 19:45:19,360 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:45:19,530 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:19] "[35m[1mGET /admin_dashboard HTTP/1.1[0m" 500 -
+2026-06-11 19:45:19,548 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:19] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-06-11 19:45:19,555 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:19] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-06-11 19:45:19,571 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:19] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png&s=RypLDZVk7vCuaHXo0MMq HTTP/1.1[0m" 304 -
+2026-06-11 19:45:19,609 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:19] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-06-11 19:45:21,726 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:45:21,726 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:21] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:45:23,361 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:45:23,361 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:23] "[32mGET /login HTTP/1.1[0m" 302 -
+2026-06-11 19:45:23,379 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:45:23,401 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:23] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:45:23,421 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:45:23,426 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:23] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:45:23,453 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:45:23,455 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:23] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:45:24,924 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:45:25,903 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:25] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:45:25,911 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:45:25,981 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:25] "[35m[1mGET /admin_dashboard HTTP/1.1[0m" 500 -
+2026-06-11 19:45:26,008 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:26] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-06-11 19:45:26,015 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:26] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-06-11 19:45:26,027 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:26] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png&s=RypLDZVk7vCuaHXo0MMq HTTP/1.1[0m" 304 -
+2026-06-11 19:45:26,077 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:45:26] "[36mGET /admin_dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-06-11 19:46:01,585 [INFO] werkzeug:  * Detected change in 'C:\\softwares\\new\\app.py', reloading
+2026-06-11 19:46:01,718 [INFO] werkzeug:  * Restarting with stat
+2026-06-11 19:46:02,536 [WARNING] werkzeug:  * Debugger is active!
+2026-06-11 19:46:02,536 [INFO] werkzeug:  * Debugger PIN: 108-321-085
+2026-06-11 19:46:04,222 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:46:04,222 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:04] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:46:05,389 [DEBUG] app: REQ GET /login from 127.0.0.1
+2026-06-11 19:46:05,738 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:05] "GET /login HTTP/1.1" 200 -
+2026-06-11 19:46:05,755 [DEBUG] app: REQ GET /static/logo.png from 127.0.0.1
+2026-06-11 19:46:05,876 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:05] "[36mGET /static/logo.png HTTP/1.1[0m" 304 -
+2026-06-11 19:46:05,886 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:46:05,886 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:05] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:46:07,147 [DEBUG] app: REQ POST /login from 127.0.0.1
+2026-06-11 19:46:08,027 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:08] "[32mPOST /login HTTP/1.1[0m" 302 -
+2026-06-11 19:46:08,037 [DEBUG] app: REQ GET /admin_dashboard from 127.0.0.1
+2026-06-11 19:46:08,086 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:08] "GET /admin_dashboard HTTP/1.1" 200 -
+2026-06-11 19:46:08,290 [DEBUG] app: REQ GET /api/user-shops from 127.0.0.1
+2026-06-11 19:46:08,313 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:08] "GET /api/user-shops HTTP/1.1" 200 -
+2026-06-11 19:46:08,335 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:46:08,335 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:08] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:46:15,225 [DEBUG] app: REQ GET /pr_posearch from 127.0.0.1
+2026-06-11 19:46:15,315 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:15] "GET /pr_posearch HTTP/1.1" 200 -
+2026-06-11 19:46:15,374 [DEBUG] app: REQ GET /api/purchase-requisitions from 127.0.0.1
+2026-06-11 19:46:15,379 [DEBUG] app: REQ GET /api/purchase-orders from 127.0.0.1
+2026-06-11 19:46:15,401 [DEBUG] app: REQ GET /favicon.ico from 127.0.0.1
+2026-06-11 19:46:15,401 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:15] "GET /favicon.ico HTTP/1.1" 200 -
+2026-06-11 19:46:15,407 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:15] "[35m[1mGET /api/purchase-requisitions HTTP/1.1[0m" 500 -
+2026-06-11 19:46:15,415 [INFO] werkzeug: 127.0.0.1 - - [11/Jun/2026 19:46:15] "[35m[1mGET /api/purchase-orders HTTP/1.1[0m" 500 -

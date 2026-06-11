@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PR & PO Manager | View Documents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            font-weight: 700;
+            color: #0f3b5f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+        }
+
+        /* List and Detail Layout */
+        .main-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            min-height: 600px;
+        }
+
+        /* Left Side - List */
+        .list-side {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-header {
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .list-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .list-item:hover {
+            background: #f8fafc;
+        }
+
+        .list-item.active {
+            background: #e0f2fe;
+            border-left: 4px solid #1e4a76;
+        }
+
+        .item-number {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .item-vendor {
+            font-size: 0.8rem;
+            color: #5b6e8c;
+        }
+
+        .item-total {
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        .item-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-pr {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-po {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Right Side - Detail View */
+        .detail-side {
+            flex: 1.5;
+            min-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .detail-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .detail-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .empty-detail {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        /* Form Styles for Edit */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #5b6e8c;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Items Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 500px;
+        }
+
+        .items-table th {
+            background: #f8fafc;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .item-input {
+            width: 70px;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-top: 2px solid #cbd5e1;
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: #1e4a76;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #1e4a76;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Flash Message */
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: #1e293b;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            animation: slideIn 0.3s ease;
+            max-width: calc(100% - 40px);
+        }
+
+        .flash-success { background: #10b981; }
+        .flash-error { background: #ef4444; }
+        .flash-info { background: #3b82f6; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .main-layout { flex-direction: column; }
+            .list-side, .detail-side { min-width: auto; }
+            .list-container { max-height: 40vh; }
+            .detail-body { max-height: 60vh; }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .list-item { min-height: 48px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>
+            <i class="fas fa-file-alt"></i>
+            PR & PO Manager
+        </h1>
+        <button class="btn btn-secondary" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search by number, vendor, or product...">
+        <select id="typeFilter" class="filter-select">
+            <option value="all">All Types</option>
+            <option value="pr">Purchase Requisitions (PR)</option>
+            <option value="po">Purchase Orders (PO)</option>
+        </select>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left: List Panel -->
+        <div class="list-side">
+            <div class="list-header">
+                <span><i class="fas fa-list"></i> Documents</span>
+                <span id="resultCount">0 items</span>
+            </div>
+            <div id="listContainer" class="list-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading documents...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Detail Panel -->
+        <div class="detail-side">
+            <div class="detail-header">
+                <h2><i class="fas fa-info-circle"></i> Document Details</h2>
+                <div id="editModeIndicator"></div>
+            </div>
+            <div id="detailContainer" class="detail-body">
+                <div class="empty-detail">
+                    <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p>Select a document from the left to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data store
+    let allPRs = [];
+    let allPOs = [];
+    let currentDocument = null;
+    let currentType = null;
+
+    // ========== BACKEND API CALLS (Replace with your Flask endpoints) ==========
+    async function fetchPRs() {
+        try {
+            const response = await fetch('/api/purchase-requisitions');
+            if(!response.ok) throw new Error('Failed to fetch PRs');
+            const data = await response.json();
+            return data.success ? data.prs : [];
+        } catch(e) {
+            console.warn('Using mock PR data');
+            return getMockPRs();
+        }
+    }
+
+    async function fetchPOs() {
+        try {
+            const response = await fetch('/api/purchase-orders');
+            if(!response.ok) throw new Error('Failed to fetch POs');
+            const data = await response.json();
+            return data.success ? data.pos : [];
+        } catch(e) {
+            console.warn('Using mock PO data');
+            return getMockPOs();
+        }
+    }
+
+    // Mock data generator (replace with real backend data)
+    function getMockPRs() {
+        return [
+            { id: 1, pr_number: "PR-001", supplier_name: "Tech Distributors", date: "2024-01-15", status: "pending", 
+              items: [{name:"Mouse",qty:10,price:500,tax:12,total:5600},{name:"Keyboard",qty:5,price:1500,tax:12,total:8400}],
+              subtotal: 12500, tax_amount: 1500, grand_total: 14000, reason: "Office equipment needed" },
+            { id: 2, pr_number: "PR-002", supplier_name: "Office Supplies Co", date: "2024-01-20", status: "approved",
+              items: [{name:"Paper",qty:50,price:300,tax:5,total:15750},{name:"Pens",qty:100,price:20,tax:5,total:2100}],
+              subtotal: 17000, tax_amount: 850, grand_total: 17850, reason: "Stationery restock" },
+            { id: 3, pr_number: "PR-003", supplier_name: "ElectroMart", date: "2024-02-01", status: "draft",
+              items: [{name:"Monitor",qty:3,price:15000,tax:18,total:53100}],
+              subtotal: 45000, tax_amount: 8100, grand_total: 53100, reason: "New workstations" },
+            { id: 4, pr_number: "PR-004", supplier_name: "Furniture World", date: "2024-02-10", status: "pending",
+              items: [{name:"Chair",qty:10,price:5000,tax:12,total:56000},{name:"Desk",qty:5,price:8000,tax:12,total:44800}],
+              subtotal: 90000, tax_amount: 10800, grand_total: 100800, reason: "Office renovation" }
+        ];
+    }
+
+    function getMockPOs() {
+        return [
+            { id: 1, po_number: "PO-001", pr_number: "PR-001", supplier_name: "Tech Distributors", date: "2024-01-16", status: "pending", delivery_date: "2024-01-25",
+              items: [{name:"Mouse",qty:10,price:500,tax:12,total:5600},{name:"Keyboard",qty:5,price:1500,tax:12,total:8400}],
+              subtotal: 12500, tax_amount: 1500, grand_total: 14000 },
+            { id: 2, po_number: "PO-002", pr_number: "PR-002", supplier_name: "Office Supplies Co", date: "2024-01-21", status: "received", delivery_date: "2024-01-28",
+              items: [{name:"Paper",qty:50,price:300,tax:5,total:15750},{name:"Pens",qty:100,price:20,tax:5,total:2100}],
+              subtotal: 17000, tax_amount: 850, grand_total: 17850 },
+            { id: 3, po_number: "PO-003", pr_number: "PR-004", supplier_name: "Furniture World", date: "2024-02-12", status: "pending", delivery_date: "2024-02-28",
+              items: [{name:"Chair",qty:10,price:5000,tax:12,total:56000},{name:"Desk",qty:5,price:8000,tax:12,total:44800}],
+              subtotal: 90000, tax_amount: 10800, grand_total: 100800 }
+        ];
+    }
+
+    // Load all data
+    async function loadAllData() {
+        showLoading(true);
+        try {
+            const [prs, pos] = await Promise.all([fetchPRs(), fetchPOs()]);
+            allPRs = prs;
+            allPOs = pos;
+            renderList();
+        } catch(e) {
+            showFlash("Error loading data", "error");
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Render the list panel
+    function renderList() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const typeFilter = document.getElementById('typeFilter').value;
+        
+        let items = [];
+        
+        if(typeFilter === 'all' || typeFilter === 'pr') {
+            items.push(...allPRs.map(pr => ({ ...pr, docType: 'pr', displayNumber: pr.pr_number })));
+        }
+        if(typeFilter === 'all' || typeFilter === 'po') {
+            items.push(...allPOs.map(po => ({ ...po, docType: 'po', displayNumber: po.po_number })));
+        }
+        
+        // Filter by search term
+        if(searchTerm) {
+            items = items.filter(item => 
+                item.displayNumber.toLowerCase().includes(searchTerm) ||
+                item.supplier_name.toLowerCase().includes(searchTerm) ||
+                item.items?.some(i => i.name.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        // Sort by date (newest first)
+        items.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        const container = document.getElementById('listContainer');
+        document.getElementById('resultCount').innerText = `${items.length} items`;
+        
+        if(items.length === 0) {
+            container.innerHTML = `<div class="empty-detail" style="padding: 40px;">
+                <i class="fas fa-search"></i>
+                <p>No documents found</p>
+            </div>`;
+            return;
+        }
+        
+        container.innerHTML = items.map(item => `
+            <div class="list-item" data-id="${item.id}" data-type="${item.docType}" onclick="selectDocument(${item.id}, '${item.docType}')">
+                <div>
+                    <div class="item-number">${item.displayNumber}</div>
+                    <div class="item-vendor">${escapeHtml(item.supplier_name)}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="item-total">₹ ${(item.grand_total || 0).toLocaleString()}</div>
+                    <span class="item-badge ${item.docType === 'pr' ? 'badge-pr' : 'badge-po'}">
+                        ${item.docType.toUpperCase()}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Select and show document detail
+    window.selectDocument = function(id, type) {
+        currentType = type;
+        if(type === 'pr') {
+            currentDocument = allPRs.find(pr => pr.id === id);
+        } else {
+            currentDocument = allPOs.find(po => po.id === id);
+        }
+        renderDetail();
+        
+        // Highlight active item
+        document.querySelectorAll('.list-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        const activeItem = document.querySelector(`.list-item[data-id="${id}"][data-type="${type}"]`);
+        if(activeItem) activeItem.classList.add('active');
+    };
+
+    // Render detail panel with edit capability
+    function renderDetail() {
+        const container = document.getElementById('detailContainer');
+        
+        if(!currentDocument) {
+            container.innerHTML = `<div class="empty-detail">
+                <i class="fas fa-folder-open" style="font-size: 48px;"></i>
+                <p>Select a document to view details</p>
+            </div>`;
+            return;
+        }
+        
+        const isPR = currentType === 'pr';
+        const doc = currentDocument;
+        
+        let itemsHtml = '';
+        doc.items.forEach((item, idx) => {
+            itemsHtml += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td><input type="text" class="item-input" value="${escapeHtml(item.name)}" data-field="name" data-idx="${idx}" style="width:150px;"></td>
+                    <td><input type="number" class="item-input" value="${item.qty || item.quantity}" data-field="qty" data-idx="${idx}" step="1" onchange="recalculateTotals()"></td>
+                    <td><input type="number" class="item-input" value="${item.price || item.unit_price}" data-field="price" data-idx="${idx}" step="0.01" onchange="recalculateTotals()"></td>
+                    <td><input type="number" class="item-input" value="${item.tax || item.tax_rate}" data-field="tax" data-idx="${idx}" step="0.5" onchange="recalculateTotals()"></td>
+                    <td><span id="item-total-${idx}">₹ ${((item.qty || item.quantity) * (item.price || item.unit_price) * (1 + (item.tax || item.tax_rate)/100)).toFixed(2)}</span></td>
+                </tr>
+            `;
+        });
+        
+        container.innerHTML = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>${isPR ? 'PR Number' : 'PO Number'}</label>
+                    <input type="text" id="docNumber" value="${doc.pr_number || doc.po_number}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>${isPR ? 'PR Date' : 'PO Date'}</label>
+                    <input type="date" id="docDate" value="${doc.date}">
+                </div>
+                ${!isPR ? `
+                <div class="form-group">
+                    <label>PR Reference</label>
+                    <input type="text" value="${doc.pr_number || ''}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Expected Delivery</label>
+                    <input type="date" id="deliveryDate" value="${doc.delivery_date || ''}">
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Supplier / Vendor</label>
+                    <input type="text" id="supplierName" value="${escapeHtml(doc.supplier_name)}">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="docStatus">
+                        <option value="draft" ${doc.status === 'draft' ? 'selected' : ''}>Draft</option>
+                        <option value="pending" ${doc.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="approved" ${doc.status === 'approved' ? 'selected' : ''}>Approved</option>
+                        <option value="received" ${doc.status === 'received' ? 'selected' : ''}>Received</option>
+                        <option value="cancelled" ${doc.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            
+            ${isPR ? `
+            <div class="form-group">
+                <label>Reason / Notes</label>
+                <textarea id="reason" rows="2">${escapeHtml(doc.reason || '')}</textarea>
+            </div>
+            ` : ''}
+            
+            <h3 style="margin: 20px 0 10px; font-size: 1rem;">Items</h3>
+            <div class="table-wrapper">
+                <table class="items-table">
+                    <thead>
+                        <tr><th>#</th><th>Product</th><th>Qty</th><th>Unit Price</th><th>Tax%</th><th>Total</th></tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-row"><span>Subtotal</span><span id="displaySubtotal">₹ ${doc.subtotal.toFixed(2)}</span></div>
+                <div class="summary-row"><span>Tax Amount</span><span id="displayTax">₹ ${doc.tax_amount.toFixed(2)}</span></div>
+                <div class="summary-row total"><span>Grand Total</span><span id="displayGrand">₹ ${doc.grand_total.toFixed(2)}</span></div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="saveDocument()"><i class="fas fa-save"></i> Save Changes</button>
+                ${isPR ? `<button class="btn btn-primary" onclick="convertToPO()"><i class="fas fa-exchange-alt"></i> Convert to PO</button>` : ''}
+                <button class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+            </div>
+        `;
+    }
+    
+    // Recalculate totals when editing items
+    window.recalculateTotals = function() {
+        if(!currentDocument) return;
+        
+        let subtotal = 0;
+        let taxTotal = 0;
+        
+        currentDocument.items.forEach((item, idx) => {
+            const qty = parseFloat(document.querySelector(`input[data-field="qty"][data-idx="${idx}"]`)?.value) || 0;
+            const price = parseFloat(document.querySelector(`input[data-field="price"][data-idx="${idx}"]`)?.value) || 0;
+            const taxRate = parseFloat(document.querySelector(`input[data-field="tax"][data-idx="${idx}"]`)?.value) || 0;
+            
+            const itemSubtotal = qty * price;
+            const itemTax = itemSubtotal * taxRate / 100;
+            const itemTotal = itemSubtotal + itemTax;
+            
+            subtotal += itemSubtotal;
+            taxTotal += itemTax;
+            
+            const totalSpan = document.getElementById(`item-total-${idx}`);
+            if(totalSpan) totalSpan.innerText = `₹ ${itemTotal.toFixed(2)}`;
+            
+            // Update item in memory
+            item.qty = qty;
+            item.price = price;
+            item.tax = taxRate;
+        });
+        
+        const grandTotal = subtotal + taxTotal;
+        
+        document.getElementById('displaySubtotal').innerText = `₹ ${subtotal.toFixed(2)}`;
+        document.getElementById('displayTax').innerText = `₹ ${taxTotal.toFixed(2)}`;
+        document.getElementById('displayGrand').innerText = `₹ ${grandTotal.toFixed(2)}`;
+        
+        // Update document object
+        currentDocument.subtotal = subtotal;
+        currentDocument.tax_amount = taxTotal;
+        currentDocument.grand_total = grandTotal;
+    };
+    
+    // Save document (POST to backend)
+    window.saveDocument = async function() {
+        if(!currentDocument) return;
+        
+        // Collect updated data
+        currentDocument.supplier_name = document.getElementById('supplierName').value;
+        currentDocument.date = document.getElementById('docDate').value;
+        currentDocument.status = document.getElementById('docStatus').value;
+        
+        if(currentType === 'pr') {
+            currentDocument.reason = document.getElementById('reason')?.value || '';
+        } else {
+            currentDocument.delivery_date = document.getElementById('deliveryDate')?.value || '';
+        }
+        
+        // Collect updated items
+        currentDocument.items.forEach((item, idx) => {
+            item.name = document.querySelector(`input[data-field="name"][data-idx="${idx}"]`)?.value || item.name;
+            item.qty = parseFloat(document.querySelector(`input[data-field="qty"][data-idx="${idx}"]`)?.value) || 0;
+            item.price = parseFloat(document.querySelector(`input[data-field="price"][data-idx="${idx}"]`)?.value) || 0;
+            item.tax = parseFloat(document.querySelector(`input[data-field="tax"][data-idx="${idx}"]`)?.value) || 0;
+        });
+        
+        try {
+            const endpoint = currentType === 'pr' 
+                ? `/api/purchase-requisitions/${currentDocument.id}`
+                : `/api/purchase-orders/${currentDocument.id}`;
+            
+            const response = await fetch(endpoint, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentDocument)
+            });
+            
+            if(response.ok) {
+                showFlash(`${currentType.toUpperCase()} saved successfully`, "success");
+                await loadAllData(); // Refresh list
+                selectDocument(currentDocument.id, currentType);
+            } else {
+                throw new Error('Save failed');
+            }
+        } catch(e) {
+            showFlash(`Error saving: ${e.message}`, "error");
+        }
+    };
+    
+    // Convert PR to PO
+    window.convertToPO = async function() {
+        if(!currentDocument || currentType !== 'pr') return;
+        
+        try {
+            const response = await fetch(`/api/purchase-orders/convert-from-pr/${currentDocument.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if(response.ok) {
+                showFlash(`PO created from ${currentDocument.pr_number}`, "success");
+                await loadAllData();
+            } else {
+                throw new Error('Conversion failed');
+            }
+        } catch(e) {
+            showFlash(`Error converting: ${e.message}`, "error");
+        }
+    };
+    
+    function showLoading(show) {
+        if(!show && document.querySelector('.loading')) {
+            // Loading already handled by renderList
+        }
+    }
+    
+    function showFlash(msg, type) {
+        const flash = document.createElement('div');
+        flash.className = `flash-message flash-${type}`;
+        flash.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 3000);
+    }
+    
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+    
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', () => renderList());
+    document.getElementById('typeFilter').addEventListener('change', () => renderList());
+    document.getElementById('refreshBtn').addEventListener('click', () => loadAllData());
+    
+    // Initialize
+    loadAllData();
+</script>
+</body>
+</html>
