@@ -38,6 +38,42 @@ def admin_required(f):
         return f(*args, **kwargs)
     return wrap
 
+
+def resolve_supplier_id(cursor, supplier_id, supplier_name, shop_id):
+    if supplier_id:
+        return supplier_id
+    if not supplier_name:
+        return None
+    cursor.execute(
+        "SELECT supplier_id FROM supplier WHERE name = %s AND shopid = %s LIMIT 1",
+        (supplier_name, shop_id)
+    )
+    supplier = cursor.fetchone()
+    return supplier['supplier_id'] if supplier else None
+
+
+def normalize_pr_item(item):
+    quantity = float(item.get('quantity') or item.get('qty') or 0)
+    unit_price = float(item.get('unit_price') or item.get('price') or 0)
+    tax_rate = float(item.get('tax_rate') or item.get('tax') or 0)
+    tax_amount = float(item.get('tax_amount') or 0)
+    total = float(item.get('total') or 0)
+
+    if tax_amount <= 0 and tax_rate:
+        tax_amount = round(quantity * unit_price * tax_rate / 100.0, 2)
+    if total <= 0:
+        total = round(quantity * unit_price + tax_amount, 2)
+
+    return {
+        'product_id': item.get('id') or item.get('product_id'),
+        'product_name': item.get('name') or item.get('product_name'),
+        'quantity': quantity,
+        'unit_price': unit_price,
+        'tax_rate': tax_rate,
+        'tax_amount': tax_amount,
+        'total': total
+    }
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 #CORS(app, supports_credentials=True)
@@ -5303,7 +5339,7 @@ def create_pr():
 def create_po_from_pr(conn, pr_id, shop_id, supplier_id, items, created_by):
     """Helper function to create PO from existing PR"""
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(dictionary=True) as cursor:
             # Calculate totals
             total_qty = sum(item['quantity'] for item in items)
             subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
@@ -5317,10 +5353,9 @@ def create_po_from_pr(conn, pr_id, shop_id, supplier_id, items, created_by):
             
             # Insert into purchase_orders
             cursor.execute("""
-                INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, INFONO, tax, QTY, price, total, created_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (pr_id, supplier_id, shop_id, 'pending', po_number, 
-                  tax_total, total_qty, subtotal, grand_total, created_by))
+                INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, tax, QTY, price, total, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (pr_id, supplier_id, shop_id, 'pending', tax_total, total_qty, subtotal, grand_total, created_by))
             
             po_id = cursor.lastrowid
             conn.commit()
@@ -5331,9 +5366,8 @@ def create_po_from_pr(conn, pr_id, shop_id, supplier_id, items, created_by):
                 'total': grand_total
             }
     except Exception as e:
-        print(f"Error creating PO: {e}")
+        print(f"Error creating PO from PR helper: {e}")
         return None
-
 
 @app.route('/api/purchase-orders/convert-from-pr/<int:pr_id>', methods=['POST'])
 @login_required
@@ -5347,7 +5381,7 @@ def create_po_from_existing_pr(pr_id):
     try:
         shop_id = session.get('selected_shop_id')
         
-        with conn.cursor() as cursor:
+        with conn.cursor(dictionary=True) as cursor:
             # Get PR details
             cursor.execute("""
                 SELECT pr.receipt_id, pr.shopid, pr.supplier_id, pr.Reason
@@ -5396,9 +5430,9 @@ def create_po_from_existing_pr(pr_id):
             
             # Insert into purchase_orders
             cursor.execute("""
-                INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, INFONO, tax, QTY, price, total, created_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (pr_id, pr['supplier_id'], shop_id, 'pending', po_number, 
+                INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, tax, QTY, price, total, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (pr_id, pr['supplier_id'], shop_id, 'pending', 
                   tax_total, total_qty, subtotal, grand_total, session.get('user')))
             
             po_id = cursor.lastrowid
@@ -5489,5 +5523,357 @@ def get_pr_details(pr_id):
 def pr_posearch():
     return render_template('PR_PO_search.html')
 
+
+# Add these routes to your Flask app
+
+@app.route('/api/purchase-requisitions', methods=['GET'])
+@login_required
+def get_all_prs():
+    """Get all purchase requisitions for the selected shop"""
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute("""
+                SELECT pr.receipt_id, pr.shopid, pr.supplier_id, pr.Reason, pr.created_at, 
+                       pr.created_by, pr.updated_at, pr.updated_by,
+                       s.name as supplier_name,
+                       CASE 
+                           WHEN po.PONO IS NOT NULL THEN 'converted'
+                           ELSE 'pending'
+                       END as status
+                FROM purchase_reciepts pr
+                LEFT JOIN supplier s ON pr.supplier_id = s.supplier_id
+                LEFT JOIN purchase_orders po ON pr.receipt_id = po.PRID AND po.shopid = pr.shopid
+                WHERE pr.shopid = %s
+                ORDER BY pr.created_at DESC
+            """, (shop_id,))
+            
+            prs = cursor.fetchall()
+            
+            # Format the response
+            result = []
+            for pr in prs:
+                cursor.execute("""
+                    SELECT pi.product_id, p.name as product_name, pi.quantity, 
+                           pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
+                    FROM PR_items pi
+                    JOIN Products p ON pi.product_id = p.product_id
+                    WHERE pi.PRID = %s AND pi.shopid = %s
+                """, (pr['receipt_id'], shop_id))
+                
+                items = cursor.fetchall()
+                
+                # Calculate totals
+                subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
+                tax_total = sum(item['tax_amount'] for item in items)
+                grand_total = subtotal + tax_total
+                
+                result.append({
+                    'id': pr['receipt_id'],
+                    'pr_number': f"PR-{pr['receipt_id']:04d}",
+                    'supplier_id': pr['supplier_id'],
+                    'supplier_name': pr['supplier_name'],
+                    'date': pr['created_at'].strftime('%Y-%m-%d') if pr['created_at'] else None,
+                    'reason': pr['Reason'],
+                    'status': pr['status'],
+                    'items': [{
+                        'id': item['product_id'],
+                        'name': item['product_name'],
+                        'quantity': float(item['quantity']),
+                        'unit_price': float(item['unit_price']),
+                        'tax_rate': float(item['tax_rate']),
+                        'tax_amount': float(item['tax_amount']),
+                        'total': float(item['total'])
+                    } for item in items],
+                    'subtotal': float(subtotal),
+                    'tax_amount': float(tax_total),
+                    'grand_total': float(grand_total),
+                    'created_by': pr['created_by'],
+                    'created_at': pr['created_at'].strftime('%Y-%m-%d %H:%M:%S') if pr['created_at'] else None
+                })
+            
+            return jsonify({'success': True, 'prs': result})
+            
+    except Exception as e:
+        print(f"Error getting PRs: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/purchase-orders', methods=['GET'])
+@login_required
+def get_all_pos():
+    """Get all purchase orders for the selected shop"""
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute("""
+                SELECT po.PONO, po.PRID, po.supplier_id, po.Status, 
+                       po.tax, po.QTY, po.price, po.total, po.created_at, po.created_by,
+                       s.name as supplier_name,
+                       pr.Reason
+                FROM purchase_orders po
+                LEFT JOIN supplier s ON po.supplier_id = s.supplier_id
+                LEFT JOIN purchase_reciepts pr ON po.PRID = pr.receipt_id
+                WHERE po.shopid = %s
+                ORDER BY po.created_at DESC
+            """, (shop_id,))
+            
+            pos = cursor.fetchall()
+            
+            result = []
+            for po in pos:
+                # Get items from the associated PR
+                if po['PRID']:
+                    cursor.execute("""
+                        SELECT pi.product_id, p.name as product_name, pi.quantity, 
+                               pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
+                        FROM PR_items pi
+                        JOIN Products p ON pi.product_id = p.product_id
+                        WHERE pi.PRID = %s AND pi.shopid = %s
+                    """, (po['PRID'], shop_id))
+                    
+                    items = cursor.fetchall()
+                    
+                    result.append({
+                        'id': po['PONO'],
+                        'po_number': f"PO-{po['PONO']:04d}",
+                        'pr_id': po['PRID'],
+                        'pr_number': f"PR-{po['PRID']:04d}" if po['PRID'] else None,
+                        'supplier_id': po['supplier_id'],
+                        'supplier_name': po['supplier_name'],
+                        'date': po['created_at'].strftime('%Y-%m-%d') if po['created_at'] else None,
+                        'status': po['Status'],
+                        'delivery_date': None,  # Add if you have this field
+                        'items': [{
+                            'id': item['product_id'],
+                            'name': item['product_name'],
+                            'quantity': float(item['quantity']),
+                            'unit_price': float(item['unit_price']),
+                            'tax_rate': float(item['tax_rate']),
+                            'tax_amount': float(item['tax_amount']),
+                            'total': float(item['total'])
+                        } for item in items],
+                        'subtotal': float(po['price']),
+                        'tax_amount': float(po['tax']),
+                        'grand_total': float(po['total']),
+                        'reason': po['Reason'],
+                        'created_by': po['created_by'],
+                        'created_at': po['created_at'].strftime('%Y-%m-%d %H:%M:%S') if po['created_at'] else None
+                    })
+            
+            return jsonify({'success': True, 'pos': result})
+            
+    except Exception as e:
+        print(f"Error getting POs: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/purchase-requisitions/<int:pr_id>', methods=['PUT'])
+@login_required
+def update_pr(pr_id):
+    """Update an existing purchase requisition"""
+    data = request.get_json()
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        with conn.cursor() as cursor:
+            # Check if PR exists and belongs to shop
+            cursor.execute("""
+                SELECT receipt_id, supplier_id FROM purchase_reciepts 
+                WHERE receipt_id = %s AND shopid = %s
+            """, (pr_id, shop_id))
+            existing_pr = cursor.fetchone()
+            
+            if not existing_pr:
+                return jsonify({'success': False, 'message': 'PR not found'}), 404
+
+            supplier_id = resolve_supplier_id(
+                cursor,
+                data.get('supplier_id') or existing_pr.get('supplier_id'),
+                data.get('supplier_name'),
+                shop_id
+            )
+            
+            # Update PR header
+            cursor.execute("""
+                UPDATE purchase_reciepts 
+                SET supplier_id = %s, Reason = %s, updated_by = %s, updated_at = NOW()
+                WHERE receipt_id = %s AND shopid = %s
+            """, (supplier_id, data.get('reason'), session.get('user'), pr_id, shop_id))
+            
+            # Delete existing items
+            cursor.execute("DELETE FROM PR_items WHERE PRID = %s AND shopid = %s", (pr_id, shop_id))
+            
+            # Insert updated items
+            for raw_item in data.get('items', []):
+                item = normalize_pr_item(raw_item)
+                product_id = item['product_id']
+                if not product_id and item.get('product_name'):
+                    cursor.execute("""
+                        SELECT product_id FROM Products 
+                        WHERE name = %s AND shop_id = %s LIMIT 1
+                    """, (item['product_name'], shop_id))
+                    product = cursor.fetchone()
+                    product_id = product['product_id'] if product else None
+                
+                if not product_id:
+                    continue
+                
+                cursor.execute("""
+                    INSERT INTO PR_items (shopid, PRID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    shop_id,
+                    pr_id,
+                    product_id,
+                    item['quantity'],
+                    item['unit_price'],
+                    item['tax_rate'],
+                    item['tax_amount'],
+                    item['total']
+                ))
+            
+            conn.commit()
+            
+            return jsonify({'success': True, 'message': 'PR updated successfully'})
+            
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating PR: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/purchase-orders/<int:po_id>', methods=['PUT'])
+@login_required
+def update_po(po_id):
+    """Update an existing purchase order"""
+    data = request.get_json()
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        with conn.cursor() as cursor:
+            # Check if PO exists and belongs to shop
+            cursor.execute("""
+                SELECT PONO, PRID, supplier_id, Status
+                FROM purchase_orders 
+                WHERE PONO = %s AND shopid = %s
+            """, (po_id, shop_id))
+            existing_po = cursor.fetchone()
+            
+            if not existing_po:
+                return jsonify({'success': False, 'message': 'PO not found'}), 404
+
+            pr_id = data.get('pr_id') or existing_po.get('PRID')
+            supplier_id = resolve_supplier_id(
+                cursor,
+                data.get('supplier_id') or existing_po.get('supplier_id'),
+                data.get('supplier_name'),
+                shop_id
+            )
+            status = data.get('status') or existing_po.get('Status')
+
+            if pr_id:
+                # Update PR supplier if linked
+                cursor.execute("""
+                    UPDATE purchase_reciepts 
+                    SET supplier_id = %s, updated_by = %s, updated_at = NOW()
+                    WHERE receipt_id = %s AND shopid = %s
+                """, (supplier_id, session.get('user'), pr_id, shop_id))
+
+            subtotal = None
+            tax_total = None
+            grand_total = None
+
+            if isinstance(data.get('items'), list) and pr_id:
+                cursor.execute("DELETE FROM PR_items WHERE PRID = %s AND shopid = %s", (pr_id, shop_id))
+                subtotal = 0.0
+                tax_total = 0.0
+                grand_total = 0.0
+                for raw_item in data.get('items', []):
+                    item = normalize_pr_item(raw_item)
+                    product_id = item['product_id']
+                    if not product_id and item.get('product_name'):
+                        cursor.execute("""
+                            SELECT product_id FROM Products 
+                            WHERE name = %s AND shop_id = %s LIMIT 1
+                        """, (item['product_name'], shop_id))
+                        product = cursor.fetchone()
+                        product_id = product['product_id'] if product else None
+
+                    if not product_id:
+                        continue
+
+                    cursor.execute("""
+                        INSERT INTO PR_items (shopid, PRID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (
+                        shop_id,
+                        pr_id,
+                        product_id,
+                        item['quantity'],
+                        item['unit_price'],
+                        item['tax_rate'],
+                        item['tax_amount'],
+                        item['total']
+                    ))
+
+                    subtotal += item['quantity'] * item['unit_price']
+                    tax_total += item['tax_amount']
+                    grand_total += item['total']
+
+            update_fields = {
+                'Status': status,
+                'supplier_id': supplier_id,
+                'updated_by': session.get('user')
+            }
+
+            if subtotal is not None and tax_total is not None and grand_total is not None:
+                update_fields['tax'] = tax_total
+                update_fields['price'] = subtotal
+                update_fields['total'] = grand_total
+
+            # Build the update query dynamically for fields that are present.
+            set_clauses = []
+            values = []
+            for key, value in update_fields.items():
+                if value is not None:
+                    set_clauses.append(f"{key} = %s")
+                    values.append(value)
+            values.extend([po_id, shop_id])
+
+            if set_clauses:
+                cursor.execute(
+                    f"UPDATE purchase_orders SET {', '.join(set_clauses)} WHERE PONO = %s AND shopid = %s",
+                    tuple(values)
+                )
+
+            conn.commit()
+            
+            return jsonify({'success': True, 'message': 'PO updated successfully'})
+            
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating PO: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+        
 if __name__ == '__main__':
     app.run(debug = True,port=5500)

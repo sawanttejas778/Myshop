@@ -465,59 +465,23 @@
 
     // ========== BACKEND API CALLS (Replace with your Flask endpoints) ==========
     async function fetchPRs() {
-        try {
-            const response = await fetch('/api/purchase-requisitions');
-            if(!response.ok) throw new Error('Failed to fetch PRs');
-            const data = await response.json();
-            return data.success ? data.prs : [];
-        } catch(e) {
-            console.warn('Using mock PR data');
-            return getMockPRs();
+        const response = await fetch('/api/purchase-requisitions');
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch PRs: ${response.status} ${errorText}`);
         }
+        const data = await response.json();
+        return data.success ? data.prs : [];
     }
 
     async function fetchPOs() {
-        try {
-            const response = await fetch('/api/purchase-orders');
-            if(!response.ok) throw new Error('Failed to fetch POs');
-            const data = await response.json();
-            return data.success ? data.pos : [];
-        } catch(e) {
-            console.warn('Using mock PO data');
-            return getMockPOs();
+        const response = await fetch('/api/purchase-orders');
+        if(!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch POs: ${response.status} ${errorText}`);
         }
-    }
-
-    // Mock data generator (replace with real backend data)
-    function getMockPRs() {
-        return [
-            { id: 1, pr_number: "PR-001", supplier_name: "Tech Distributors", date: "2024-01-15", status: "pending", 
-              items: [{name:"Mouse",qty:10,price:500,tax:12,total:5600},{name:"Keyboard",qty:5,price:1500,tax:12,total:8400}],
-              subtotal: 12500, tax_amount: 1500, grand_total: 14000, reason: "Office equipment needed" },
-            { id: 2, pr_number: "PR-002", supplier_name: "Office Supplies Co", date: "2024-01-20", status: "approved",
-              items: [{name:"Paper",qty:50,price:300,tax:5,total:15750},{name:"Pens",qty:100,price:20,tax:5,total:2100}],
-              subtotal: 17000, tax_amount: 850, grand_total: 17850, reason: "Stationery restock" },
-            { id: 3, pr_number: "PR-003", supplier_name: "ElectroMart", date: "2024-02-01", status: "draft",
-              items: [{name:"Monitor",qty:3,price:15000,tax:18,total:53100}],
-              subtotal: 45000, tax_amount: 8100, grand_total: 53100, reason: "New workstations" },
-            { id: 4, pr_number: "PR-004", supplier_name: "Furniture World", date: "2024-02-10", status: "pending",
-              items: [{name:"Chair",qty:10,price:5000,tax:12,total:56000},{name:"Desk",qty:5,price:8000,tax:12,total:44800}],
-              subtotal: 90000, tax_amount: 10800, grand_total: 100800, reason: "Office renovation" }
-        ];
-    }
-
-    function getMockPOs() {
-        return [
-            { id: 1, po_number: "PO-001", pr_number: "PR-001", supplier_name: "Tech Distributors", date: "2024-01-16", status: "pending", delivery_date: "2024-01-25",
-              items: [{name:"Mouse",qty:10,price:500,tax:12,total:5600},{name:"Keyboard",qty:5,price:1500,tax:12,total:8400}],
-              subtotal: 12500, tax_amount: 1500, grand_total: 14000 },
-            { id: 2, po_number: "PO-002", pr_number: "PR-002", supplier_name: "Office Supplies Co", date: "2024-01-21", status: "received", delivery_date: "2024-01-28",
-              items: [{name:"Paper",qty:50,price:300,tax:5,total:15750},{name:"Pens",qty:100,price:20,tax:5,total:2100}],
-              subtotal: 17000, tax_amount: 850, grand_total: 17850 },
-            { id: 3, po_number: "PO-003", pr_number: "PR-004", supplier_name: "Furniture World", date: "2024-02-12", status: "pending", delivery_date: "2024-02-28",
-              items: [{name:"Chair",qty:10,price:5000,tax:12,total:56000},{name:"Desk",qty:5,price:8000,tax:12,total:44800}],
-              subtotal: 90000, tax_amount: 10800, grand_total: 100800 }
-        ];
+        const data = await response.json();
+        return data.success ? data.pos : [];
     }
 
     // Load all data
@@ -623,14 +587,20 @@
         
         let itemsHtml = '';
         doc.items.forEach((item, idx) => {
+            const name = item.name || item.product_name || '';
+            const quantity = item.quantity ?? item.qty ?? 0;
+            const unitPrice = item.unit_price ?? item.price ?? 0;
+            const taxRate = item.tax_rate ?? item.tax ?? 0;
+            const itemTotal = quantity * unitPrice * (1 + taxRate / 100);
+
             itemsHtml += `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td><input type="text" class="item-input" value="${escapeHtml(item.name)}" data-field="name" data-idx="${idx}" style="width:150px;"></td>
-                    <td><input type="number" class="item-input" value="${item.qty || item.quantity}" data-field="qty" data-idx="${idx}" step="1" onchange="recalculateTotals()"></td>
-                    <td><input type="number" class="item-input" value="${item.price || item.unit_price}" data-field="price" data-idx="${idx}" step="0.01" onchange="recalculateTotals()"></td>
-                    <td><input type="number" class="item-input" value="${item.tax || item.tax_rate}" data-field="tax" data-idx="${idx}" step="0.5" onchange="recalculateTotals()"></td>
-                    <td><span id="item-total-${idx}">₹ ${((item.qty || item.quantity) * (item.price || item.unit_price) * (1 + (item.tax || item.tax_rate)/100)).toFixed(2)}</span></td>
+                    <td><input type="text" class="item-input" value="${escapeHtml(name)}" data-field="name" data-idx="${idx}" style="width:150px;"></td>
+                    <td><input type="number" class="item-input" value="${quantity}" data-field="qty" data-idx="${idx}" step="1" onchange="recalculateTotals()"></td>
+                    <td><input type="number" class="item-input" value="${unitPrice}" data-field="price" data-idx="${idx}" step="0.01" onchange="recalculateTotals()"></td>
+                    <td><input type="number" class="item-input" value="${taxRate}" data-field="tax" data-idx="${idx}" step="0.5" onchange="recalculateTotals()"></td>
+                    <td><span id="item-total-${idx}">₹ ${itemTotal.toFixed(2)}</span></td>
                 </tr>
             `;
         });
@@ -639,7 +609,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>${isPR ? 'PR Number' : 'PO Number'}</label>
-                    <input type="text" id="docNumber" value="${doc.pr_number || doc.po_number}" readonly>
+                    <input type="text" id="docNumber" value="${isPR ? doc.pr_number : doc.po_number}" readonly>
                 </div>
                 <div class="form-group">
                     <label>${isPR ? 'PR Date' : 'PO Date'}</label>
@@ -729,10 +699,13 @@
             const totalSpan = document.getElementById(`item-total-${idx}`);
             if(totalSpan) totalSpan.innerText = `₹ ${itemTotal.toFixed(2)}`;
             
-            // Update item in memory
-            item.qty = qty;
-            item.price = price;
-            item.tax = taxRate;
+            // Update item in memory with backend field names
+            item.quantity = qty;
+            item.unit_price = price;
+            item.tax_rate = taxRate;
+            item.tax_amount = parseFloat(itemTax.toFixed(2));
+            item.total = parseFloat(itemTotal.toFixed(2));
+            item.name = document.querySelector(`input[data-field="name"][data-idx="${idx}"]`)?.value || item.name || item.product_name;
         });
         
         const grandTotal = subtotal + taxTotal;
@@ -764,10 +737,21 @@
         
         // Collect updated items
         currentDocument.items.forEach((item, idx) => {
-            item.name = document.querySelector(`input[data-field="name"][data-idx="${idx}"]`)?.value || item.name;
-            item.qty = parseFloat(document.querySelector(`input[data-field="qty"][data-idx="${idx}"]`)?.value) || 0;
-            item.price = parseFloat(document.querySelector(`input[data-field="price"][data-idx="${idx}"]`)?.value) || 0;
-            item.tax = parseFloat(document.querySelector(`input[data-field="tax"][data-idx="${idx}"]`)?.value) || 0;
+            const nameValue = document.querySelector(`input[data-field="name"][data-idx="${idx}"]`)?.value;
+            const qty = parseFloat(document.querySelector(`input[data-field="qty"][data-idx="${idx}"]`)?.value) || 0;
+            const price = parseFloat(document.querySelector(`input[data-field="price"][data-idx="${idx}"]`)?.value) || 0;
+            const taxRate = parseFloat(document.querySelector(`input[data-field="tax"][data-idx="${idx}"]`)?.value) || 0;
+            const itemSubtotal = qty * price;
+            const itemTax = itemSubtotal * taxRate / 100;
+            const itemTotal = itemSubtotal + itemTax;
+
+            item.product_name = nameValue || item.product_name || item.name;
+            item.name = item.product_name;
+            item.quantity = qty;
+            item.unit_price = price;
+            item.tax_rate = taxRate;
+            item.tax_amount = parseFloat(itemTax.toFixed(2));
+            item.total = parseFloat(itemTotal.toFixed(2));
         });
         
         try {
