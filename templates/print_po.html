@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Purchase Order | Print & PDF</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            padding: 30px 20px;
+        }
+
+        /* A4 size container */
+        .po-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .po-inner {
+            background: white;
+            padding: 2rem 2rem 2rem 2rem;
+        }
+
+        /* Header section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #1e3a8a;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .shop-info h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+        }
+
+        .shop-info .shop-address {
+            color: #334155;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-top: 5px;
+            max-width: 320px;
+        }
+
+        .po-title {
+            text-align: right;
+        }
+
+        .po-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            letter-spacing: 1px;
+        }
+
+        .po-title .ref {
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* Vendor & PO Details row */
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+        }
+
+        .vendor-info h3,
+        .po-details h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .vendor-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+
+        .vendor-detail {
+            font-size: 0.85rem;
+            color: #334155;
+            margin-top: 4px;
+        }
+
+        .po-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 0.85rem;
+        }
+
+        .po-detail-row strong {
+            color: #1e293b;
+        }
+
+        .status-badge {
+            margin-top: 8px;
+        }
+
+        .badge-status {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 40px;
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        /* Items table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0 1.2rem 0;
+            font-size: 0.85rem;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 12px 8px;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        .items-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+            color: #0f172a;
+        }
+
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Totals section */
+        .totals-card {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .totals-box {
+            width: 320px;
+            background: #fefefe;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9rem;
+        }
+
+        .total-row.grand {
+            font-weight: 800;
+            font-size: 1.2rem;
+            border-top: 2px dashed #cbd5e1;
+            margin-top: 6px;
+            padding-top: 12px;
+            color: #0f3b5f;
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.3rem;
+            margin-top: 0.8rem;
+        }
+
+        /* Print optimization */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .po-wrapper {
+                max-width: 100%;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .po-inner {
+                padding: 0.6in 0.5in;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .badge-status {
+                border: 1px solid #ccc;
+                background: #f3f4f6;
+                print-color-adjust: exact;
+            }
+        }
+
+        button {
+            background: #1e3a8a;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 20px;
+            margin-left: 20px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .demo-info {
+            background: #fef9e6;
+            margin: 10px 20px 0 20px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #1e3a8a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-msg {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="po-wrapper" id="poApp">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 0 20px;" class="no-print">
+        <div class="demo-info">
+            PO Document - Press Ctrl+P or click Print to save as PDF
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+            <button id="printBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+            <button id="backBtn" style="background: #64748b;"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+    </div>
+    <div class="po-inner" id="poContent">
+        <!-- Header: Shop & Title -->
+        <div class="header-section">
+            <div class="shop-info">
+                <h2 id="shopName">[Shop Name]</h2>
+                <div class="shop-address" id="shopAddress">
+                    [Shop Address]<br>
+                    [City, State - Pin Code] | GST: XX-XXXXX
+                </div>
+                <div id="shopExtra" style="font-size:0.75rem; margin-top:6px;"></div>
+            </div>
+            <div class="po-title">
+                <h1>PURCHASE ORDER</h1>
+                <div class="ref">
+                    <span id="poRef">#PO-0000</span>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 6px;" id="poDate"></div>
+            </div>
+        </div>
+
+        <!-- Vendor & PO Details row -->
+        <div class="details-row">
+            <div class="vendor-info">
+                <h3><i class="fas fa-building"></i> VENDOR / SUPPLIER</h3>
+                <div class="vendor-name" id="vendorName">Vendor Name</div>
+                <div class="vendor-detail" id="vendorDetails">Contact / Address</div>
+                <div class="status-badge" id="statusBadge"></div>
+            </div>
+            <div class="po-details">
+                <h3><i class="fas fa-file-invoice"></i> PO DETAILS</h3>
+                <div class="po-detail-row"><span>PO #:</span><strong id="poNumber">#PO-0000</strong></div>
+                <div class="po-detail-row"><span>PR Reference:</span><strong id="prRef">#PR-0000</strong></div>
+                <div class="po-detail-row"><span>Status:</span><strong id="poStatus">Pending</strong></div>
+                <div class="po-detail-row"><span>Created:</span><strong id="poCreated">-</strong></div>
+            </div>
+        </div>
+
+        <!-- PO Items Table -->
+        <table class="items-table" id="itemsTable">
+            <thead>
+                <tr>
+                    <th>#</th><th>Product</th><th>Quantity</th><th>Unit Price (₹)</th><th>Tax Rate</th><th>Tax Amt (₹)</th><th>Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <tr><td colspan="7" class="text-center">Loading items...</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Totals Section -->
+        <div class="totals-card">
+            <div class="totals-box">
+                <div class="total-row"><span>Subtotal</span><span id="subtotalVal">0.00</span></div>
+                <div class="total-row"><span>Total Tax</span><span id="totalTaxVal">0.00</span></div>
+                <div class="total-row grand"><span>GRAND TOTAL</span><span id="grandTotalVal">0.00</span></div>
+            </div>
+        </div>
+
+        <!-- Footer note -->
+        <div class="footer-note">
+            <span id="footerText">This is a system generated Purchase Order. Please retain for your records.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get PO ID from Flask template or URL query param
+    let poId = '{{ po_id }}';
+    poId = poId ? parseInt(poId) : null;
+    
+    if (!poId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        poId = urlParams.get('po_id');
+    }
+
+    // Back button handler
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.history.back();
+    });
+
+    // Print button handler
+    document.getElementById('printBtn').addEventListener('click', () => {
+        window.print();
+    });
+
+    // Fetch PO data from backend
+    async function loadPOData() {
+        if (!poId) {
+            document.getElementById('poContent').innerHTML = '<div class="error-msg"><i class="fas fa-exclamation-circle"></i> PO ID not provided in URL.</div>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/po-print/${poId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch PO: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load PO data');
+            }
+            renderPO(data);
+        } catch (error) {
+            document.getElementById('poContent').innerHTML = `<div class="error-msg"><i class="fas fa-exclamation-circle"></i> ${error.message}</div>`;
+            console.error('Error loading PO:', error);
+        }
+    }
+
+    // Render PO on page
+    function renderPO(data) {
+        const po = data.po || {};
+        const shop = data.shop || {};
+        const vendor = data.vendor || {};
+        const items = Array.isArray(data.items) ? data.items : [];
+
+        // Shop Info
+        document.getElementById('shopName').textContent = shop.name || 'Shop Name';
+        const shopAddress = [shop.Address, shop.phone].filter(Boolean).join(' | ');
+        document.getElementById('shopAddress').innerHTML = `${shopAddress}<br>GST: ${shop.GSTN || 'N/A'}`;
+        document.getElementById('shopExtra').textContent = shop.email ? `Email: ${shop.email}` : '';
+
+        // PO Header
+        document.getElementById('poRef').textContent = `#PO-${po.PONO || '0000'}`;
+        document.getElementById('poDate').textContent = po.created_at 
+            ? new Date(po.created_at).toLocaleDateString('en-IN')
+            : '';
+
+        // Vendor Info
+        document.getElementById('vendorName').textContent = vendor.name || 'Vendor Name';
+        const vendorInfo = [vendor.contact_person, vendor.phone, vendor.address].filter(Boolean).join(' | ');
+        document.getElementById('vendorDetails').textContent = vendorInfo || 'Contact / Address';
+        document.getElementById('statusBadge').innerHTML = po.Status 
+            ? `<span class="badge-status">${po.Status.toUpperCase()}</span>` 
+            : '';
+
+        // PO Details
+        document.getElementById('poNumber').textContent = `#PO-${po.PONO || '0000'}`;
+        document.getElementById('prRef').textContent = po.PRID ? `#PR-${po.PRID}` : 'N/A';
+        document.getElementById('poStatus').textContent = po.Status || 'Pending';
+        document.getElementById('poCreated').textContent = po.created_by 
+            ? `${po.created_by} on ${po.created_at ? new Date(po.created_at).toLocaleDateString('en-IN') : ''}`
+            : '';
+
+        // Items Table
+        const tbody = document.getElementById('itemsBody');
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No items in this PO.</td></tr>';
+        } else {
+            tbody.innerHTML = items.map((item, index) => {
+                const productName = item.name || item.product_name || 'Product';
+                return `<tr>
+                    <td>${index + 1}</td>
+                    <td>${productName}</td>
+                    <td>${item.quantity || 0}</td>
+                    <td>₹ ${parseFloat(item.unit_price || 0).toFixed(2)}</td>
+                    <td>${parseFloat(item.tax_rate || 0).toFixed(2)}%</td>
+                    <td>₹ ${parseFloat(item.tax_amount || 0).toFixed(2)}</td>
+                    <td>₹ ${parseFloat(item.total || 0).toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Totals
+        document.getElementById('subtotalVal').textContent = parseFloat(po.price || 0).toFixed(2);
+        document.getElementById('totalTaxVal').textContent = parseFloat(po.tax || 0).toFixed(2);
+        document.getElementById('grandTotalVal').textContent = parseFloat(po.total || 0).toFixed(2);
+
+        // Footer
+        document.getElementById('footerText').textContent = `PO for ${vendor.name || 'the vendor'}. Created by ${po.created_by || 'system'}. Valid as per terms.`;
+    }
+
+    // Load data on page ready
+    window.addEventListener('DOMContentLoaded', () => {
+        loadPOData();
+    });
+</script>
+</body>
+</html>

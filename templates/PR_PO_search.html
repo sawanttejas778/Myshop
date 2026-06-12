@@ -672,7 +672,7 @@
             <div class="btn-group">
                 <button class="btn btn-success" onclick="saveDocument()"><i class="fas fa-save"></i> Save Changes</button>
                 ${isPR ? `<button class="btn btn-primary" onclick="convertToPO()"><i class="fas fa-exchange-alt"></i> Convert to PO</button>` : ''}
-                <button class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+                ${!isPR ? `<button class="btn btn-secondary" onclick="openPOPrint(${doc.id})"><i class="fas fa-print"></i> Print</button>` : ''}
             </div>
         `;
     }
@@ -796,6 +796,15 @@
         } catch(e) {
             showFlash(`Error converting: ${e.message}`, "error");
         }
+    };
+    
+    // Open PO print page
+    window.openPOPrint = function(poId) {
+        if(!poId || poId <= 0) {
+            showFlash('Invalid PO ID', "error");
+            return;
+        }
+        window.open(`/print-po/${poId}`, 'POPrint', 'width=900,height=1200');
     };
     
     function showLoading(show) {

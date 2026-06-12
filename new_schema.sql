@@ -1,5 +1,3 @@
-create database shop;
-use shop;
 
 -- Users table
 CREATE TABLE Users (
@@ -272,7 +270,7 @@ CREATE TABLE IF NOT EXISTS Invoices (
     INDEX idx_customer_email (customer_email),
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
-    foreign key (shop_id) references Shops(shopid) on delete cascade
+    foreign key (shop_id) references Shops(shopid) on delete cascade,
     foreign key (QID) references Quotations(QID) on delete set null
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -477,7 +475,7 @@ create table Sales_order(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by VARCHAR(255) NOT NULL default "N/A",
     FOREIGN KEY (shopid) REFERENCES Shops(shopid) ON DELETE CASCADE,
-    FOREIGN KEY (customerid) REFERENCES Customer(customer_id) ON DELETE CASCADE
+    FOREIGN KEY (customerid) REFERENCES customer(customer_id) ON DELETE CASCADE
 );
 
 create table sales_item(
@@ -530,12 +528,11 @@ create table supplier_invoice(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     updated_by INT,
     INDEX idx_supplier_invoice_number (invoice_number),
-    INDEX idx_supplier_email (supplier_email),
     INDEX idx_supplier_status (status),
     INDEX idx_supplier_created_at (created_at),
     INDEX idx_supplier_PONO (PONO),
     FOREIGN KEY (PONO) REFERENCES purchase_orders(PONO) ON DELETE CASCADE,
-    foreign key (shop_id) references Shops(shopid) on delete cascade
+    foreign key (shop_id) references Shops(shopid) on delete cascade,
     foreign key (supplier_id) references supplier(supplier_id) on delete cascade
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

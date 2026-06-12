@@ -74,6 +74,19 @@ def normalize_pr_item(item):
         'total': total
     }
 
+def normalize_po_status(status):
+    """Map frontend status values to database ENUM values"""
+    status_map = {
+        'draft': 'Incomplete',
+        'pending': 'pending',
+        'approved': 'Approved',
+        'received': 'received',
+        'cancelled': 'Incomplete',
+        'incomplete': 'Incomplete',
+    }
+    normalized = status_map.get(str(status).lower(), 'pending')
+    return normalized
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 #CORS(app, supports_credentials=True)
@@ -904,7 +917,7 @@ def create_category():
         # Insert new category
         cursor.execute("INSERT INTO Categories (name, shopid , created_by,updated_by) VALUES (%s, %s, %s, %s)", (name, shopid, user, user))
         conn.commit()
-        
+
         # Get the inserted category ID
         new_category_id = cursor.lastrowid
         conn.close()
@@ -1000,7 +1013,7 @@ def api_export_products():
                 'description4': r.get('description4') or '',
                 'description5': r.get('description5') or ''
             }
-            products.append(prod)   
+            products.append(prod)
 
         return jsonify({"success": True, "products": products}), 200
     except mysql.connector.Error as err:
@@ -1032,16 +1045,16 @@ def update_quotation(quotation_id):
         customer_phone = customer.get('phone', '').strip()
         customer_address = customer.get('address', '').strip() or 'N/A'
         customer_id_from_frontend = customer.get('id')
-        
+
         if not customer_name:
             return jsonify({'success': False, 'message': 'Customer name is required'}), 400
 
         shopid = data.get('shopid')
         if not shopid:
             shopid = 1
-            
+
         user_key = session.get('user') or session.get('username') or 'system'
-        
+
         status = data.get('status', 'draft')
         payment_terms = data.get('payment_terms') or ''
         subtotal = float(data.get('subtotal') or 0)
@@ -1052,7 +1065,7 @@ def update_quotation(quotation_id):
         igst = 0.0
 
         conn.start_transaction()
-        
+
         # Check if quotation exists
         cur.execute("SELECT QID FROM Quotations WHERE QID = %s", (quotation_id,))
         if not cur.fetchone():
@@ -1061,11 +1074,11 @@ def update_quotation(quotation_id):
 
         # Validate customer exists (NO AUTO-CREATE)
         customer_id = None
-        
+
         # If customer ID provided, verify it exists and belongs to shop
         if customer_id_from_frontend:
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.customer_id = %s AND uc.shopid = %s
@@ -1075,19 +1088,19 @@ def update_quotation(quotation_id):
                 customer_id = customer_id_from_frontend
                 # Update existing customer info (optional - can be removed if you don't want updates)
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_name, customer_phone, customer_address, user_key, customer_id))
             else:
                 conn.rollback()
                 return jsonify({'success': False, 'message': f'Customer with ID {customer_id_from_frontend} does not exist or does not belong to this shop'}), 400
-        
+
         # If no customer ID but email provided, try to find by email
         elif customer_email:
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.email = %s AND uc.shopid = %s
@@ -1097,19 +1110,19 @@ def update_quotation(quotation_id):
                 customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
                 # Update existing customer info
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_name, customer_phone, customer_address, user_key, customer_id))
             else:
                 conn.rollback()
                 return jsonify({'success': False, 'message': f'Customer with email {customer_email} does not exist in this shop. Please select an existing customer.'}), 400
-        
+
         else:
             # No customer ID or email provided, try to find by name and phone
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.customer_name = %s AND uc.shopid = %s
@@ -1120,9 +1133,9 @@ def update_quotation(quotation_id):
                 customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
                 # Update existing customer info
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_phone, customer_address, user_key, customer_id))
             else:
@@ -1131,17 +1144,17 @@ def update_quotation(quotation_id):
 
         # Update quotation
         cur.execute("""
-            UPDATE Quotations 
-            SET customer_id = %s, shopid = %s, subtotal = %s, total_tax = %s, 
-                cgst = %s, sgst = %s, igst = %s, grand_total = %s, 
-                status = %s, payment_terms = %s, updated_at = NOW(), updated_by = %s 
+            UPDATE Quotations
+            SET customer_id = %s, shopid = %s, subtotal = %s, total_tax = %s,
+                cgst = %s, sgst = %s, igst = %s, grand_total = %s,
+                status = %s, payment_terms = %s, updated_at = NOW(), updated_by = %s
             WHERE QID = %s
-        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, 
+        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total,
               status, payment_terms, user_key, quotation_id))
 
         # Delete existing items
         cur.execute("DELETE FROM quotation_items WHERE QID = %s", (quotation_id,))
-        
+
         # Insert new items
         for item in items:
             product_id = item.get('product_id')
@@ -1150,16 +1163,16 @@ def update_quotation(quotation_id):
             tax_rate = float(item.get('tax_rate') or 0)
             tax_amount = float(item.get('tax_amount') or 0)
             total = float(item.get('total') or 0)
-            
+
             # Verify product exists (optional but recommended)
             if product_id:
-                cur.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+                cur.execute("SELECT product_id FROM Products WHERE product_id = %s", (product_id,))
                 if not cur.fetchone():
                     conn.rollback()
                     return jsonify({'success': False, 'message': f'Product ID {product_id} does not exist'}), 400
-            
+
             cur.execute("""
-                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total) 
+                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (shopid, quotation_id, product_id, quantity, unit_price, tax_rate, tax_amount, total))
 
@@ -1220,9 +1233,9 @@ def create_quotation():
         shopid = data.get('shopid')
         if not shopid:
             shopid = 1
-            
+
         user_key = session.get('user') or session.get('username') or 'system'
-        
+
         status = data.get('status', 'draft')
         payment_terms = data.get('payment_terms') or ''
         subtotal = float(data.get('subtotal') or 0)
@@ -1233,14 +1246,14 @@ def create_quotation():
         igst = 0.0
 
         conn.start_transaction()
-        
+
         # Validate customer exists (NO AUTO-CREATE)
         customer_id = None
-        
+
         # If customer ID provided, verify it exists and belongs to shop
         if customer_id_from_frontend:
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.customer_id = %s AND uc.shopid = %s
@@ -1250,19 +1263,19 @@ def create_quotation():
                 customer_id = customer_id_from_frontend
                 # Optional: Update customer info (can be removed)
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_name, customer_phone, customer_address, user_key, customer_id))
             else:
                 conn.rollback()
                 return jsonify({'success': False, 'message': f'Customer with ID {customer_id_from_frontend} does not exist or does not belong to this shop'}), 400
-        
+
         # If no customer ID but email provided, try to find by email
         elif customer_email:
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.email = %s AND uc.shopid = %s
@@ -1272,19 +1285,19 @@ def create_quotation():
                 customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
                 # Optional: Update customer info
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_name = %s, customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_name, customer_phone, customer_address, user_key, customer_id))
             else:
                 conn.rollback()
                 return jsonify({'success': False, 'message': f'Customer with email {customer_email} does not exist in this shop. Please select an existing customer.'}), 400
-        
+
         else:
             # No customer ID or email, try to find by name
             cur.execute("""
-                SELECT c.customer_id 
+                SELECT c.customer_id
                 FROM customer c
                 INNER JOIN user_customer uc ON c.customer_id = uc.customer_id
                 WHERE c.customer_name = %s AND uc.shopid = %s
@@ -1295,9 +1308,9 @@ def create_quotation():
                 customer_id = row['customer_id'] if isinstance(row, dict) else row[0]
                 # Optional: Update customer info
                 cur.execute("""
-                    UPDATE customer 
-                    SET customer_mobile_number = %s, address1 = %s, 
-                        updated_at = NOW(), updated_by = %s 
+                    UPDATE customer
+                    SET customer_mobile_number = %s, address1 = %s,
+                        updated_at = NOW(), updated_by = %s
                     WHERE customer_id = %s
                 """, (customer_phone, customer_address, user_key, customer_id))
             else:
@@ -1306,11 +1319,11 @@ def create_quotation():
 
         # Insert quotation
         cur.execute("""
-            INSERT INTO Quotations (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, status, payment_terms, created_at, updated_at, created_by, updated_by) 
+            INSERT INTO Quotations (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, status, payment_terms, created_at, updated_at, created_by, updated_by)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s, %s)
-        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total, 
+        """, (customer_id, shopid, subtotal, total_tax, cgst, sgst, igst, grand_total,
               status, payment_terms, user_key, user_key))
-        
+
         quotation_id = cur.lastrowid
 
         # Insert items
@@ -1321,16 +1334,16 @@ def create_quotation():
             tax_rate = float(item.get('tax_rate') or 0)
             tax_amount = float(item.get('tax_amount') or 0)
             total = float(item.get('total') or 0)
-            
+
             # Verify product exists
             if product_id:
-                cur.execute("SELECT product_id FROM products WHERE product_id = %s", (product_id,))
+                cur.execute("SELECT product_id FROM Products WHERE product_id = %s", (product_id,))
                 if not cur.fetchone():
                     conn.rollback()
                     return jsonify({'success': False, 'message': f'Product ID {product_id} does not exist'}), 400
-            
+
             cur.execute("""
-                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total) 
+                INSERT INTO quotation_items (shopid, QID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (shopid, quotation_id, product_id, quantity, unit_price, tax_rate, tax_amount, total))
 
@@ -1507,7 +1520,7 @@ def api_create_shop():
         address = data.get('address', "N/A")
         phone = data.get('phone', "N/A")
         print(f"Creating shop with name: {shop_name} for user: {userid} with tax_id: {tax_id} and gstn: {gstn} and address: {address} and phone: {phone}")
-        
+
         if not userid:
             return jsonify({"success": False, "message": "User not authenticated"}), 401
 
@@ -3705,14 +3718,12 @@ def quotations_list():
             SELECT q.QID, q.subtotal, q.total_tax, q.cgst, q.sgst, q.igst, q.grand_total,
                    q.status, q.payment_terms, q.created_at,
                    c.customer_name, s.name AS shop_name
-            FROM Quotations q 
+            FROM Quotations q
             LEFT JOIN customer c ON q.customer_id = c.customer_id
             LEFT JOIN Shops s ON q.shopid = s.shopid
             where q.shopid = %s
             ORDER BY q.created_at DESC
-            """
-            , (session.get('selected_shop_id') or 1,)
-        )
+        """,(session.get('selected_shop_id'),))
         quotations = cursor.fetchall() or []
     except Exception as e:
         app.logger.error(f"Error loading quotation list: {e}")
@@ -3807,7 +3818,7 @@ def convert_quotation_to_invoice(qid):
             FROM quotation_items qi
             LEFT JOIN Products p ON qi.product_id = p.product_id
             WHERE qi.QID = %s
-            """,  
+            """,
             (qid,)
         )
         items = cursor.fetchall() or []
@@ -3844,7 +3855,7 @@ def convert_quotation_to_invoice(qid):
             )
         )
         invoice_id = cursor.lastrowid
-        
+
         for item in item_payloads:
             cursor.execute(
                 "INSERT INTO Invoice_Items (invoice_id, product_id, description, quantity, unit_price, tax_rate, tax_amount, total) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -3859,7 +3870,7 @@ def convert_quotation_to_invoice(qid):
                     item['total'],
                 ))
         cursor.execute("UPDATE Quotations SET status = %s, updated_at = %s WHERE QID = %s", ('sent', datetime.now(), qid))
-        cursor.execute("UPDATE products p JOIN quotation_items qi ON p.product_id = qi.product_id SET p.stock = GREATEST(p.stock - qi.quantity, 0) WHERE qi.QID = %s", (qid,))
+        cursor.execute("UPDATE Products p JOIN quotation_items qi ON p.product_id = qi.product_id SET p.stock = GREATEST(p.stock - qi.quantity, 0) WHERE qi.QID = %s", (qid,))
         conn.commit()
 
         flash('Invoice generated from quotation successfully.', 'success')
@@ -4229,7 +4240,6 @@ def list_invoices():
     if not conn or not cur:
         return jsonify({'success': False, 'message': 'Database connection failed'}), 500
     try:
-        shop_id = request.args.get('shop_id', type=int) or session.get('selected_shop_id', 1)
         cur.execute(
             """
             SELECT invoice_id, invoice_number, customer_name, customer_email,
@@ -4237,7 +4247,7 @@ def list_invoices():
             FROM Invoices WHERE shop_id = %s
             ORDER BY created_at DESC
             """,
-            (shop_id,)
+            (session.get("selected_shop_id"),)
         )
         invoices = cur.fetchall() or []
         conn.close()
@@ -4458,7 +4468,7 @@ def create_customer():
                 data.get('customer_bank_account_number', '') or 'N/A',
                 data.get('customer_bank_name', '') or 'N/A',
                 session.get('user_id', 1),
-                session.get('user_id', 1)  
+                session.get('user_id', 1)
             )
 
             app.logger.debug(f"Executing insert query with values: {values}")
@@ -4508,10 +4518,10 @@ def create_customer():
 def search_customers():
     search_term = request.args.get('q', '')
     shopid = session.get("selected_shop_id")
-    
+
     if not shopid:
         return jsonify({'error': 'No shop selected'}), 400
-    
+
     conn, cur = get_db()
     if not conn or not cur:
         return jsonify({'error': 'Database connection failed'}), 500
@@ -4685,7 +4695,7 @@ def api_products():
         search_term = request.args.get('search', '').strip()  # NEW: search parameter for SPID/name
         category_id = None
         role = session.get("role")
-        
+
         # Process category parameter (existing logic)
         if category:
             if re.fullmatch(r"\d+", category.strip()):
@@ -4695,23 +4705,23 @@ def api_products():
                 row = cur.fetchone()
                 if row:
                     category_id = row.get('categories_id')
-        
+
         # Build query based on role, category, and search term
         if role == "admin" or role == "owner":
             shopid = session.get("selected_shop_id")
             if not shopid:
                 conn.close()
                 return jsonify({'success': False, 'message': 'No shop selected'}), 400
-            
+
             # Base query
             query = """
-                SELECT DISTINCT 
-                    p.product_id as id, 
-                    p.name, 
-                    p.image, 
-                    p.price, 
-                    p.stock, 
-                    p.tax, 
+                SELECT DISTINCT
+                    p.product_id as id,
+                    p.name,
+                    p.image,
+                    p.price,
+                    p.stock,
+                    p.tax,
                     p.safe_stock,
                     p.SPID,
                     p.HSN_code,
@@ -4721,31 +4731,31 @@ def api_products():
                 WHERE p.shop_id = %s AND p.status = "active"
             """
             params = [shopid]
-            
+
             # Add category filter if provided
             if category_id:
                 query += " AND p.categoryid = %s"
                 params.append(category_id)
-            
+
             # Add search filter if provided (NEW)
             if search_term:
                 query += """ AND (p.SPID LIKE %s OR p.name LIKE %s)"""
                 search_pattern = f"%{search_term}%"
                 params.extend([search_pattern, search_pattern])
-            
+
             query += " ORDER BY p.product_id DESC"
             cur.execute(query, params)
-            
+
         else:
             # Non-admin/owner role (existing logic)
             query = """
-                SELECT DISTINCT 
-                    product_id as id, 
-                    name, 
-                    image, 
-                    price, 
-                    stock, 
-                    tax, 
+                SELECT DISTINCT
+                    product_id as id,
+                    name,
+                    image,
+                    price,
+                    stock,
+                    tax,
                     safe_stock,
                     SPID,
                     HSN_code,
@@ -4755,28 +4765,28 @@ def api_products():
                 WHERE status = "active"
             """
             params = []
-            
+
             if category_id:
                 query += " AND categoryid = %s"
                 params.append(category_id)
-            
+
             if search_term:
                 query += " AND (SPID LIKE %s OR name LIKE %s)"
                 search_pattern = f"%{search_term}%"
                 params.extend([search_pattern, search_pattern])
-            
+
             query += " ORDER BY product_id DESC"
             cur.execute(query, params)
-        
+
         rows = cur.fetchall()
         products = []
-        
+
         for r in rows:
             pid = r.get('id')
             img = r.get('image')
             img_path = f'static/uploads/{img}' if img else None
             print(f"Processing product {pid} with image field: {img_path}")
-            
+
             # Check if image exists (existing logic)
             filename = None
             if img_path and os.path.exists(os.path.join(app.root_path, img_path)):
@@ -4784,7 +4794,7 @@ def api_products():
                 img_url = filename
             else:
                 img_url = "static/logo.png"
-            
+
             products.append({
                 'id': pid,
                 'name': r.get('name'),
@@ -4799,14 +4809,14 @@ def api_products():
                 'location': r.get('location') or '',
                 'status': r.get('status') or 'active'
             })
-        
+
         conn.close()
         return jsonify({'success': True, 'products': products}), 200
-        
+
     except Exception as e:
         conn.close()
         return jsonify({'success': False, 'message': str(e)}), 500
-    
+
 
 @app.route("/add-products", methods=["POST"])
 @login_required
@@ -4866,7 +4876,7 @@ def add_products():
                             categoryid = cat_row[0] if isinstance(cat_row, tuple) else cat_row.get('categories_id')
                         else:
                             cur.execute(
-                                """INSERT INTO Categories (name, shopid, created_by, updated_by) 
+                                """INSERT INTO Categories (name, shopid, created_by, updated_by)
                                    VALUES (%s, %s, %s, %s)""",
                                 (category_input, shopid, user, user)
                             )
@@ -4875,25 +4885,25 @@ def add_products():
 
             # Check if product exists with same name + location + status
             cur.execute("""
-                SELECT product_id, price, stock, Bprice 
-                FROM Products 
-                WHERE name = %s 
-                  AND location = %s 
-                  AND status = %s 
+                SELECT product_id, price, stock, Bprice
+                FROM Products
+                WHERE name = %s
+                  AND location = %s
+                  AND status = %s
                   AND shop_id = %s
                 LIMIT 1
             """, (name, location, status, shopid))
-            
+
             existing = cur.fetchone()
 
             if existing:
                 # Product exists - UPDATE everything including buying price
                 product_id = existing[0] if isinstance(existing, tuple) else existing.get('product_id')
                 old_bprice = existing[3] if isinstance(existing, tuple) else existing.get('Bprice')
-                
+
                 # Update all fields (prices can change)
                 cur.execute("""
-                    UPDATE Products 
+                    UPDATE Products
                     SET price = %s,
                         Bprice = %s,
                         tax = %s,
@@ -4906,39 +4916,39 @@ def add_products():
                         updated_by = %s,
                         updated_at = NOW()
                     WHERE product_id = %s
-                """, (selling_price, buying_price, tax, stock, safe_stock, categoryid, 
+                """, (selling_price, buying_price, tax, stock, safe_stock, categoryid,
                       hsn_code, location, status, user, product_id))
-                
+
                 updated_count += 1
-                
+
                 # Optional: Log significant price changes
                 if old_bprice != buying_price:
                     print(f"Buying price updated for {name}: ₹{old_bprice} → ₹{buying_price}")
-                
+
             else:
                 # Check if same name exists for SPID generation
                 cur.execute("""
-                    SELECT SPID FROM Products 
-                    WHERE name = %s AND shop_id = %s 
+                    SELECT SPID FROM Products
+                    WHERE name = %s AND shop_id = %s
                     LIMIT 1
                 """, (name, shopid))
                 existing_spid = cur.fetchone()
-                
+
                 # Generate or reuse SPID
                 if existing_spid:
                     spid = existing_spid[0] if isinstance(existing_spid, tuple) else existing_spid.get('SPID')
                 else:
                     spid = generate_spid(name)
-                
+
                 # Insert new product with buying price
                 cur.execute("""
-                    INSERT INTO Products 
-                    (name, price, Bprice, tax, stock, safe_stock, categoryid, shop_id, 
+                    INSERT INTO Products
+                    (name, price, Bprice, tax, stock, safe_stock, categoryid, shop_id,
                      HSN_code, location, status, created_by, updated_by, SPID)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (name, selling_price, buying_price, tax, stock, safe_stock, categoryid, shopid,
                       hsn_code, location, status, user, user, spid))
-                
+
                 product_id = cur.lastrowid
                 saved_count += 1
 
@@ -4948,26 +4958,26 @@ def add_products():
                 if description_lines:
                     cur.execute("SELECT product_id FROM product_desc WHERE product_id = %s", (product_id,))
                     desc_exists = cur.fetchone()
-                    
+
                     desc_values = description_lines[:5]
                     desc_values += [''] * (5 - len(desc_values))
-                    
+
                     if desc_exists:
                         cur.execute("""
-                            UPDATE product_desc 
-                            SET description1 = %s, description2 = %s, description3 = %s, 
+                            UPDATE product_desc
+                            SET description1 = %s, description2 = %s, description3 = %s,
                                 description4 = %s, description5 = %s
                             WHERE product_id = %s
                         """, (*desc_values, product_id))
                     else:
                         cur.execute("""
-                            INSERT INTO product_desc 
+                            INSERT INTO product_desc
                             (product_id, description1, description2, description3, description4, description5)
                             VALUES (%s, %s, %s, %s, %s, %s)
                         """, (product_id, *desc_values))
 
         conn.commit()
-        
+
         message = []
         if saved_count > 0:
             message.append(f"{saved_count} new product(s) created")
@@ -4975,7 +4985,7 @@ def add_products():
             message.append(f"{updated_count} product(s) updated")
         if skipped_count > 0:
             message.append(f"{skipped_count} skipped")
-        
+
         return jsonify({
             "success": True,
             "message": f"✓ {', '.join(message)}",
@@ -4996,19 +5006,19 @@ def generate_spid(name):
     """Generate SPID from product name"""
     import re
     from datetime import datetime
-    
+
     # Clean name
     name = re.sub(r'[^a-zA-Z0-9\s]', '', name)
     words = name.split()[:3]
     spid_parts = []
-    
+
     for word in words:
         # Get first 3-4 letters
         part = word[:4].upper()
         spid_parts.append(part)
-    
+
     base_spid = '-'.join(spid_parts) if spid_parts else 'NEW'
-    
+
     # Add timestamp to ensure uniqueness
     return f"{base_spid}-{datetime.now().strftime('%y%m%d%H%M')}"
 
@@ -5024,7 +5034,7 @@ def suppliers():
         conn.close()
         return redirect(url_for('admin_dashboard'))
 
-    cur.execute("SELECT name FROM shops WHERE shopid = %s", (shop_id,))
+    cur.execute("SELECT name FROM Shops WHERE shopid = %s", (shop_id,))
     shop_row = cur.fetchone()
     shop_name = shop_row.get('name') if shop_row else None
 
@@ -5047,16 +5057,16 @@ def api_create_supplier():
     shop_id = session.get('selected_shop_id', None)
     if not shop_id:
         return jsonify({"success": False, "error": "Shop not selected"}), 400
-    
+
     data = request.get_json()
     app.logger.debug(f"Creating supplier with data: {data}")
-    
+
     # Get current user from session
     current_user = session.get('username', 'admin')  # Adjust based on your auth system
-    
+
     try:
         conn, cur = get_db()
-        
+
         # Insert into supplier table (singular, not suppliers)
         cur.execute("""
             INSERT INTO supplier (
@@ -5082,13 +5092,13 @@ def api_create_supplier():
             current_user,
             current_user
         ))
-        
+
         conn.commit()
         app.logger.debug("Supplier created successfully")
         conn.close()
-        
+
         return jsonify({"success": True, "message": "Supplier created successfully"}), 201
-        
+
     except mysql.connector.Error as e:
         app.logger.error(f"Database error: {e}")
         if conn:
@@ -5110,29 +5120,29 @@ def api_get_suppliers():
     if not shop_id:
         flash("Shop not selected", "error")
         return redirect(url_for('admin_dashboard'))
-    
+
     conn = None
     cur = None
     try:
         conn, cur = get_db()
-        
+
         # Debug: Check if table has data for this shop
         cur.execute("SELECT COUNT(*) AS supplier_count FROM supplier WHERE shop_id = %s", (shop_id,))
         count_row = cur.fetchone()
         count = count_row.get('supplier_count', 0) if count_row else 0
         app.logger.debug(f"Found {count} suppliers for shop_id {shop_id}")
-        
+
         cur.execute("""
-            SELECT supplier_id, name, email, phone, Pincode, state, city, 
-                   country, address, GSTN, Bank_IFSC, Bank_Account_Number, 
+            SELECT supplier_id, name, email, phone, Pincode, state, city,
+                   country, address, GSTN, Bank_IFSC, Bank_Account_Number,
                    Bank_Name, Payment_Terms, created_at
-            FROM supplier 
+            FROM supplier
             WHERE shop_id = %s
             ORDER BY created_at DESC
         """, (shop_id,))
-        
+
         suppliers = cur.fetchall()
-        
+
         # Convert to list of dicts (cursor already returns dict rows)
         sup = []
         for s in suppliers:
@@ -5153,10 +5163,10 @@ def api_get_suppliers():
                 'Payment_Terms': s.get('Payment_Terms', '') or '',
                 'created_at': s.get('created_at').strftime('%Y-%m-%d %H:%M:%S') if s.get('created_at') else ''
             })
-        
+
         app.logger.debug(f"Returning {len(sup)} suppliers")
         return jsonify(sup), 200
-        
+
     except Exception as e:
         app.logger.error(f"Error fetching suppliers: {str(e)}")
         return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
@@ -5175,46 +5185,46 @@ def api_search_suppliers():
     if not shop_id:
         flash("Shop not selected", "error")
         return redirect(url_for('admin_dashboard'))
-    
+
     search_term = request.args.get('q', '').strip()
-    
+
     # If search term is empty, return all suppliers
     if not search_term:
         return api_get_suppliers()
-    
+
     conn = None
     cur = None
     try:
         conn, cur = get_db()
-        
+
         # Search across multiple fields
         cur.execute("""
-            SELECT supplier_id, name, email, phone, Pincode, state, city, 
-                   country, address, GSTN, Bank_IFSC, Bank_Account_Number, 
+            SELECT supplier_id, name, email, phone, Pincode, state, city,
+                   country, address, GSTN, Bank_IFSC, Bank_Account_Number,
                    Bank_Name, Payment_Terms, created_at
-            FROM supplier 
-            WHERE shop_id = %s 
+            FROM supplier
+            WHERE shop_id = %s
             AND (
-                name LIKE %s OR 
-                email LIKE %s OR 
-                phone LIKE %s OR 
+                name LIKE %s OR
+                email LIKE %s OR
+                phone LIKE %s OR
                 GSTN LIKE %s OR
                 city LIKE %s OR
                 state LIKE %s
             )
             ORDER BY name
         """, (
-            shop_id, 
-            f'%{search_term}%', 
-            f'%{search_term}%', 
-            f'%{search_term}%', 
+            shop_id,
+            f'%{search_term}%',
+            f'%{search_term}%',
+            f'%{search_term}%',
             f'%{search_term}%',
             f'%{search_term}%',
             f'%{search_term}%'
         ))
-        
+
         suppliers = cur.fetchall()
-        
+
         # Convert to list of dicts (cursor already returns dict rows)
         result = []
         for sup in suppliers:
@@ -5235,9 +5245,9 @@ def api_search_suppliers():
                 'Payment_Terms': sup.get('Payment_Terms', '') or '',
                 'created_at': sup.get('created_at').strftime('%Y-%m-%d %H:%M:%S') if sup.get('created_at') else ''
             })
-        
+
         return jsonify(result), 200
-        
+
     except Exception as e:
         app.logger.error(f"Error searching suppliers: {str(e)}")
         return jsonify({"success": False, "error": f"Search error: {str(e)}"}), 500
@@ -5250,21 +5260,21 @@ def api_search_suppliers():
 @app.route('/PRPO', methods=['GET', 'POST'])
 @admin_required
 def prpo():
-    return render_template('PR.html')
+    return render_template('PR.HTML')
 
 @app.route('/api/create_pr', methods=['POST'])
 @login_required
 def create_pr():
     data = request.get_json()
     conn , cur  = get_db()
-    
+
     try:
         shop_id = data.get('shopid')
         supplier_id = data.get('supplier_id')
         reason = data.get('reason', '')
         items = data.get('items', [])
         convert_to_po = data.get('convert_to_po', False)
-        
+
         # Validation
         if not shop_id:
             return jsonify({'success': False, 'message': 'Shop ID required'}), 400
@@ -5272,53 +5282,53 @@ def create_pr():
             return jsonify({'success': False, 'message': 'Supplier ID required'}), 400
         if not items:
             return jsonify({'success': False, 'message': 'At least one item required'}), 400
-        
+
         with conn.cursor() as cursor:
             # Calculate totals if not provided
             subtotal = data.get('subtotal', 0)
             tax_amount = data.get('tax_amount', 0)
             grand_total = data.get('grand_total', 0)
-            
+
             if not subtotal:
                 subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
                 tax_amount = sum(item['tax_amount'] for item in items)
                 grand_total = subtotal + tax_amount
-            
+
             # 1. Insert into purchase_reciepts
             cursor.execute("""
                 INSERT INTO purchase_reciepts (shopid, supplier_id, Reason, created_by, updated_by)
                 VALUES (%s, %s, %s, %s, %s)
             """, (shop_id, supplier_id, reason, session.get('user'), session.get('user')))
-            
+
             pr_id = cursor.lastrowid
             pr_number = f"PR-{pr_id:04d}"
-            
+
             # 2. Insert items into PR_items
             for item in items:
                 product_id = item.get('product_id')
                 if not product_id:
                     # Try to get product_id by name if not provided
-                    cursor.execute("SELECT product_id FROM Products WHERE name = %s AND shop_id = %s LIMIT 1", 
+                    cursor.execute("SELECT product_id FROM Products WHERE name = %s AND shop_id = %s LIMIT 1",
                                   (item['product_name'], shop_id))
                     product = cursor.fetchone()
                     product_id = product['product_id'] if product else None
-                
+
                 if not product_id:
                     continue  # Skip if product not found
-                
+
                 cursor.execute("""
                     INSERT INTO PR_items (shopid, PRID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (shop_id, pr_id, product_id, item['quantity'], item['unit_price'], 
+                """, (shop_id, pr_id, product_id, item['quantity'], item['unit_price'],
                       item['tax_rate'], item['tax_amount'], item['total']))
-            
+
             conn.commit()
-            
+
             # 3. Optionally create PO immediately
             po_result = None
             if convert_to_po:
                 po_result = create_po_from_pr(conn, pr_id, shop_id, supplier_id, items, session.get('user'))
-            
+
             return jsonify({
                 'success': True,
                 'message': 'Purchase Requisition created successfully',
@@ -5327,7 +5337,7 @@ def create_pr():
                 'po_created': convert_to_po,
                 'po_result': po_result
             })
-            
+
     except Exception as e:
         conn.rollback()
         print(f"Error creating PR: {e}")
@@ -5345,21 +5355,21 @@ def create_po_from_pr(conn, pr_id, shop_id, supplier_id, items, created_by):
             subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
             tax_total = sum(item['tax_amount'] for item in items)
             grand_total = subtotal + tax_total
-            
+
             # Generate PO number
             cursor.execute("SELECT COUNT(*) as count FROM purchase_orders WHERE shopid = %s", (shop_id,))
             count = cursor.fetchone()
             po_number = f"PO-{count['count'] + 1:04d}"
-            
+
             # Insert into purchase_orders
             cursor.execute("""
                 INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, tax, QTY, price, total, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (pr_id, supplier_id, shop_id, 'pending', tax_total, total_qty, subtotal, grand_total, created_by))
-            
+
             po_id = cursor.lastrowid
             conn.commit()
-            
+
             return {
                 'po_id': po_id,
                 'po_number': po_number,
@@ -5377,10 +5387,10 @@ def create_po_from_existing_pr(pr_id):
     Reuses items from PR_items table (no duplicate storage)
     """
     conn , cur  = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor(dictionary=True) as cursor:
             # Get PR details
             cursor.execute("""
@@ -5388,11 +5398,11 @@ def create_po_from_existing_pr(pr_id):
                 FROM purchase_reciepts pr
                 WHERE pr.receipt_id = %s AND pr.shopid = %s
             """, (pr_id, shop_id))
-            
+
             pr = cursor.fetchone()
             if not pr:
                 return jsonify({'success': False, 'message': 'PR not found'}), 404
-            
+
             # Get items from PR_items (reuse existing data)
             cursor.execute("""
                 SELECT pi.product_id, pi.quantity, pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total,
@@ -5401,43 +5411,43 @@ def create_po_from_existing_pr(pr_id):
                 JOIN Products p ON pi.product_id = p.product_id
                 WHERE pi.PRID = %s AND pi.shopid = %s
             """, (pr_id, shop_id))
-            
+
             items = cursor.fetchall()
-            
+
             if not items:
                 return jsonify({'success': False, 'message': 'No items found in PR'}), 400
-            
+
             # Check if PO already exists for this PR
             cursor.execute("SELECT PONO FROM purchase_orders WHERE PRID = %s AND shopid = %s", (pr_id, shop_id))
             existing_po = cursor.fetchone()
             if existing_po:
                 return jsonify({
-                    'success': False, 
+                    'success': False,
                     'message': f'PO already exists for this PR',
                     'existing_po_id': existing_po['PONO']
                 }), 400
-            
+
             # Calculate totals from items
             total_qty = sum(item['quantity'] for item in items)
             subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
             tax_total = sum(item['tax_amount'] for item in items)
             grand_total = subtotal + tax_total
-            
+
             # Generate PO number
             cursor.execute("SELECT COUNT(*) as count FROM purchase_orders WHERE shopid = %s", (shop_id,))
             count = cursor.fetchone()
             po_number = f"PO-{count['count'] + 1:04d}"
-            
+
             # Insert into purchase_orders
             cursor.execute("""
                 INSERT INTO purchase_orders (PRID, supplier_id, shopid, Status, tax, QTY, price, total, created_by)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (pr_id, pr['supplier_id'], shop_id, 'pending', 
+            """, (pr_id, pr['supplier_id'], shop_id, 'pending',
                   tax_total, total_qty, subtotal, grand_total, session.get('user')))
-            
+
             po_id = cursor.lastrowid
             conn.commit()
-            
+
             return jsonify({
                 'success': True,
                 'message': 'Purchase Order created successfully',
@@ -5448,7 +5458,7 @@ def create_po_from_existing_pr(pr_id):
                 'total': grand_total,
                 'items_count': len(items)
             })
-            
+
     except Exception as e:
         conn.rollback()
         print(f"Error creating PO from PR: {e}")
@@ -5462,10 +5472,10 @@ def create_po_from_existing_pr(pr_id):
 def get_pr_details(pr_id):
     """Get PR with its items (reuses PR_items table)"""
     conn , cur  = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor() as cursor:
             # Get PR header
             cursor.execute("""
@@ -5473,29 +5483,29 @@ def get_pr_details(pr_id):
                        s.name as supplier_name
                 FROM purchase_reciepts pr
                 LEFT JOIN supplier s ON pr.supplier_id = s.supplier_id
-                WHERE pr.receipt_id = %s AND pr.shopid = %s   
+                WHERE pr.receipt_id = %s AND pr.shopid = %s
             """, (pr_id, shop_id))
-            
+
             pr = cursor.fetchone()
             if not pr:
                 return jsonify({'success': False, 'message': 'PR not found'}), 404
-            
+
             # Get items from PR_items
             cursor.execute("""
-                SELECT pi.id, pi.product_id, p.name as product_name, pi.quantity, 
+                SELECT pi.id, pi.product_id, p.name as product_name, pi.quantity,
                        pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
                 FROM PR_items pi
                 JOIN Products p ON pi.product_id = p.product_id
                 WHERE pi.PRID = %s AND pi.shopid = %s
             """, (pr_id, shop_id))
-            
+
             items = cursor.fetchall()
-            
+
             # Calculate totals
             subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
             tax_total = sum(item['tax_amount'] for item in items)
             grand_total = subtotal + tax_total
-            
+
             return jsonify({
                 'success': True,
                 'pr': {
@@ -5512,7 +5522,7 @@ def get_pr_details(pr_id):
                     'grand_total': grand_total
                 }
             })
-            
+
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
@@ -5531,16 +5541,16 @@ def pr_posearch():
 def get_all_prs():
     """Get all purchase requisitions for the selected shop"""
     conn, cur = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor(dictionary=True) as cursor:
             cursor.execute("""
-                SELECT pr.receipt_id, pr.shopid, pr.supplier_id, pr.Reason, pr.created_at, 
+                SELECT pr.receipt_id, pr.shopid, pr.supplier_id, pr.Reason, pr.created_at,
                        pr.created_by, pr.updated_at, pr.updated_by,
                        s.name as supplier_name,
-                       CASE 
+                       CASE
                            WHEN po.PONO IS NOT NULL THEN 'converted'
                            ELSE 'pending'
                        END as status
@@ -5550,27 +5560,27 @@ def get_all_prs():
                 WHERE pr.shopid = %s
                 ORDER BY pr.created_at DESC
             """, (shop_id,))
-            
+
             prs = cursor.fetchall()
-            
+
             # Format the response
             result = []
             for pr in prs:
                 cursor.execute("""
-                    SELECT pi.product_id, p.name as product_name, pi.quantity, 
+                    SELECT pi.product_id, p.name as product_name, pi.quantity,
                            pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
                     FROM PR_items pi
                     JOIN Products p ON pi.product_id = p.product_id
                     WHERE pi.PRID = %s AND pi.shopid = %s
                 """, (pr['receipt_id'], shop_id))
-                
+
                 items = cursor.fetchall()
-                
+
                 # Calculate totals
                 subtotal = sum(item['quantity'] * item['unit_price'] for item in items)
                 tax_total = sum(item['tax_amount'] for item in items)
                 grand_total = subtotal + tax_total
-                
+
                 result.append({
                     'id': pr['receipt_id'],
                     'pr_number': f"PR-{pr['receipt_id']:04d}",
@@ -5594,9 +5604,9 @@ def get_all_prs():
                     'created_by': pr['created_by'],
                     'created_at': pr['created_at'].strftime('%Y-%m-%d %H:%M:%S') if pr['created_at'] else None
                 })
-            
+
             return jsonify({'success': True, 'prs': result})
-            
+
     except Exception as e:
         print(f"Error getting PRs: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -5609,13 +5619,13 @@ def get_all_prs():
 def get_all_pos():
     """Get all purchase orders for the selected shop"""
     conn, cur = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor(dictionary=True) as cursor:
             cursor.execute("""
-                SELECT po.PONO, po.PRID, po.supplier_id, po.Status, 
+                SELECT po.PONO, po.PRID, po.supplier_id, po.Status,
                        po.tax, po.QTY, po.price, po.total, po.created_at, po.created_by,
                        s.name as supplier_name,
                        pr.Reason
@@ -5625,23 +5635,23 @@ def get_all_pos():
                 WHERE po.shopid = %s
                 ORDER BY po.created_at DESC
             """, (shop_id,))
-            
+
             pos = cursor.fetchall()
-            
+
             result = []
             for po in pos:
                 # Get items from the associated PR
                 if po['PRID']:
                     cursor.execute("""
-                        SELECT pi.product_id, p.name as product_name, pi.quantity, 
+                        SELECT pi.product_id, p.name as product_name, pi.quantity,
                                pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
                         FROM PR_items pi
                         JOIN Products p ON pi.product_id = p.product_id
                         WHERE pi.PRID = %s AND pi.shopid = %s
                     """, (po['PRID'], shop_id))
-                    
+
                     items = cursor.fetchall()
-                    
+
                     result.append({
                         'id': po['PONO'],
                         'po_number': f"PO-{po['PONO']:04d}",
@@ -5668,9 +5678,9 @@ def get_all_pos():
                         'created_by': po['created_by'],
                         'created_at': po['created_at'].strftime('%Y-%m-%d %H:%M:%S') if po['created_at'] else None
                     })
-            
+
             return jsonify({'success': True, 'pos': result})
-            
+
     except Exception as e:
         print(f"Error getting POs: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -5684,18 +5694,18 @@ def update_pr(pr_id):
     """Update an existing purchase requisition"""
     data = request.get_json()
     conn, cur = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor() as cursor:
             # Check if PR exists and belongs to shop
             cursor.execute("""
-                SELECT receipt_id, supplier_id FROM purchase_reciepts 
+                SELECT receipt_id, supplier_id FROM purchase_reciepts
                 WHERE receipt_id = %s AND shopid = %s
             """, (pr_id, shop_id))
             existing_pr = cursor.fetchone()
-            
+
             if not existing_pr:
                 return jsonify({'success': False, 'message': 'PR not found'}), 404
 
@@ -5705,32 +5715,32 @@ def update_pr(pr_id):
                 data.get('supplier_name'),
                 shop_id
             )
-            
+
             # Update PR header
             cursor.execute("""
-                UPDATE purchase_reciepts 
+                UPDATE purchase_reciepts
                 SET supplier_id = %s, Reason = %s, updated_by = %s, updated_at = NOW()
                 WHERE receipt_id = %s AND shopid = %s
             """, (supplier_id, data.get('reason'), session.get('user'), pr_id, shop_id))
-            
+
             # Delete existing items
             cursor.execute("DELETE FROM PR_items WHERE PRID = %s AND shopid = %s", (pr_id, shop_id))
-            
+
             # Insert updated items
             for raw_item in data.get('items', []):
                 item = normalize_pr_item(raw_item)
                 product_id = item['product_id']
                 if not product_id and item.get('product_name'):
                     cursor.execute("""
-                        SELECT product_id FROM Products 
+                        SELECT product_id FROM Products
                         WHERE name = %s AND shop_id = %s LIMIT 1
                     """, (item['product_name'], shop_id))
                     product = cursor.fetchone()
                     product_id = product['product_id'] if product else None
-                
+
                 if not product_id:
                     continue
-                
+
                 cursor.execute("""
                     INSERT INTO PR_items (shopid, PRID, product_id, quantity, unit_price, tax_rate, tax_amount, total)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
@@ -5744,11 +5754,11 @@ def update_pr(pr_id):
                     item['tax_amount'],
                     item['total']
                 ))
-            
+
             conn.commit()
-            
+
             return jsonify({'success': True, 'message': 'PR updated successfully'})
-            
+
     except Exception as e:
         conn.rollback()
         print(f"Error updating PR: {e}")
@@ -5763,19 +5773,19 @@ def update_po(po_id):
     """Update an existing purchase order"""
     data = request.get_json()
     conn, cur = get_db()
-    
+
     try:
         shop_id = session.get('selected_shop_id')
-        
+
         with conn.cursor() as cursor:
             # Check if PO exists and belongs to shop
             cursor.execute("""
                 SELECT PONO, PRID, supplier_id, Status
-                FROM purchase_orders 
+                FROM purchase_orders
                 WHERE PONO = %s AND shopid = %s
             """, (po_id, shop_id))
             existing_po = cursor.fetchone()
-            
+
             if not existing_po:
                 return jsonify({'success': False, 'message': 'PO not found'}), 404
 
@@ -5786,12 +5796,12 @@ def update_po(po_id):
                 data.get('supplier_name'),
                 shop_id
             )
-            status = data.get('status') or existing_po.get('Status')
+            status = normalize_po_status(data.get('status') or existing_po.get('Status'))
 
             if pr_id:
                 # Update PR supplier if linked
                 cursor.execute("""
-                    UPDATE purchase_reciepts 
+                    UPDATE purchase_reciepts
                     SET supplier_id = %s, updated_by = %s, updated_at = NOW()
                     WHERE receipt_id = %s AND shopid = %s
                 """, (supplier_id, session.get('user'), pr_id, shop_id))
@@ -5810,7 +5820,7 @@ def update_po(po_id):
                     product_id = item['product_id']
                     if not product_id and item.get('product_name'):
                         cursor.execute("""
-                            SELECT product_id FROM Products 
+                            SELECT product_id FROM Products
                             WHERE name = %s AND shop_id = %s LIMIT 1
                         """, (item['product_name'], shop_id))
                         product = cursor.fetchone()
@@ -5864,9 +5874,9 @@ def update_po(po_id):
                 )
 
             conn.commit()
-            
+
             return jsonify({'success': True, 'message': 'PO updated successfully'})
-            
+
     except Exception as e:
         conn.rollback()
         print(f"Error updating PO: {e}")
@@ -5874,6 +5884,81 @@ def update_po(po_id):
     finally:
         conn.close()
 
-        
+
+@app.route('/api/po-print/<int:po_id>', methods=['GET'])
+@login_required
+def get_po_print_data(po_id):
+    """Get PO data with shop and vendor details for printing"""
+    conn, cur = get_db()
+
+    try:
+        shop_id = session.get('selected_shop_id')
+
+        with conn.cursor(dictionary=True) as cursor:
+            # Get PO details
+            cursor.execute("""
+                SELECT po.PONO, po.PRID, po.supplier_id, po.Status,
+                       po.tax, po.QTY, po.price, po.total, po.created_at, po.created_by
+                FROM purchase_orders po
+                WHERE po.PONO = %s AND po.shopid = %s
+            """, (po_id, shop_id))
+
+            po = cursor.fetchone()
+            if not po:
+                return jsonify({'success': False, 'message': 'PO not found'}), 404
+
+            # Get shop details
+            cursor.execute("""
+                SELECT shopid, name, Address, phone, GSTN, userid
+                FROM Shops
+                WHERE shopid = %s
+            """, (shop_id,))
+
+            shop = cursor.fetchone()
+
+            # Get vendor/supplier details
+            cursor.execute("""
+                SELECT supplier_id, name, phone, address, email, city, state, country
+                FROM supplier
+                WHERE supplier_id = %s
+            """, (po['supplier_id'],))
+
+            vendor = cursor.fetchone()
+
+            # Get items from PR_items (reuse items from linked PR)
+            items = []
+            if po['PRID']:
+                cursor.execute("""
+                    SELECT pi.product_id, p.name, pi.quantity,
+                           pi.unit_price, pi.tax_rate, pi.tax_amount, pi.total
+                    FROM PR_items pi
+                    JOIN Products p ON pi.product_id = p.product_id
+                    WHERE pi.PRID = %s AND pi.shopid = %s
+                """, (po['PRID'], shop_id))
+
+                items = cursor.fetchall()
+
+            return jsonify({
+                'success': True,
+                'po': po,
+                'shop': shop,
+                'vendor': vendor,
+                'items': items
+            })
+
+    except Exception as e:
+        print(f"Error fetching PO print data: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/print-po/<int:po_id>')
+@login_required
+def print_po_page(po_id):
+    """Render the print PO page"""
+    return render_template('print_po.html', po_id=po_id)
+
+
 if __name__ == '__main__':
     app.run(debug = True,port=5500)
