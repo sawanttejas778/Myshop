@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>{% if selected_invoice %}Invoice {{ selected_invoice.invoice_number }}{% else %}Professional Invoices{% endif %} · Flask Data</title>
-    <!-- Font Awesome 5 (free) for icons -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
-    <!-- Google Font: Inter & Roboto Mono for clean look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Professional Invoice | A4 Optimized & Mobile Ready</title>
+    <!-- Google Fonts: Inter for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -16,462 +16,385 @@
         }
 
         body {
-            background: #f3f5f9;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            padding: clamp(0.75rem, 3vw, 2rem) clamp(0.75rem, 4vw, 2.5rem);
+            background: #e2e8f0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            color: #1e293b;
             min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            padding: 20px 16px;
         }
 
-        .invoice-container {
-            max-width: 1440px;
+        /* A4-optimized container: exactly fits A4 print area, but flexible on mobile */
+        .invoice-wrapper {
+            max-width: 1100px;
             width: 100%;
             background: white;
-            border-radius: clamp(16px, 4vw, 28px);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-            overflow: hidden;
-            border: 1px solid #e9eef2;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
-        /* header area with flask badge - responsive */
-        .flask-header {
-            background: #0b1120;
-            padding: clamp(0.75rem, 2vw, 1.2rem) clamp(1rem, 3vw, 2rem);
+        /* Inner content with balanced padding for A4 print and mobile */
+        .invoice-inner {
+            background: white;
+            padding: 1.8rem 1.5rem;
+        }
+
+        /* Header section with shop details - flexible wrap */
+        .header-section {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #2d3a4e;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .flask-header h3 {
-            font-weight: 500;
-            font-size: clamp(0.8rem, 2.5vw, 1rem);
-            color: #a5b4cb;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: clamp(5px, 1.5vw, 10px);
-        }
-        .flask-header h3 i {
-            color: #3b82f6;
-            font-size: clamp(0.9rem, 3vw, 1.2rem);
-        }
-        .flask-header .data-badge {
-            background: #1e2b3c;
-            padding: 0.4rem clamp(0.7rem, 2vw, 1rem);
-            border-radius: 60px;
-            color: #b9c8e0;
-            font-size: clamp(0.7rem, 2vw, 0.85rem);
-            font-weight: 500;
-            border: 1px solid #314a62;
-            white-space: nowrap;
-        }
-        .flask-header .data-badge i {
-            margin-right: 6px;
-            color: #10b981;
-        }
-
-        /* responsive two column layout */
-        .invoice-panels {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .panel-left {
-            flex: 1.2;
-            min-width: 300px;
-            width: 100%;
-            background: #ffffff;
-            padding: clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
-            border-right: 1px solid #eef2f6;
-        }
-
-        .panel-right {
-            flex: 0.9;
-            min-width: 280px;
-            width: 100%;
-            background: #f9fbfd;
-            padding: clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
-        }
-
-        /* invoice meta header */
-        .invoice-title {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 15px;
-            margin-bottom: clamp(1.2rem, 4vw, 2rem);
+            border-bottom: 3px solid #1e3a8a;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-        .invoice-title .badge {
-            background: #e6edfb;
-            color: #1d4ed8;
-            font-weight: 600;
-            font-size: clamp(0.7rem, 2vw, 0.8rem);
-            padding: 0.4rem clamp(0.8rem, 2.5vw, 1rem);
-            border-radius: 40px;
-            letter-spacing: 0.3px;
-            border: 1px solid #cbdcff;
-            white-space: nowrap;
-        }
-        .invoice-title h2 {
+        .shop-info h2 {
             font-size: clamp(1.3rem, 5vw, 1.8rem);
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #0f1825;
-            word-break: break-word;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.3rem;
+        }
+        .shop-info .shop-address {
+            color: #334155;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+            line-height: 1.4;
+            max-width: 320px;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h1 {
+            font-size: clamp(1.5rem, 6vw, 2rem);
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        .invoice-title .ref {
+            font-size: clamp(0.7rem, 3vw, 0.9rem);
+            background: #f1f5f9;
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 6px;
+            font-weight: 500;
         }
 
-        /* customer card - fully responsive */
-        .customer-card {
-            background: #f2f5fa;
-            border-radius: clamp(16px, 3vw, 20px);
-            padding: clamp(1.2rem, 3vw, 1.8rem);
-            margin: 1.5rem 0 1.8rem 0;
-            border: 1px solid #e2eaf1;
-            width: 100%;
-            overflow: hidden;
+        /* customer & details row - card style */
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 1rem 1rem;
+            border-radius: 14px;
+        }
+        .bill-to, .invoice-meta {
+            flex: 1;
+            min-width: 180px;
+        }
+        .bill-to h3, .invoice-meta h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 8px;
         }
         .customer-name {
-            font-size: clamp(1.1rem, 4vw, 1.4rem);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 4vw, 1.1rem);
+            color: #0f172a;
             word-break: break-word;
         }
         .customer-detail {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-            color: #33455a;
-            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-            word-break: break-word;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+            color: #334155;
+            margin-top: 4px;
             line-height: 1.4;
-        }
-        .customer-detail i {
-            width: 20px;
-            color: #3b82f6;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .divider {
-            height: 1px;
-            background: #dde3e9;
-            margin: 1.5rem 0;
-        }
-
-        /* responsive grid */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: clamp(1rem, 3vw, 1.8rem);
-        }
-        .info-item {
-            background: white;
-            border-radius: clamp(14px, 2.5vw, 18px);
-            padding: clamp(1rem, 2.5vw, 1.5rem);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            border: 1px solid #ecf1f7;
-            width: 100%;
-        }
-        .info-item .label {
-            font-size: clamp(0.65rem, 2vw, 0.75rem);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 0.3rem;
-        }
-        .info-item .value {
-            font-size: clamp(1.1rem, 4vw, 1.4rem);
-            font-weight: 600;
-            color: #0b1c2e;
             word-break: break-word;
         }
-        .info-item .sub {
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-            color: #3a546d;
-            margin-top: 6px;
-            border-top: 1px dashed #d3dee9;
-            padding-top: 6px;
-        }
-
-        /* table styling - fully responsive with horizontal scroll */
-        .items-table-wrapper {
-            overflow-x: auto;
-            margin-top: 1.8rem;
-            border-radius: clamp(14px, 3vw, 18px);
-            border: 1px solid #e3eaf1;
-            background: white;
-            -webkit-overflow-scrolling: touch;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-            min-width: 600px; /* ensures table doesn't squish too much */
-        }
-        th {
-            background: #f0f4fa;
-            font-weight: 600;
-            font-size: clamp(0.7rem, 2vw, 0.8rem);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #415a77;
-            padding: clamp(0.7rem, 2vw, 1rem);
-            text-align: left;
-            border-bottom: 1px solid #cfddee;
-            white-space: nowrap;
-        }
-        td {
-            padding: clamp(0.7rem, 2vw, 1rem);
-            border-bottom: 1px solid #eaeff5;
-            color: #1f3449;
-            word-break: break-word;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        .mono {
-            font-family: 'Roboto Mono', monospace;
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-        }
-        .product-badge {
-            background: #e2eaf3;
-            padding: 0.25rem 0.8rem;
-            border-radius: 40px;
-            font-size: clamp(0.7rem, 2vw, 0.8rem);
+        .invoice-meta p {
             font-weight: 500;
-            white-space: nowrap;
-        }
-
-        /* right panel summary blocks */
-        .totals-box {
             background: white;
-            border-radius: clamp(18px, 4vw, 24px);
-            padding: clamp(1.2rem, 3.5vw, 2rem);
-            border: 1px solid #e4eaf2;
-            box-shadow: 0 8px 15px -10px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            width: 100%;
+            padding: 4px 10px;
+            border-radius: 24px;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+            display: inline-block;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 8px;
         }
-        .totals-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.7rem 0;
-            border-bottom: 1px dashed #dae2ec;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .totals-row .label {
-            word-break: break-word;
-        }
-        .totals-row:last-of-type {
-            border-bottom: none;
-        }
-        .grand-row {
-            font-weight: 700;
-            font-size: clamp(1.1rem, 4vw, 1.5rem);
-            color: #075985;
-            margin-top: 0.8rem;
-            padding-top: 0.8rem;
-            border-top: 2px solid #cbd5e1;
+        .status-badge {
+            margin-top: 8px;
         }
         .badge-status {
-            display: inline-block;
-            background: #ffedd5;
-            color: #9a3412;
-            padding: 0.3rem 1.2rem;
-            border-radius: 50px;
+            font-size: 0.7rem;
             font-weight: 600;
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-            text-transform: capitalize;
-            border: 1px solid #fed7aa;
-            white-space: nowrap;
-        }
-        .shop-id {
-            background: #dee7f2;
-            border-radius: 30px;
-            padding: 0.3rem 1rem;
-            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            padding: 4px 10px;
+            border-radius: 40px;
+            background: #fef9c3;
+            color: #854d0e;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
+        }
+        .shop-id-badge {
+            background: #e2eaf3;
+            border-radius: 40px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+        }
+
+        /* items table - horizontal scroll on mobile, but fits A4 */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 1.2rem 0 1rem 0;
+            border-radius: 12px;
+            border: 1px solid #eef2f6;
+            -webkit-overflow-scrolling: touch;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.7rem, 2.8vw, 0.85rem);
+            min-width: 580px;
+        }
+        .items-table th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 10px 8px;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #cbd5e1;
             white-space: nowrap;
         }
-
-        .meta-footer {
-            margin-top: 2rem;
-            font-size: clamp(0.7rem, 2vw, 0.8rem);
-            color: #546a7a;
-            background: #eef3f8;
-            border-radius: clamp(14px, 3vw, 18px);
-            padding: clamp(1rem, 2.5vw, 1.5rem);
-            line-height: 1.6;
+        .items-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+            color: #0f172a;
             word-break: break-word;
         }
-        .meta-footer i {
-            color: #3b6e9b;
-            width: 18px;
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .mono { font-family: 'Courier New', monospace; font-size: 0.75rem; }
+        .product-badge-sm {
+            background: #eef2ff;
+            padding: 2px 6px;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 4px;
         }
 
-        /* flask data note */
-        .flask-note {
-            background: #eef9ff;
-            border-radius: clamp(12px, 2.5vw, 16px);
-            padding: clamp(0.8rem, 2.2vw, 1.2rem);
-            margin: 1.5rem 1.5rem 1.5rem 1.5rem;
-            border: 1px solid #bdd8f0;
+        /* totals section - fully responsive, aligned right on desktop, stack on mobile */
+        .totals-card {
             display: flex;
-            align-items: center;
-            gap: clamp(10px, 2vw, 16px);
+            justify-content: flex-end;
+            margin: 1rem 0 1.5rem;
+        }
+        .totals-box {
+            width: 100%;
+            max-width: 320px;
+            background: #fefefe;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
             flex-wrap: wrap;
+            gap: 6px;
         }
-        .flask-note i {
-            font-size: clamp(1rem, 3vw, 1.3rem);
+        .total-row.grand {
+            font-weight: 800;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            border-top: 2px dashed #cbd5e1;
+            margin-top: 6px;
+            padding-top: 10px;
+            color: #0f3b5f;
         }
-        .flask-note div {
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-            flex: 1;
+        .tax-break {
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 6px;
+            word-break: break-word;
         }
 
-        /* invoice selector - responsive */
-        .invoice-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            align-items: center;
+        /* footer note */
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+            margin-top: 0.5rem;
         }
-        
-        .invoice-btn {
+
+        /* Toolbar & buttons (no-print) */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px 0 20px;
+            flex-wrap: wrap;
+            gap: 12px;
             background: white;
-            border: 1px solid #d0ddee;
-            padding: 0.6rem 1.2rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .demo-info {
+            background: #fef9e6;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button, .invoice-btn {
+            background: #1e3a8a;
+            border: none;
+            color: white;
+            padding: 6px 16px;
             border-radius: 40px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.1s;
-            color: #1e2f44;
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            transition: 0.2s;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .invoice-btn.active {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
-            color: white;
-        }
-        .invoice-btn:hover {
-            background: #e9eff8;
-        }
-
-        /* other invoices section */
-        .other-invoices {
-            margin-top: 1.8rem;
-            background: white;
-            border-radius: clamp(14px, 3vw, 18px);
-            padding: clamp(1rem, 2.5vw, 1.5rem);
-            border: 1px solid #d8e2ed;
-            width: 100%;
-        }
-        .other-invoice-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.7rem 0;
-            border-bottom: 1px dashed #dee7f0;
-            flex-wrap: wrap;
-            gap: 8px;
-            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
-        }
-        .other-invoice-item:last-child {
-            border-bottom: none;
+        button:hover, .invoice-btn:hover { background: #2563eb; }
+        .invoice-btn.secondary { background: #334155; }
+        select.status-select {
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: #854d0e;
+            font-size: inherit;
+            cursor: pointer;
+            font-family: inherit;
         }
 
-        /* responsive breakpoints */
-        @media (max-width: 768px) {
-            .panel-left, .panel-right {
-                flex: 100%;
-            }
-            .panel-left {
-                border-right: none;
-                border-bottom: 1px solid #eef2f6;
-            }
-            .customer-detail {
-                flex-wrap: wrap;
-            }
-            .grand-row {
-                font-size: 1.3rem;
-            }
-        }
+        /* Flash messages overlay (original feature preserved) */
+        .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: 0.3s; z-index: 1500; }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+        .flash-message { min-width: 220px; max-width: 350px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 12px; box-shadow: 0 8px 18px rgba(0,0,0,.25); display: flex; align-items: center; gap: 8px; justify-content: space-between; font-size: 0.8rem; }
+        .flash-message.success { background: #22c55e; }
+        .flash-message.error { background: #ef4444; }
+        .flash-message.warning { background: #f59e0b; }
+        .flash-message.info { background: #3b82f6; }
+        .flash-message.fade-out { opacity: 0; transform: translateY(-10px); transition: 0.3s; }
+        .close-flash { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 0 4px; }
 
-        @media (max-width: 480px) {
+        /* ===== PRINT STYLES: perfect A4 fit ===== */
+        @media print {
             body {
-                padding: 0.5rem;
+                background: white;
+                padding: 0;
+                margin: 0;
             }
-            .flask-header {
+            .invoice-wrapper {
+                max-width: 100%;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .invoice-inner {
+                padding: 0.5in 0.4in;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .badge-status {
+                border: 1px solid #aaa;
+                background: #f3f4f6;
+                print-color-adjust: exact;
+            }
+            .items-table th, .items-table td {
+                border-color: #ccc;
+            }
+            .totals-box {
+                border: 1px solid #ccc;
+            }
+            .details-row {
+                background: #f9fafb;
+                border: 1px solid #e2e8f0;
+            }
+            .header-section {
+                border-bottom-width: 2px;
+            }
+        }
+
+        /* Mobile optimizations: full bleed, tap friendly */
+        @media (max-width: 640px) {
+            body {
+                padding: 12px 8px;
+            }
+            .invoice-inner {
+                padding: 1rem;
+            }
+            .details-row {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            .totals-card {
+                justify-content: stretch;
+            }
+            .totals-box {
+                max-width: 100%;
+            }
+            .toolbar {
+                padding: 10px 12px;
+            }
+            .badge-status {
+                white-space: normal;
+            }
+        }
+        @media (max-width: 480px) {
+            .header-section {
                 flex-direction: column;
                 align-items: flex-start;
-            }
-            .flask-header .data-badge {
-                align-self: flex-start;
             }
             .invoice-title {
-                flex-direction: column;
-                align-items: flex-start;
+                text-align: left;
+                width: 100%;
             }
-            .customer-card .shop-id {
-                white-space: normal;
-                word-break: break-word;
+            .shop-info h2 {
+                font-size: 1.4rem;
             }
-            .totals-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-            .meta-footer div {
-                word-break: break-word;
+            .items-table th, .items-table td {
+                padding: 8px 6px;
             }
         }
-
-        /* touch-friendly improvements */
-        button, .invoice-btn {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        /* print styles */
-        @media print {
-            body { background: white; padding: 0; }
-            .invoice-container { box-shadow: none; border: 1px solid #ddd; }
-            .flask-header, .flask-note, .invoice-selector { display: none; }
-        }
-    
-  /* Flash overlay */
-  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
-  .flash-overlay.active { opacity: 1; visibility: visible; }
-  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
-  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
-  .flash-message.success { background: #22c55e; }
-  .flash-message.error { background: #ef4444; }
-  .flash-message.warning { background: #f59e0b; }
-  .flash-message.info { background: #3b82f6; }
-  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
-
-</style>
+    </style>
 </head>
 <body>
-  <div id="flashOverlay" class="flash-overlay"></div>
-<!-- Flash Messages -->
+<div id="flashOverlay" class="flash-overlay"></div>
 <div class="flash-container" id="flashContainer">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -486,62 +409,101 @@
   {% endwith %}
 </div>
 
-<div class="invoice-container">
-    <!-- header mimicking Flask data context - fully responsive -->
-    <div class="flask-header" style="align-items: center; gap: 1rem;">
-        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-            <h3><i class="fas fa-flask"></i>invoice view ·</h3>
-            <a class="invoice-btn" href="{{ url_for('quotations_list') }}" style="padding: 0.6rem 1rem; background: #1d4ed8; color: white; border-color: #1d4ed8;"><i class="fas fa-file-invoice"></i> Quotation List</a>
-            <button class="invoice-btn" id="printInvoiceBtn" type="button" style="padding: 0.6rem 1rem; background: #0f172a; color: white; border-color: #0f172a;"><i class="fas fa-print"></i> Print</button>
+<div class="invoice-wrapper" id="invoiceApp">
+    <div class="toolbar no-print">
+        <div class="demo-info">
+            <i class="fas fa-database"></i> <span>{{ invoices|length }} invoices · {{ invoice_items|length }} items</span>
+            <i class="fas fa-flask" style="margin-left: 4px;"></i>
         </div>
-        <span class="data-badge"><i class="fas fa-database"></i> {{ invoices|length }} invoices · {{ invoice_items|length }} items</span>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <a href="{{ url_for('quotations_list') }}" class="invoice-btn secondary" style="text-decoration: none;"><i class="fas fa-file-invoice"></i> Quotations</a>
+            <button id="printInvoiceBtn"><i class="fas fa-print"></i> Print / PDF</button>
+        </div>
     </div>
 
-    {% if read_only and invoices %}
-    <div class="invoice-selector" style="margin-top:1rem;">
-        {% for inv in invoices %}
-            <a class="invoice-btn {% if selected_invoice and selected_invoice.invoice_id == inv.invoice_id %}active{% endif %}" href="{{ url_for('my_invoices') }}?invoice_id={{ inv.invoice_id }}">
-                #{{ inv.invoice_number }} • ₹{{ "%.2f"|format(inv.grand_total) }} • {{ inv.status|capitalize }}
-            </a>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- main two panel layout -->
     {% set display_invoice = selected_invoice if selected_invoice else invoices[0] if invoices else None %}
     {% set display_items = invoice_items if invoice_items else [] %}
-    
-    <div class="invoice-panels">
-        <!-- LEFT PANEL: invoice items table - fully responsive with horizontal scroll -->
-        <div class="panel-left">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
-                <h3 style="font-weight: 600; font-size: clamp(1rem, 4vw, 1.3rem);">
-                    <i class="fas fa-receipt" style="color:#2563eb; margin-right: 8px;"></i>Line items
-                </h3>
-                <span class="product-badge">{{ display_items|length }} records</span>
+
+    <div class="invoice-inner" id="invoiceContent">
+        <!-- HEADER: shop + title (A4 clean) -->
+        <div class="header-section">
+            <div class="shop-info">
+                <h2 id="shopName">{% if display_invoice and display_invoice.shop_name %}{{ display_invoice.shop_name }}{% else %}SHOP STATION{% endif %}</h2>
+                <div class="shop-address" id="shopAddress">
+                    {% if display_invoice and display_invoice.shop_address %}{{ display_invoice.shop_address }}{% else %}Business Hub, 4th Cross<br>Bengaluru - 560001 | GST: 29AAACA1234A1Z{% endif %}
+                </div>
+                <div id="shopExtra" class="shop-id-badge"><i class="fas fa-store"></i> Shop ID: {% if display_invoice %}{{ display_invoice.shop_id }}{% else %}SP-001{% endif %}</div>
             </div>
-            <div class="items-table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item ID</th>
-                            <th>Product</th>
-                            <th>Description</th>
-                            <th>Qty</th>
-                            <th>Unit price</th>
-                            <th>Tax %</th>
-                            <th>Tax amt</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoiceItems">
+            <div class="invoice-title">
+                <h1>INVOICE</h1>
+                <div class="ref">
+                    <span id="invoiceNumber">{% if display_invoice %}{{ display_invoice.invoice_number }}{% else %}INV-0000{% endif %}</span>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 6px;" id="invoiceDate">
+                    {% if display_invoice and display_invoice.created_at %}{{ display_invoice.created_at.strftime('%d %b %Y') if display_invoice.created_at else '' }}{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- CUSTOMER & INVOICE META ROW -->
+        <div class="details-row">
+            <div class="bill-to">
+                <h3><i class="far fa-user"></i> BILL TO</h3>
+                <div class="customer-name" id="customerName">{% if display_invoice %}{{ display_invoice.customer_name }}{% else %}Customer Name{% endif %}</div>
+                <div class="customer-detail" id="customerDetails">
+                    {% if display_invoice %}
+                        {{ display_invoice.customer_email }}<br>
+                        {{ display_invoice.customer_phone }}<br>
+                        {{ display_invoice.customer_address }}
+                    {% else %}customer@example.com | +91 9876543210 | Address line{% endif %}
+                </div>
+                <div class="status-badge" id="statusBadge">
+                    {% if display_invoice %}
+                        <span class="badge-status">
+                            <i class="far fa-clock"></i>
+                            {% if not read_only %}
+                            <select id="statusSelect" class="status-select">
+                                {% for st in ['draft','sent','paid','cancelled'] %}
+                                <option value="{{ st }}" {% if display_invoice.status==st %}selected{% endif %}>{{ st|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                            {% else %}
+                            {{ display_invoice.status|capitalize }}
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="invoice-meta">
+                <h3><i class="far fa-calendar-alt"></i> INVOICE DETAILS</h3>
+                <p><i class="fas fa-hourglass-half"></i> Due: {% if display_invoice %}{{ display_invoice.due_date }}{% else %}2025-02-15{% endif %}</p>
+                <div style="font-size:0.7rem; margin-top: 6px;" id="createdInfo">
+                    {% if display_invoice and display_invoice.created_at %}
+                        <i class="far fa-calendar-check"></i> Created: {{ display_invoice.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% endif %}
+                </div>
+                <div style="font-size:0.7rem; margin-top: 4px;" id="updatedInfo">
+                    {% if display_invoice and display_invoice.updated_at %}
+                        <i class="far fa-edit"></i> Updated: {{ display_invoice.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE (Horiz scroll on mobile, but crisp on A4) -->
+        <div class="table-responsive">
+            <table class="items-table" id="itemsTable">
+                <thead>
+                    <tr>
+                        <th>Item ID</th><th>Product</th><th>Description</th><th>Qty</th><th>Unit Price</th><th>Tax %</th><th>Tax Amt</th><th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    {% if display_items %}
                         {% for item in display_items %}
                         <tr>
                             <td class="mono">#{{ item.item_id }}</td>
-                            <td>
-                                <span style="font-weight:500;">{{ item.product_name if item.product_name else 'Product' }}</span>
-                                <br><span style="font-size:0.7rem; color:#3f5e7a;">ID: {{ item.product_id }}</span>
-                            </td>
+                            <td><span style="font-weight:500;">{{ item.product_name if item.product_name else 'Product' }}</span><br><span class="product-badge-sm">ID: {{ item.product_id }}</span></td>
                             <td>{{ item.description }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>₹{{ "%.2f"|format(item.unit_price) }}</td>
@@ -549,135 +511,45 @@
                             <td>₹{{ "%.2f"|format(item.tax_amount) }}</td>
                             <td><strong>₹{{ "%.2f"|format(item.total) }}</strong></td>
                         </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="8" style="text-align:center; padding:2rem; color:#6f8faf;">
-                                <i class="fas fa-box-open" style="font-size:2rem; opacity:0.5; margin-bottom:0.5rem; display:block;"></i>
-                                No invoice items found
-                            </td>
-                        </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    {% else %}
+                        <tr><td colspan="8" class="text-center"><i class="fas fa-box-open"></i> No items found</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOTALS BOX (A4 friendly, responsive) -->
+        <div class="totals-card">
+            <div class="totals-box">
+                <div class="total-row"><span>Subtotal</span><span id="subtotalVal">{% if display_invoice %}₹{{ "%.2f"|format(display_invoice.subtotal) }}{% else %}0.00{% endif %}</span></div>
+                <div class="total-row"><span>Total Tax</span><span id="totalTaxVal">{% if display_invoice %}₹{{ "%.2f"|format(display_invoice.total_tax) }}{% else %}0.00{% endif %}</span></div>
+                <div class="tax-break" id="taxBreakdown">
+                    {% if display_invoice %}
+                        {% set cgst = (display_invoice.total_tax / 2) if display_invoice.total_tax else 0 %}
+                        CGST: ₹{{ "%.2f"|format(cgst) }} | SGST: ₹{{ "%.2f"|format(cgst) }}
+                    {% else %}CGST: ₹0.00 | SGST: ₹0.00{% endif %}
+                </div>
+                <div class="total-row grand"><span>GRAND TOTAL</span><span id="grandTotalVal">{% if display_invoice %}₹{{ "%.2f"|format(display_invoice.grand_total) }}{% else %}0.00{% endif %}</span></div>
             </div>
         </div>
 
-        <!-- RIGHT PANEL: invoice master data -->
-        <div class="panel-right">
-            {% if display_invoice %}
-            <!-- invoice header with status -->
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.2rem;">
-                <h3 style="font-weight: 600; font-size: clamp(1rem, 4vw, 1.3rem);">
-                    <i class="fas fa-file-invoice"></i> Invoice details
-                </h3>
-                {% if not read_only %}
-                <span class="badge-status" style="background:#e0f2fe; color:#0369a1;">
-                    <i class="far fa-clock"></i>
-                    <select id="statusSelect" style="background:transparent; border:none; color:inherit; font-weight:600;">
-                        {% for st in ['draft','sent','paid','cancelled'] %}
-                        <option value="{{ st }}" {% if display_invoice.status==st %}selected{% endif %}>{{ st }}</option>
-                        {% endfor %}
-                    </select>
-                </span>
-                {% else %}
-                <span class="badge-status" style="background:#f0f4f8; color:#1e3a56; cursor:default;">
-                    <i class="far fa-clock"></i> {{ display_invoice.status|capitalize }}
-                </span>
-                {% endif %}
-            </div>
-
-            <!-- customer details card - fully responsive -->
-            <div class="customer-card">
-                <div class="customer-name">
-                    <i class="fas fa-user-circle" style="color:#2563eb;"></i> {{ display_invoice.customer_name }}
-                </div>
-                <div class="customer-detail"><i class="fas fa-envelope"></i> {{ display_invoice.customer_email }}</div>
-                <div class="customer-detail"><i class="fas fa-phone-alt"></i> {{ display_invoice.customer_phone }}</div>
-                <div class="customer-detail"><i class="fas fa-map-marker-alt"></i> {{ display_invoice.customer_address }}</div>
-                <div style="margin-top: 1.2rem; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                    <span><span style="color:#4a627a;">invoice no.</span> <strong>{{ display_invoice.invoice_number }}</strong></span>
-                    <span class="shop-id"><i class="fas fa-store"></i> {{ display_invoice.shop_name or ('Shop #' ~ display_invoice.shop_id) }}</span>
-                    <span><i class="far fa-calendar-alt" style="color:#3b82f6;"></i> due: {{ display_invoice.due_date }}</span>
-                </div>
-            </div>
-
-            <!-- totals summary - responsive -->
-            <div class="totals-box">
-                <h4 style="font-weight:500; margin-bottom:1.2rem; display:flex; align-items: center; gap:6px; flex-wrap:wrap;">
-                    <i class="fas fa-calculator" style="color:#2563eb;"></i>Invoice summary
-                </h4>
-                <div class="totals-row"><span class="label">Subtotal (from items)</span> <span class="mono">₹{{ "%.2f"|format(display_invoice.subtotal) }}</span></div>
-                <div class="totals-row"><span class="label">Total tax</span> <span class="mono">₹{{ "%.2f"|format(display_invoice.total_tax) }}</span></div>
-                <div class="totals-row grand-row"><span class="label">Grand total</span> <span>₹{{ "%.2f"|format(display_invoice.grand_total) }}</span></div>
-                <div style="margin-top: 1rem; background:#f2f7ff; border-radius:12px; padding:0.7rem 1rem; word-break:break-word;">
-                    <span style="color:#1f4a7a;"><i class="fas fa-tag"></i> created by: user #{{ display_invoice.created_by }}</span>
-                </div>
-            </div>
-
-            <!-- metadata footer with timestamps -->
-            <div class="meta-footer">
-                <div><i class="far fa-calendar-check"></i> Created: {{ display_invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') if display_invoice.created_at else 'N/A' }}</div>
-                <div style="margin-top:8px;"><i class="far fa-clock"></i> Last updated: {{ display_invoice.updated_at.strftime('%Y-%m-%d %H:%M:%S') if display_invoice.updated_at else 'N/A' }}</div>
-            </div>
-            {% endif %}
+        <!-- FOOTER NOTE -->
+        <div class="footer-note">
+            <span id="footerText">Thank you for your business! This invoice is system generated. 
+            {% if display_invoice %} Created by: user #{{ display_invoice.created_by }}{% endif %}</span>
         </div>
     </div>
 </div>
 
-<!-- responsive JavaScript for mobile touch and dynamic behavior -->
 <script>
     (function() {
-        // Make invoice buttons touch-friendly
-        const buttons = document.querySelectorAll('.invoice-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // Visual feedback for touch
-                buttons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-            
-            // Ensure minimum touch target size
-            if (window.innerWidth <= 480) {
-                btn.style.padding = '0.8rem 1.2rem';
-            }
-        });
-
-        // Handle responsive table text wrap
-        function adjustTableForMobile() {
-            const table = document.querySelector('table');
-            if (!table) return;
-            
-            if (window.innerWidth <= 600) {
-                table.style.fontSize = '0.75rem';
-            } else {
-                table.style.fontSize = '';
-            }
-        }
-        
-        window.addEventListener('resize', adjustTableForMobile);
-        adjustTableForMobile();
-        
-        // Prevent zoom on double-tap for better UX
-        let lastTap = 0;
-        document.addEventListener('touchend', function(e) {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
-            if (tapLength < 500 && tapLength > 0) {
-                e.preventDefault();
-            }
-            lastTap = currentTime;
-        });
-    })();
-</script>
-
-<script>
-    // status dropdown updates backend using existing invoice API
-    document.addEventListener('DOMContentLoaded', function() {
+        // STATUS UPDATE (original feature fully preserved)
         const params = new URLSearchParams(window.location.search);
         const invoiceId = params.get('invoice_id');
-        const sel = document.getElementById('statusSelect');
-        if (sel && invoiceId) {
-            sel.addEventListener('change', async function() {
+        const statusSelect = document.getElementById('statusSelect');
+        if (statusSelect && invoiceId) {
+            statusSelect.addEventListener('change', async function() {
                 const newStatus = this.value;
                 try {
                     const res = await fetch(`/api/invoices/${invoiceId}`);
@@ -694,92 +566,93 @@
                         const uj = await u.json();
                         if (!u.ok || !uj.success) {
                             alert('Status update failed: '+(uj.message||u.statusText));
-                            sel.value = inv.status;
+                            statusSelect.value = inv.status;
+                        } else {
+                            const flashDiv = document.getElementById('flashContainer');
+                            if(flashDiv){
+                                let msgDiv = document.createElement('div');
+                                msgDiv.className = 'flash-message success';
+                                msgDiv.innerHTML = '<i class="fas fa-check-circle"></i> <span>Status updated to '+newStatus+'</span><button class="close-flash">&times;</button>';
+                                flashDiv.appendChild(msgDiv);
+                                setTimeout(()=> msgDiv.classList.add('fade-out'), 2000);
+                                setTimeout(()=> msgDiv.remove(), 2500);
+                            }
                         }
                     }
-                } catch (e) {
-                    console.error(e);
-                    alert('Error saving status');
-                }
+                } catch(e) { console.error(e); alert('Error updating status'); }
             });
         }
-    });
+
+        // PRINT BUTTON: perfect A4 print
+        const printBtn = document.getElementById('printInvoiceBtn');
+        if(printBtn) printBtn.addEventListener('click', () => window.print());
+
+        // Touch / responsive small adjustments
+        function handleTableResponsive() {
+            const wrapper = document.querySelector('.table-responsive');
+            if(window.innerWidth <= 640 && wrapper) wrapper.style.overflowX = 'auto';
+        }
+        window.addEventListener('resize', handleTableResponsive);
+        handleTableResponsive();
+
+        // Prevent zoom on double-tap for better mobile UX (optional)
+        let lastTap = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = new Date().getTime();
+            if (now - lastTap < 500 && now - lastTap > 0) e.preventDefault();
+            lastTap = now;
+        });
+    })();
 </script>
 
+<!-- DYNAMIC API UPDATE (same as original: fetch invoice items and refresh) -->
 <script>
-    // fetch invoice via API and re-render table (used when selecting via JS)
-    async function fetchInvoice(id) {
+    async function fetchInvoiceAndRefresh(id) {
         try {
             const res = await fetch(`/api/invoices/${id}`, {credentials:'include'});
             const data = await res.json();
             if (res.ok && data.success && data.invoice) {
-                populate(data.invoice);
+                const inv = data.invoice;
+                document.getElementById('subtotalVal').innerText = '₹' + parseFloat(inv.subtotal||0).toFixed(2);
+                document.getElementById('totalTaxVal').innerText = '₹' + parseFloat(inv.total_tax||0).toFixed(2);
+                document.getElementById('grandTotalVal').innerText = '₹' + parseFloat(inv.grand_total||0).toFixed(2);
+                const cgst = (inv.total_tax||0)/2;
+                document.getElementById('taxBreakdown').innerHTML = `CGST: ₹${cgst.toFixed(2)} | SGST: ₹${cgst.toFixed(2)}`;
+                if (inv.items && Array.isArray(inv.items)) {
+                    const tbody = document.getElementById('itemsBody');
+                    if(tbody){
+                        tbody.innerHTML = '';
+                        inv.items.forEach(item => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="mono">#${item.item_id}</td>
+                                <td><span style="font-weight:500;">${item.product_name || 'Product'}</span><br><span class="product-badge-sm">ID: ${item.product_id}</span></td>
+                                <td>${item.description || ''}</td>
+                                <td>${item.quantity}</td>
+                                <td>₹${parseFloat(item.unit_price).toFixed(2)}</td>
+                                <td>${parseFloat(item.tax_rate).toFixed(2)}%</td>
+                                <td>₹${parseFloat(item.tax_amount).toFixed(2)}</td>
+                                <td><strong>₹${parseFloat(item.total).toFixed(2)}</strong></td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                }
+                if(document.getElementById('customerName')) document.getElementById('customerName').innerText = inv.customer_name;
+                if(document.getElementById('customerDetails')) document.getElementById('customerDetails').innerHTML = `${inv.customer_email || ''}<br>${inv.customer_phone || ''}<br>${inv.customer_address || ''}`;
+                const dueP = document.querySelector('.invoice-meta p');
+                if(dueP && inv.due_date) dueP.innerHTML = `<i class="fas fa-hourglass-half"></i> Due: ${inv.due_date}`;
+                document.getElementById('footerText').innerHTML = `Thank you for your business! This invoice is system generated. Created by: user #${inv.created_by}`;
             }
-        } catch (e) { console.error(e); }
+        } catch(e) { console.warn("API fetch not critical, static data remains"); }
     }
-
-    function updateStatusOptions(current) {
-        const sel = document.getElementById('statusSelect');
-        if (!sel) return;
-        for (let opt of sel.options) {
-            if (current === 'paid') {
-                opt.disabled = !(opt.value === 'paid' || opt.value === 'cancelled');
-            } else {
-                opt.disabled = false;
-            }
-        }
-    }
-
-    function populate(inv) {
-        // only update portions that exist; template may already have static data
-        const statusSel = document.getElementById('statusSelect');
-        if (statusSel) {
-            statusSel.value = inv.status;
-            updateStatusOptions(inv.status);
-        }
-
-        const tbody = document.getElementById('invoiceItems');
-        if (tbody && inv.items) {
-            tbody.innerHTML = '';
-            inv.items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="mono">#${item.item_id}</td>
-                    <td><span style="font-weight:500;">${item.product_name||'Product'}</span><br><span style="font-size:0.7rem; color:#3f5e7a;">ID: ${item.product_id}</span></td>
-                    <td>${item.description}</td>
-                    <td>${item.quantity}</td>
-                    <td>₹${item.unit_price.toFixed(2)}</td>
-                    <td>${item.tax_rate.toFixed(2)}</td>
-                    <td>₹${item.tax_amount.toFixed(2)}</td>
-                    <td><strong>₹${item.total.toFixed(2)}</strong></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const params = new URLSearchParams(window.location.search);
-        const invoiceId = params.get('invoice_id');
-        if (invoiceId) fetchInvoice(invoiceId);
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlId = new URLSearchParams(window.location.search).get('invoice_id');
+        if (urlId) fetchInvoiceAndRefresh(urlId);
     });
 </script>
 
-<!-- 
-    Expected Flask context variables:
-    - invoices: list of invoice objects from the invoices table
-    - invoice_items: list of item objects from invoice_items table (filtered by selected invoice if needed)
-    - selected_invoice: the currently selected invoice object (optional)
-    
-    Object structure based on your tables:
-    Invoice: invoice_id, invoice_number, customer_name, customer_email, customer_phone, 
-             customer_address, due_date, shop_id, subtotal, total_tax, grand_total, 
-             status, created_by, created_at, updated_at
-    
-    InvoiceItem: item_id, invoice_id, product_id, description, quantity, unit_price,
-                 tax_rate, tax_amount, total
--->
-
+<!-- Flash overlay handler original style -->
 <script>
 (function(){
   function setupFlashOverlay(){
@@ -787,16 +660,16 @@
     if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
     var container=document.getElementById('flashContainer');
     if(!container) return;
-    var messages=Array.from(container.querySelectorAll('.flash-message'));
-    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function refreshOverlay(){ if(overlay) overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
     function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
-    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2200); var close=msg.querySelector('.close-flash'); if(close) close.addEventListener('click', function(){ dismiss(msg); }); });
     refreshOverlay();
     container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
   }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', setupFlashOverlay);
+  else setupFlashOverlay();
 })();
 </script>
-
 </body>
 </html>

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Gate Receipt Manager | Search by PO, Receipt ID or Product</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: #0f2b3b;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0b4f6c, #1a7f7a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge-info {
+            background: #e6f0f5;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #0c5e6b;
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            gap: 6px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2edf2;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            color: #5f7f8c;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #1f6e6c;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            padding: 1.25rem 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2edf2;
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #1f6b7a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        input, select, textarea {
+            padding: 0.75rem 1rem;
+            border-radius: 20px;
+            border: 1.5px solid #dce7ef;
+            font-family: 'Inter', monospace;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1f8a8c;
+            box-shadow: 0 0 0 3px rgba(31,138,140,0.15);
+        }
+        button {
+            background: #1f6e6c;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .btn-secondary {
+            background: #e9ecef;
+            color: #1f5068;
+            border: 1px solid #cbdbe0;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #1f6e6c;
+            color: #1f6e6c;
+        }
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .flex-row button {
+            flex: 1;
+            white-space: nowrap;
+        }
+        .search-bar {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            border: 1px solid #e2edf2;
+        }
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-input-group input {
+            flex: 3;
+            min-width: 200px;
+        }
+        .search-input-group select {
+            flex: 1;
+            min-width: 150px;
+        }
+        .search-input-group button {
+            flex: 0.5;
+            min-width: 100px;
+        }
+        .stats-badge {
+            background: #e6f0f5;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 20px;
+            border: 1px solid #e2edf2;
+            background: white;
+            margin-top: 0.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            min-width: 800px;
+        }
+        th {
+            text-align: left;
+            padding: 0.85rem 0.6rem;
+            background: #f8fafc;
+            color: #1f5b6e;
+            font-weight: 700;
+            border-bottom: 1px solid #e0e9f0;
+            position: sticky;
+            top: 0;
+        }
+        td {
+            padding: 0.8rem 0.5rem;
+            border-bottom: 1px solid #ecf3f8;
+            vertical-align: middle;
+        }
+        .delete-row, .edit-row {
+            background: none;
+            padding: 6px 8px;
+            border-radius: 30px;
+        }
+        .delete-row { color: #bc5a5a; }
+        .edit-row { color: #1f6e6c; }
+        .qty-input, .tax-input {
+            width: 75px;
+            padding: 6px 6px;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .summary {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            background: #f8fffe;
+            padding: 1rem;
+            border-radius: 24px;
+            border: 1px solid #cfe3e8;
+        }
+        .summary span {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+        .status-msg {
+            background: #eef2fa;
+            padding: 0.8rem;
+            border-radius: 50px;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            display: none;
+        }
+        .note {
+            background: #fff8e7;
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            color: #a2741a;
+            margin-top: 6px;
+        }
+        .badge-product {
+            background: #eef2ff;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+        }
+        .badge-paid {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        .badge-unpaid {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 28px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+        @media (min-width: 768px) {
+            body { padding: 1.5rem; }
+            .card { padding: 1.5rem 1.8rem; }
+            .summary { flex-direction: row; justify-content: space-between; }
+            .action-buttons { flex-direction: row; justify-content: flex-end; }
+        }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-warehouse"></i> Gate Receipt Manager</h1>
+        <div class="badge-info"><i class="fas fa-truck-fast"></i> Create | Search by PO/Receipt ID/Product | Update Stock</div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="create-tab"><i class="fas fa-plus-circle"></i> Create Receipt</button>
+        <button class="tab-btn" data-tab="list-tab"><i class="fas fa-list"></i> Receipts List & Search</button>
+    </div>
+
+    <!-- CREATE TAB -->
+    <div id="create-tab" class="tab-content active">
+        <div class="card">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label><i class="fas fa-receipt"></i> Purchase Order (PO-XXXX or ID)</label>
+                    <div class="flex-row">
+                        <input type="text" id="ponoInput" placeholder="e.g., PO-0001, PO-0042, or 42" style="flex:2">
+                        <button type="button" id="fetchPoBtn" class="btn-secondary"><i class="fas fa-search"></i> Fetch</button>
+                    </div>
+                    <div class="note"><i class="fas fa-info-circle"></i> Make GR honestly check all Quality and also Note vehicle No if applicable</div>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-boxes"></i> Product from PO</label>
+                    <select id="productSelect">
+                        <option value="">-- select product to receive --</option>
+                    </select>
+                    <button type="button" id="addProductBtn" class="btn-outline" style="margin-top: 4px;"><i class="fas fa-plus-circle"></i> + Add selected product</button>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-pen-alt"></i> Reason / Remarks</label>
+                    <textarea id="reasonText" rows="2" placeholder="Delivery notes, quality remarks..."></textarea>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex:1; min-width: 140px;">
+                        <div class="input-group">
+                            <label><i class="fas fa-credit-card"></i> Payment Status</label>
+                            <select id="paymentStatus">
+                                <option value="unpaid">Unpaid</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="flex:2; min-width: 180px;">
+                        <div class="input-group">
+                            <label><i class="fas fa-file-invoice"></i> Invoice No.</label>
+                            <input type="text" id="invno" placeholder="Vendor invoice" value="N/A">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="items-section">
+                <label style="font-weight: 700; margin: 1rem 0 0.5rem 0; display: flex; gap: 6px;"><i class="fas fa-clipboard-list"></i> Products to Receive <span class="badge-product"><i class="fas fa-edit"></i> Tax editable</span></label>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>Product</th><th>PO Qty</th><th>Received Qty</th><th>Unit Price</th><th>Tax %</th><th>Line Total</th><th></th></tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <tr><td colspan="7" class="text-center">🔍 Load PO first → add products and adjust tax</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="summary">
+                    <span><i class="fas fa-cubes"></i> Total quantity: <strong id="totalQtySpan">0</strong></span>
+                    <span><i class="fas fa-rupee-sign"></i> Total amount: <strong id="totalAmountSpan">0.00</strong></span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" id="submitGateBtn"><i class="fas fa-check-circle"></i> Create Receipt & Stock ↑</button>
+                <button type="button" id="resetBtn" class="btn-secondary"><i class="fas fa-undo-alt"></i> Reset</button>
+            </div>
+            <div id="createStatusMsg" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- LIST TAB WITH SEARCH -->
+    <div id="list-tab" class="tab-content">
+        <div class="card">
+            <div class="search-bar">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" placeholder="Search by Receipt ID, PO Number, or Product Name..." class="search-field">
+                    <select id="searchType">
+                        <option value="all">All Fields</option>
+                        <option value="receipt_id">Receipt ID</option>
+                        <option value="po_number">PO Number</option>
+                        <option value="product_name">Product Name</option>
+                    </select>
+                    <button id="searchBtn" class="btn-secondary"><i class="fas fa-search"></i> Search</button>
+                    <button id="clearSearchBtn" class="btn-outline"><i class="fas fa-times"></i> Clear</button>
+                </div>
+                <div class="flex-row" style="justify-content: space-between; margin-top: 0.8rem;">
+                    <div class="stats-badge"><i class="fas fa-chart-line"></i> Total Receipts: <strong id="totalCount">0</strong></div>
+                    <div class="stats-badge"><i class="fas fa-filter"></i> Showing: <strong id="showingCount">0</strong></div>
+                    <button id="refreshListBtn" class="btn-sm" style="background: #1f6e6c;"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Product</th><th>PO #</th><th>Quantity</th><th>Payment</th><th>Invoice</th><th>Date</th><th>Created By</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="receiptsListBody">
+                        <tr><td colspan="9" class="text-center">Loading receipts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="listStatusMsg" class="status-msg"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-edit"></i> Update Receipt</h3>
+        <div class="input-group" style="margin-bottom: 1rem;">
+            <label>Payment Status</label>
+            <select id="editPaymentStatus">
+                <option value="unpaid">Unpaid</option>
+                <option value="paid">Paid</option>
+            </select>
+        </div>
+        <div class="input-group" style="margin-bottom: 1rem;">
+            <label>Invoice Number</label>
+            <input type="text" id="editInvno" placeholder="Invoice number">
+        </div>
+        <div class="input-group" style="margin-bottom: 1rem;">
+            <label>Reason</label>
+            <textarea id="editReason" rows="2" placeholder="Reason"></textarea>
+        </div>
+        <div class="flex-row">
+            <button id="saveEditBtn"><i class="fas fa-save"></i> Save</button>
+            <button id="closeModalBtn" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPoData = null;
+    let receivedItems = [];
+    let selectedPoId = null;
+    let currentEditId = null;
+    let allReceipts = []; // Store all receipts for searching
+    let currentFilteredReceipts = [];
+
+    function extractPoNumber(rawInput) {
+        if (!rawInput) return null;
+        const trimmed = rawInput.trim();
+        if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10);
+        const match = trimmed.match(/^po[-_]?(\d+)$/i);
+        if (match) return parseInt(match[1], 10);
+        const anyNum = trimmed.match(/(\d+)/);
+        return anyNum ? parseInt(anyNum[1], 10) : null;
+    }
+
+    function formatCurrency(v) { return parseFloat(v).toFixed(2); }
+
+    function recalcItem(idx) {
+        const item = receivedItems[idx];
+        const qty = item.received_qty || 0;
+        const base = qty * item.unit_price;
+        const taxAmount = base * (item.tax_rate / 100);
+        item.tax_amount = taxAmount;
+        item.row_total = base + taxAmount;
+    }
+
+    function updateCreateUI() {
+        const tbody = document.getElementById('itemsTableBody');
+        if (!receivedItems.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">✨ No products added. Fetch PO & add items.</td></tr>';
+            document.getElementById('totalQtySpan').innerText = '0';
+            document.getElementById('totalAmountSpan').innerText = '0.00';
+            return;
+        }
+        let totalQty = 0, totalAmt = 0;
+        let html = '';
+        for (let i = 0; i < receivedItems.length; i++) {
+            const it = receivedItems[i];
+            const qty = it.received_qty || 0;
+            totalQty += qty;
+            totalAmt += it.row_total || 0;
+            html += `<tr>
+                <td><strong>${escapeHtml(it.product_name)}</strong><br><span class="badge-product">ID:${it.product_id}</span></td>
+                <td class="text-center">${it.po_qty}</td>
+                <td><input type="number" step="any" min="0" max="${it.po_qty}" value="${qty}" class="qty-input" data-index="${i}" style="width:80px;"></td>
+                <td>${formatCurrency(it.unit_price)}</td>
+                <td><input type="number" step="0.1" min="0" max="100" value="${it.tax_rate}" class="tax-input" data-index="${i}" style="width:70px;"> %</td>
+                <td style="font-weight:600;">${formatCurrency(it.row_total)}</td>
+                <td><button type="button" class="delete-row" data-index="${i}" style="background:none;"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+        document.getElementById('totalQtySpan').innerText = totalQty;
+        document.getElementById('totalAmountSpan').innerText = formatCurrency(totalAmt);
+        
+        document.querySelectorAll('.qty-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const idx = parseInt(inp.dataset.index);
+                let newQty = parseFloat(inp.value);
+                if (isNaN(newQty)) newQty = 0;
+                const maxQ = receivedItems[idx].po_qty;
+                if (newQty > maxQ) newQty = maxQ;
+                receivedItems[idx].received_qty = newQty;
+                recalcItem(idx);
+                updateCreateUI();
+            });
+        });
+        document.querySelectorAll('.tax-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const idx = parseInt(inp.dataset.index);
+                let newTax = parseFloat(inp.value);
+                if (isNaN(newTax)) newTax = 0;
+                receivedItems[idx].tax_rate = Math.min(100, Math.max(0, newTax));
+                recalcItem(idx);
+                updateCreateUI();
+            });
+        });
+        document.querySelectorAll('.delete-row').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.index);
+                receivedItems.splice(idx, 1);
+                updateCreateUI();
+                showStatus("Item removed", "info", "create");
+            });
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    function highlightText(text, searchTerm) {
+        if (!searchTerm || !text) return escapeHtml(text);
+        const escapedSearch = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedSearch})`, 'gi');
+        return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function filterReceipts() {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        const searchType = document.getElementById('searchType').value;
+        
+        if (!searchTerm) {
+            currentFilteredReceipts = [...allReceipts];
+        } else {
+            currentFilteredReceipts = allReceipts.filter(receipt => {
+                if (searchType === 'receipt_id') {
+                    return receipt.gate_id.toString().includes(searchTerm);
+                } else if (searchType === 'po_number') {
+                    return (receipt.po_number || `PO-${receipt.po_id}`).toLowerCase().includes(searchTerm);
+                } else if (searchType === 'product_name') {
+                    return (receipt.product_name || '').toLowerCase().includes(searchTerm);
+                } else {
+                    // Search in all fields
+                    return receipt.gate_id.toString().includes(searchTerm) ||
+                           (receipt.po_number || `PO-${receipt.po_id}`).toLowerCase().includes(searchTerm) ||
+                           (receipt.product_name || '').toLowerCase().includes(searchTerm);
+                }
+            });
+        }
+        
+        displayReceipts(currentFilteredReceipts, searchTerm);
+        document.getElementById('showingCount').innerText = currentFilteredReceipts.length;
+    }
+
+    function displayReceipts(receipts, searchTerm = '') {
+        const tbody = document.getElementById('receiptsListBody');
+        if (!receipts.length) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No receipts found</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        for (const r of receipts) {
+            const statusBadge = r.payment_status === 'paid' ? '<span class="badge-paid">Paid</span>' : '<span class="badge-unpaid">Unpaid</span>';
+            const productName = searchTerm ? highlightText(r.product_name || 'N/A', searchTerm) : escapeHtml(r.product_name || 'N/A');
+            const poNumber = searchTerm ? highlightText(r.po_number || `PO-${r.po_id}`, searchTerm) : escapeHtml(r.po_number || `PO-${r.po_id}`);
+            
+            html += `<tr>
+                <td>${r.gate_id}</td>
+                <td>${productName}<br><small>ID:${r.product_id}</small></td>
+                <td>${poNumber}</td>
+                <td>${r.quantity}</td>
+                <td>${statusBadge}</td>
+                <td>${escapeHtml(r.invoice_number || 'N/A')}</td>
+                <td>${r.created_at ? r.created_at.split(' ')[0] : 'N/A'}</td>
+                <td>${escapeHtml(r.created_by || 'N/A')}</td>
+                <td>
+                    <button class="edit-row btn-sm" data-id="${r.gate_id}" data-status="${r.payment_status}" data-invno="${escapeHtml(r.invoice_number)}" data-reason="${escapeHtml(r.reason || '')}"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+        document.getElementById('totalCount').innerText = allReceipts.length;
+        document.getElementById('showingCount').innerText = receipts.length;
+        
+        document.querySelectorAll('.edit-row').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentEditId = parseInt(btn.dataset.id);
+                document.getElementById('editPaymentStatus').value = btn.dataset.status;
+                document.getElementById('editInvno').value = btn.dataset.invno === 'N/A' ? '' : btn.dataset.invno;
+                document.getElementById('editReason').value = btn.dataset.reason;
+                document.getElementById('editModal').style.display = 'flex';
+            });
+        });
+    }
+
+    async function fetchPO(poInput) {
+        const poId = extractPoNumber(poInput);
+        if (!poId) {
+            showStatus("❌ Invalid PO format", "error", "create");
+            return;
+        }
+        showStatus(`⏳ Fetching PO ID: ${poId}...`, "info", "create");
+        try {
+            const response = await fetch('/api/purchase-orders');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || "Failed to load POs");
+            
+            const posList = data.pos || [];
+            const matched = posList.find(po => po.id === poId);
+            
+            if (!matched) throw new Error(`PO with ID ${poId} not found`);
+            if (!matched.items || matched.items.length === 0) throw new Error("PO has no items");
+            
+            selectedPoId = matched.id;
+            currentPoData = {
+                po: matched,
+                items: matched.items.map(it => ({
+                    product_id: it.id,
+                    product_name: it.name,
+                    po_qty: it.quantity,
+                    unit_price: it.unit_price,
+                    tax_rate: it.tax_rate || 0
+                }))
+            };
+            
+            receivedItems = currentPoData.items.map(item => ({
+                ...item,
+                received_qty: 0,
+                tax_amount: 0,
+                row_total: 0
+            }));
+            
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">-- Choose product --</option>' + 
+                currentPoData.items.map((it, idx) => `<option value="${idx}">${it.product_name} (Max:${it.po_qty}) | ₹${it.unit_price}</option>`).join('');
+            
+            updateCreateUI();
+            showStatus(`✅ PO ${matched.po_number} loaded`, "success", "create");
+        } catch (err) {
+            showStatus(`❌ ${err.message}`, "error", "create");
+            currentPoData = null;
+            receivedItems = [];
+            updateCreateUI();
+        }
+    }
+
+    function addProduct() {
+        if (!currentPoData) {
+            showStatus("Load a PO first", "error", "create");
+            return;
+        }
+        const select = document.getElementById('productSelect');
+        const idx = parseInt(select.value);
+        if (isNaN(idx)) { showStatus("Select a product", "info", "create"); return; }
+        
+        const poItem = currentPoData.items[idx];
+        const existing = receivedItems.find(r => r.product_id === poItem.product_id);
+        if (existing) {
+            let newQty = existing.received_qty + 1;
+            if (newQty > existing.po_qty) newQty = existing.po_qty;
+            existing.received_qty = newQty;
+            const idx2 = receivedItems.findIndex(r => r.product_id === poItem.product_id);
+            recalcItem(idx2);
+            showStatus(`📦 ${poItem.product_name} qty: ${newQty}`, "success", "create");
+        } else {
+            const newItem = {
+                ...poItem,
+                received_qty: 1,
+                tax_amount: (1 * poItem.unit_price) * (poItem.tax_rate / 100),
+                row_total: (1 * poItem.unit_price) * (1 + poItem.tax_rate / 100)
+            };
+            receivedItems.push(newItem);
+            showStatus(`➕ Added ${poItem.product_name}`, "success", "create");
+        }
+        updateCreateUI();
+    }
+
+    async function createGateReceipt() {
+        if (!selectedPoId) {
+            showStatus("No PO loaded", "error", "create");
+            return;
+        }
+        const itemsToReceive = receivedItems.filter(i => (i.received_qty || 0) > 0);
+        if (!itemsToReceive.length) {
+            showStatus("Add at least one product with quantity > 0", "error", "create");
+            return;
+        }
+        
+        const payload = {
+            po_id: selectedPoId,
+            reason: document.getElementById('reasonText').value,
+            payment_status: document.getElementById('paymentStatus').value,
+            invno: document.getElementById('invno').value.trim() || "N/A",
+            items: itemsToReceive.map(i => ({
+                product_id: i.product_id,
+                quantity: i.received_qty,
+                unit_price: i.unit_price,
+                tax_rate: i.tax_rate
+            }))
+        };
+        
+        showStatus("Submitting...", "info", "create");
+        try {
+            const response = await fetch('/api/gate_receipt/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showStatus("✅ Gate receipt created! Stock updated.", "success", "create");
+                for (let i = 0; i < receivedItems.length; i++) {
+                    receivedItems[i].received_qty = 0;
+                    recalcItem(i);
+                }
+                updateCreateUI();
+                document.getElementById('reasonText').value = '';
+                document.getElementById('invno').value = 'N/A';
+                loadReceiptsList();
+            } else {
+                throw new Error(result.message || "Backend error");
+            }
+        } catch (err) {
+            showStatus(`❌ Error: ${err.message}`, "error", "create");
+        }
+    }
+
+    async function loadReceiptsList() {
+        const tbody = document.getElementById('receiptsListBody');
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading...</td></tr>';
+        try {
+            const response = await fetch('/api/gate_receipts');
+            if (!response.ok) throw new Error('Failed to fetch');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message);
+            
+            allReceipts = data.receipts || [];
+            filterReceipts();
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center">Error: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function updateGateReceipt() {
+        if (!currentEditId) return;
+        const payload = {
+            payment_status: document.getElementById('editPaymentStatus').value,
+            invno: document.getElementById('editInvno').value.trim() || "N/A",
+            Reason: document.getElementById('editReason').value
+        };
+        try {
+            const response = await fetch(`/api/gate_receipt/${currentEditId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showStatus("Receipt updated successfully", "success", "list");
+                loadReceiptsList();
+                document.getElementById('editModal').style.display = 'none';
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (err) {
+            showStatus(`Update failed: ${err.message}`, "error", "list");
+        }
+    }
+
+    function resetForm() {
+        currentPoData = null;
+        selectedPoId = null;
+        receivedItems = [];
+        updateCreateUI();
+        document.getElementById('ponoInput').value = '';
+        document.getElementById('reasonText').value = '';
+        document.getElementById('paymentStatus').value = 'unpaid';
+        document.getElementById('invno').value = 'N/A';
+        document.getElementById('productSelect').innerHTML = '<option value="">-- load PO first --</option>';
+        showStatus("Form reset", "info", "create");
+    }
+
+    function showStatus(msg, type, tab) {
+        const statusDiv = document.getElementById(`${tab === 'create' ? 'createStatusMsg' : 'listStatusMsg'}`);
+        if (!statusDiv) return;
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = msg;
+        statusDiv.style.background = type === 'error' ? '#ffe9e6' : (type === 'success' ? '#e0f6ed' : '#eef3fc');
+        statusDiv.style.color = type === 'error' ? '#b13e3e' : '#1b6b5e';
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 4000);
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            const tabId = btn.dataset.tab;
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'list-tab') loadReceiptsList();
+        });
+    });
+
+    // Event listeners
+    document.getElementById('fetchPoBtn').onclick = () => fetchPO(document.getElementById('ponoInput').value);
+    document.getElementById('addProductBtn').onclick = addProduct;
+    document.getElementById('submitGateBtn').onclick = createGateReceipt;
+    document.getElementById('resetBtn').onclick = resetForm;
+    document.getElementById('refreshListBtn').onclick = loadReceiptsList;
+    document.getElementById('saveEditBtn').onclick = updateGateReceipt;
+    document.getElementById('closeModalBtn').onclick = () => document.getElementById('editModal').style.display = 'none';
+    document.getElementById('searchBtn').onclick = filterReceipts;
+    document.getElementById('clearSearchBtn').onclick = () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchType').value = 'all';
+        filterReceipts();
+    };
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') filterReceipts();
+    });
+    
+    window.onclick = (e) => { if (e.target === document.getElementById('editModal')) document.getElementById('editModal').style.display = 'none'; };
+    
+    // Initial load
+    loadReceiptsList();
+</script>
+</body>
+</html>

@@ -953,7 +953,7 @@ def api_export_products():
         # Fetch all products with category names and descriptions for the selected shop
         cur.execute(
             """
-            SELECT p.product_id, p.name, p.HSN_code, p.location, p.status, p.price, p.tax, p.stock, p.safe_stock,
+            SELECT p.product_id, p.name, p.HSN_code, p.location, p.status, p.price, p.Unit AS unit, p.tax, p.stock, p.safe_stock,
                    c.name AS category_name,
                    pd.description1, pd.description2, pd.description3, pd.description4, pd.description5
             FROM Products p
@@ -1007,6 +1007,7 @@ def api_export_products():
                 'stock': int(r.get('stock') or 0),
                 'safe_stock': int(r.get('safe_stock') or 0),
                 'category_name': r.get('category_name') or '',
+                'unit': r.get('unit') or r.get('Unit') or 'PC',
                 'description1': r.get('description1') or '',
                 'description2': r.get('description2') or '',
                 'description3': r.get('description3') or '',
@@ -1742,7 +1743,7 @@ def edit_product():
         # Update product
         cursor.execute(
             """UPDATE Products SET
-               name = %s, HSN_code = %s, location = %s, status = %s, price = %s, tax = %s,
+               name = %s, HSN_code = %s, location = %s, status = %s, price = %s,unit = %s, tax = %s,
                stock = %s, safe_stock = %s,
                categoryid = %s
                WHERE product_id = %s AND shop_id = %s""",
@@ -1751,10 +1752,11 @@ def edit_product():
                 data.get("HSN_code"),
                 data.get("location"),
                 data.get("status"),
-                float(data.get("price", 0)),
-                float(data.get("tax", 0)),
-                int(data.get("stock", 0)),
-                int(data.get("safe_stock", 0)),
+                float(data.get("price")),
+                data.get("unit"),
+                float(data.get("tax")),
+                int(data.get("stock")),
+                int(data.get("safe_stock")),
                 categoryid,
                 product_id,
                 shop_id
@@ -4726,7 +4728,8 @@ def api_products():
                     p.SPID,
                     p.HSN_code,
                     p.location,
-                    p.status
+                    p.status,
+                    p.Unit as unit
                 FROM Products p
                 WHERE p.shop_id = %s AND p.status = "active"
             """
@@ -4760,7 +4763,8 @@ def api_products():
                     SPID,
                     HSN_code,
                     location,
-                    status
+                    status,
+                    Unit as unit
                 FROM Products
                 WHERE status = "active"
             """
@@ -4807,7 +4811,8 @@ def api_products():
                 'SPID': r.get('SPID'),
                 'HSN_code': r.get('HSN_code') or '',
                 'location': r.get('location') or '',
-                'status': r.get('status') or 'active'
+                'status': r.get('status') or 'active',
+                'unit': r.get('unit') or r.get('Unit') or 'PC'
             })
 
         conn.close()
@@ -4854,6 +4859,7 @@ def add_products():
             hsn_code = (product.get("HSN_code") or product.get("hsn") or product.get("hsn_code") or product.get("HSN") or "").strip()
             location = (product.get("location") or product.get("loc") or "N/A").strip()
             status = (product.get("status") or product.get("state") or "active").strip().lower()
+            unit =(product.get("unit") or product.get("units") or product.get("Unit") or "PC").upper().strip()
 
             # Calculate profit margin (optional - for logging)
             profit_margin = selling_price - buying_price
@@ -4897,34 +4903,8 @@ def add_products():
             existing = cur.fetchone()
 
             if existing:
-                # Product exists - UPDATE everything including buying price
-                product_id = existing[0] if isinstance(existing, tuple) else existing.get('product_id')
-                old_bprice = existing[3] if isinstance(existing, tuple) else existing.get('Bprice')
-
-                # Update all fields (prices can change)
-                cur.execute("""
-                    UPDATE Products
-                    SET price = %s,
-                        Bprice = %s,
-                        tax = %s,
-                        stock = stock + %s,
-                        safe_stock = %s,
-                        categoryid = %s,
-                        HSN_code = %s,
-                        location = %s,
-                        status = %s,
-                        updated_by = %s,
-                        updated_at = NOW()
-                    WHERE product_id = %s
-                """, (selling_price, buying_price, tax, stock, safe_stock, categoryid,
-                      hsn_code, location, status, user, product_id))
-
-                updated_count += 1
-
-                # Optional: Log significant price changes
-                if old_bprice != buying_price:
-                    print(f"Buying price updated for {name}: ₹{old_bprice} → ₹{buying_price}")
-
+                skipped_count += 1
+                continue
             else:
                 # Check if same name exists for SPID generation
                 cur.execute("""
@@ -4943,10 +4923,10 @@ def add_products():
                 # Insert new product with buying price
                 cur.execute("""
                     INSERT INTO Products
-                    (name, price, Bprice, tax, stock, safe_stock, categoryid, shop_id,
+                    (name, price, Bprice, unit, tax, stock, safe_stock, categoryid, shop_id,
                      HSN_code, location, status, created_by, updated_by, SPID)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (name, selling_price, buying_price, tax, stock, safe_stock, categoryid, shopid,
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (name, selling_price, buying_price, unit, tax, stock, safe_stock, categoryid, shopid,
                       hsn_code, location, status, user, user, spid))
 
                 product_id = cur.lastrowid
@@ -5959,6 +5939,422 @@ def print_po_page(po_id):
     """Render the print PO page"""
     return render_template('print_po.html', po_id=po_id)
 
+
+@app.route("/gate_reciept")
+@admin_required
+def gate_reciept():
+    return render_template("gr.html")
+
+# ============================================
+# ADD THIS API ENDPOINT TO YOUR FLASK APP
+# Works with cursor(dictionary=True)
+# ============================================
+@app.route('/api/gate_receipt/create', methods=['POST'])
+@login_required
+def create_gate_receipt():
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        created_by = session.get('user')
+        
+        # Validate required fields
+        po_id = data.get('po_id')
+        items = data.get('items', [])
+        
+        if not po_id:
+            return jsonify({'success': False, 'message': 'PO ID (po_id) is required'}), 400
+        
+        if not items:
+            return jsonify({'success': False, 'message': 'At least one item is required'}), 400
+        
+        if not shop_id:
+            return jsonify({'success': False, 'message': 'No shop selected. Please select a shop first.'}), 400
+        
+        if not created_by:
+            return jsonify({'success': False, 'message': 'User not authenticated'}), 401
+        
+        with cur as cursor:
+            # Get PO details with received quantity
+            cursor.execute("""
+                SELECT PONO, PRID, Status, QTY, recieved_QTY, total 
+                FROM purchase_orders 
+                WHERE PONO = %s AND shopid = %s
+            """, (po_id, shop_id))
+            
+            po_info = cursor.fetchall()
+            po = po_info[0] if po_info else None
+            
+            if not po:
+                return jsonify({'success': False, 'message': f'PO with ID {po_id} not found for this shop'}), 404
+            
+            # Calculate available quantity
+            total_po_qty = po['QTY'] if isinstance(po, dict) else po[3]
+            total_received_so_far = po['recieved_QTY'] if isinstance(po, dict) else po[4]
+            available_qty = total_po_qty - total_received_so_far
+            
+            # Check if PO is already fully received
+            if available_qty <= 0:
+                return jsonify({
+                    'success': False, 
+                    'message': f'PO {po_id} is already fully received. Total PO quantity: {total_po_qty}, Already received: {total_received_so_far}'
+                }), 400
+            
+            # Calculate total quantity being received in this request
+            total_requested_qty = sum([item.get('quantity', 0) for item in items])
+            
+            # Check if requested quantity exceeds available quantity
+            if total_requested_qty > available_qty:
+                return jsonify({
+                    'success': False, 
+                    'message': f'Cannot receive {total_requested_qty} units. Only {available_qty} units available in PO {po_id}. Already received: {total_received_so_far} of {total_po_qty}'
+                }), 400
+            
+            # Get all product IDs from items for validation
+            product_ids = [item['product_id'] for item in items]
+            placeholders = ','.join(['%s'] * len(product_ids))
+            
+            cursor.execute(f"""
+                SELECT product_id, name, stock 
+                FROM Products 
+                WHERE product_id IN ({placeholders}) AND shop_id = %s
+            """, product_ids + [shop_id])
+            
+            products = {}
+            for row in cursor.fetchall():
+                if isinstance(row, dict):
+                    products[row['product_id']] = row
+                else:
+                    products[row[0]] = {'product_id': row[0], 'name': row[1], 'stock': row[2]}
+            
+            # Validate all products exist
+            for item in items:
+                if item['product_id'] not in products:
+                    return jsonify({
+                        'success': False, 
+                        'message': f"Product ID {item['product_id']} not found in this shop"
+                    }), 404
+            
+            # Create gate receipt entries and update stock
+            gate_receipt_ids = []
+            total_received_qty = 0
+            total_amount = 0
+            new_received_qty = total_received_so_far
+            
+            for item in items:
+                product_id = item['product_id']
+                quantity = item.get('quantity', 0)
+                unit_price = item.get('unit_price', 0)
+                tax_rate = item.get('tax_rate', 0)
+                payment_status = data.get('payment_status', 'unpaid')
+                invno = data.get('invno', 'N/A')
+                reason = data.get('reason', '')
+                
+                if quantity <= 0:
+                    continue
+                
+                # Calculate amounts
+                subtotal = quantity * unit_price
+                tax_amount = subtotal * (tax_rate / 100)
+                line_total = subtotal + tax_amount
+                total_amount += line_total
+                
+                # Insert into gate_reciept table
+                cursor.execute("""
+                    INSERT INTO gate_reciept 
+                    (product_id, PONO, quantity, shopid, Reason, payment_status, invno, created_by, updated_by)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (product_id, po_id, quantity, shop_id, reason, payment_status, invno, created_by, created_by))
+                
+                gate_receipt_ids.append(cursor.lastrowid)
+                total_received_qty += quantity
+                new_received_qty += quantity
+                
+                # Increase stock in Products table
+                cursor.execute("""
+                    UPDATE Products 
+                    SET stock = stock + %s, updated_at = NOW()
+                    WHERE product_id = %s AND shop_id = %s
+                """, (quantity, product_id, shop_id))
+                
+                # Update product's last purchase price
+                try:
+                    cursor.execute("""
+                        UPDATE Products 
+                        SET Bprice = %s 
+                        WHERE product_id = %s AND shop_id = %s
+                    """, (unit_price, product_id, shop_id))
+                except Exception:
+                    pass
+            
+            # Update PO with new received quantity
+            cursor.execute("""
+                UPDATE purchase_orders 
+                SET recieved_QTY = %s, updated_at = NOW(), updated_by = %s
+                WHERE PONO = %s AND shopid = %s
+            """, (new_received_qty, created_by, po_id, shop_id))
+            
+            conn.commit()
+            
+            # Check if PO is now fully received
+            remaining_qty = total_po_qty - new_received_qty
+            status_message = f'Gate receipt created successfully. Received: {total_received_qty} units.'
+            if remaining_qty == 0:
+                status_message += f' PO {po_id} is now COMPLETELY received!'
+            else:
+                status_message += f' {remaining_qty} units still remaining in PO.'
+            
+            return jsonify({
+                'success': True,
+                'message': status_message,
+                'data': {
+                    'po_id': po_id,
+                    'po_number': f"PO-{po_id:04d}",
+                    'shop_id': shop_id,
+                    'total_items_received': len([i for i in items if i.get('quantity', 0) > 0]),
+                    'total_quantity_received': total_received_qty,
+                    'total_po_quantity': total_po_qty,
+                    'previously_received': total_received_so_far,
+                    'remaining_quantity': remaining_qty,
+                    'total_amount': round(total_amount, 2),
+                    'gate_receipt_ids': gate_receipt_ids,
+                    'created_by': created_by,
+                    'po_completed': remaining_qty == 0
+                }
+            })
+            
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating gate receipt: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# ============================================
+# GET ALL GATE RECEIPTS FOR CURRENT SHOP
+# ============================================
+
+@app.route('/api/gate_receipts', methods=['GET'])
+@login_required
+def get_gate_receipts():
+    """Get all gate receipts for the selected shop"""
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        if not shop_id:
+            return jsonify({'success': False, 'message': 'No shop selected'}), 400
+        
+        with cur as cursor:
+            cursor.execute("""
+                SELECT 
+                    gr.gate_id,
+                    gr.product_id,
+                    p.name as product_name,
+                    gr.PONO,
+                    gr.quantity,
+                    gr.shopid,
+                    gr.Reason,
+                    gr.payment_status,
+                    gr.invno,
+                    gr.created_at,
+                    gr.created_by,
+                    gr.updated_at,
+                    gr.updated_by,
+                    CONCAT('PO-', gr.PONO) as po_number
+                FROM gate_reciept gr
+                LEFT JOIN Products p ON gr.product_id = p.product_id
+                WHERE gr.shopid = %s
+                ORDER BY gr.created_at DESC
+            """, (shop_id,))
+            
+            receipts = cursor.fetchall()
+            
+            # Format the response
+            result = []
+            for receipt in receipts:
+                result.append({
+                    'gate_id': receipt['gate_id'],
+                    'product_id': receipt['product_id'],
+                    'product_name': receipt['product_name'],
+                    'po_id': receipt['PONO'],
+                    'po_number': receipt['po_number'],
+                    'quantity': float(receipt['quantity']) if receipt['quantity'] else 0,
+                    'reason': receipt['Reason'],
+                    'payment_status': receipt['payment_status'],
+                    'invoice_number': receipt['invno'],
+                    'created_at': receipt['created_at'].strftime('%Y-%m-%d %H:%M:%S') if receipt['created_at'] else None,
+                    'created_by': receipt['created_by']
+                })
+            
+            return jsonify({
+                'success': True,
+                'receipts': result,
+                'count': len(result)
+            })
+            
+    except Exception as e:
+        print(f"Error getting gate receipts: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+# ============================================
+# GET SINGLE GATE RECEIPT BY ID
+# ============================================
+
+@app.route('/api/gate_receipt/<int:gate_id>', methods=['GET'])
+@login_required
+def get_gate_receipt(gate_id):
+    """Get a single gate receipt by ID"""
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        
+        if not shop_id:
+            return jsonify({'success': False, 'message': 'No shop selected'}), 400
+        
+        with cur as cursor:
+            cursor.execute("""
+                SELECT 
+                    gr.gate_id,
+                    gr.product_id,
+                    p.name as product_name,
+                    p.sku,
+                    gr.PONO,
+                    gr.quantity,
+                    gr.shopid,
+                    gr.Reason,
+                    gr.payment_status,
+                    gr.invno,
+                    gr.created_at,
+                    gr.created_by,
+                    gr.updated_at,
+                    gr.updated_by,
+                    CONCAT('PO-', gr.PONO) as po_number
+                FROM gate_reciept gr
+                LEFT JOIN Products p ON gr.product_id = p.product_id
+                WHERE gr.gate_id = %s AND gr.shopid = %s
+            """, (gate_id, shop_id))
+            
+            receipt = cursor.fetchone()
+            
+            if not receipt:
+                return jsonify({'success': False, 'message': 'Gate receipt not found'}), 404
+            
+            return jsonify({
+                'success': True,
+                'receipt': {
+                    'gate_id': receipt['gate_id'],
+                    'product_id': receipt['product_id'],
+                    'product_name': receipt['product_name'],
+                    'sku': receipt.get('sku'),
+                    'po_id': receipt['PONO'],
+                    'po_number': receipt['po_number'],
+                    'quantity': float(receipt['quantity']) if receipt['quantity'] else 0,
+                    'reason': receipt['Reason'],
+                    'payment_status': receipt['payment_status'],
+                    'invoice_number': receipt['invno'],
+                    'created_at': receipt['created_at'].strftime('%Y-%m-%d %H:%M:%S') if receipt['created_at'] else None,
+                    'created_by': receipt['created_by']
+                }
+            })
+            
+    except Exception as e:
+        print(f"Error getting gate receipt: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
+# ============================================
+# UPDATE GATE RECEIPT (e.g., change payment status)
+# ============================================
+
+@app.route('/api/gate_receipt/<int:gate_id>', methods=['PUT'])
+@login_required
+def update_gate_receipt(gate_id):
+    """Update gate receipt (payment status, invoice number, etc.)"""
+    data = request.get_json()
+    conn, cur = get_db()
+    
+    try:
+        shop_id = session.get('selected_shop_id')
+        updated_by = session.get('user')
+        
+        if not shop_id:
+            return jsonify({'success': False, 'message': 'No shop selected'}), 400
+        
+        with cur as cursor:
+            # Check if receipt exists
+            cursor.execute("""
+                SELECT gate_id FROM gate_reciept 
+                WHERE gate_id = %s AND shopid = %s
+            """, (gate_id, shop_id))
+            
+            if not cursor.fetchone():
+                return jsonify({'success': False, 'message': 'Gate receipt not found'}), 404
+            
+            # Build update query dynamically
+            update_fields = []
+            values = []
+            
+            if 'payment_status' in data:
+                update_fields.append("payment_status = %s")
+                values.append(data['payment_status'])
+            
+            if 'invno' in data:
+                update_fields.append("invno = %s")
+                values.append(data['invno'])
+            
+            if 'Reason' in data:
+                update_fields.append("Reason = %s")
+                values.append(data['Reason'])
+            
+            if not update_fields:
+                return jsonify({'success': False, 'message': 'No fields to update'}), 400
+            
+            update_fields.append("updated_by = %s")
+            values.append(updated_by)
+            update_fields.append("updated_at = NOW()")
+            
+            values.extend([gate_id, shop_id])
+            
+            query = f"""
+                UPDATE gate_reciept 
+                SET {', '.join(update_fields)}
+                WHERE gate_id = %s AND shopid = %s
+            """
+            
+            cursor.execute(query, values)
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Gate receipt updated successfully'
+            })
+            
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating gate receipt: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route("/stock_adj")
+@admin_required
+def stock_adjustment():
+    return render_template("stock_adj.html")
 
 if __name__ == '__main__':
     app.run(debug = True,port=5500)

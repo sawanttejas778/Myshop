@@ -1009,16 +1009,25 @@
           return;
         }
         
-        const header = ['ID','Name','Price','Tax','Stock','Safe Stock','Category'];
+        const header = ['ID', 'Name', 'HSN Code', 'Location', 'Status', 'Price', 'Tax', 'Unit', 'Stock', 'Safe Stock', 'Category', 'Description 1', 'Description 2', 'Description 3', 'Description 4', 'Description 5'];
         const csv = [header.join(',')].concat(products.map(p=>
           [
-            p.products_id,
+            p.product_id || p.products_id || '',
             '"' + String(p.name||'').replace(/"/g,'""') + '"',
+            '"' + String(p.hsn_code||'').replace(/"/g,'""') + '"',
+            '"' + String(p.location||'').replace(/"/g,'""') + '"',
+            '"' + String(p.status||'').replace(/"/g,'""') + '"',
             p.price,
             p.tax,
+            '"' + String(p.unit||'').replace(/"/g,'""') + '"',
             p.stock,
             p.safe_stock,
-            '"' + String(p.category_name||'').replace(/"/g,'""') + '"'
+            '"' + String(p.category_name||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description1||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description2||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description3||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description4||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description5||'').replace(/"/g,'""') + '"'
           ].join(',')
         )).join('\n');
         

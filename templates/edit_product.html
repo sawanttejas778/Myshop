@@ -337,9 +337,10 @@
             <th>Location</th>
             <th>Status</th>
             <th>Price</th>
+            <th>Unit</th>
             <th>Tax (%)</th>
-            <th>Safe Stock</th>
             <th>Stock</th>
+            <th>Safe Stock</th>
             <th>Category</th>
             <th>Description</th>
             <th>Actions</th>
@@ -390,8 +391,23 @@
         <input type="number" id="editPrice" step="0.01">
       </div>
       <div class="form-group">
+        <label for="editUnit">Unit</label>
+        <select id="editUnit" class="form-control">
+          <option value="PC">PC</option>
+          <option value="KG">KG</option>
+          <option value="GM">GM</option>
+          <option value="LTR">LTR</option>
+          <option value="ML">ML</option>
+          <option value="TON">TON</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Tax (%)</label>
         <input type="number" id="editTax" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" id="editStock">
       </div>
       <div class="form-group">
         <label>Safe Stock</label>
@@ -534,6 +550,7 @@
           <td>${escapeHtml(p.location)}</td>
           <td>${escapeHtml(p.status)}</td>
           <td>$${parseFloat(p.price).toFixed(2)}</td>
+          <td>${escapeHtml(p.unit || 'PC')}</td>
           <td>${p.tax}%</td>
           <td>${p.stock}</td>
           <td>${p.safe_stock}</td>
@@ -563,7 +580,9 @@
       document.getElementById('editLocation').value = product.location || '';
       document.getElementById('editStatus').value = product.status || '';
       document.getElementById('editPrice').value = product.price;
+      document.getElementById('editUnit').value = product.unit || 'PC';
       document.getElementById('editTax').value = product.tax;
+      document.getElementById('editStock').value = product.stock;
       document.getElementById('editSafeStock').value = product.safe_stock;
       document.getElementById('editCategory').value = product.category_name;
       document.getElementById('editModal').classList.add('active');
@@ -581,13 +600,15 @@
       const product = {
         id: currentEditProduct.product_id,
         name: document.getElementById('editName').value,
-        hsn_code: parseFloat(document.getElementById('editHsn').value || 0).toFixed(2),
+        HSN_code: document.getElementById('editHsn').value || '',
         location: document.getElementById('editLocation').value || '',
         status: document.getElementById('editStatus').value || '',
-        price: parseFloat(document.getElementById('editPrice').value || 0).toFixed(2),
-        tax: parseFloat(document.getElementById('editTax').value || 0).toFixed(2),
-        safe_stock: parseInt(document.getElementById('editSafeStock').value || 0),
-        category_name: document.getElementById('editCategory').value
+        price: document.getElementById('editPrice').value || '0',
+        unit: document.getElementById('editUnit').value || 'PC',
+        tax: document.getElementById('editTax').value || '0',
+        stock: parseInt(document.getElementById('editStock').value || 0) || 0,
+        safe_stock: parseInt(document.getElementById('editSafeStock').value || 0) || 0,
+        category_name: document.getElementById('editCategory').value || ''
       };
 
       try {

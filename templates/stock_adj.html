@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>MultiStock Pro | Adjustment & Transfer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: #0f2b3d;
+            padding: 20px 12px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .page-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0b3b4f, #1e6a8c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .page-header p {
+            color: #4a627a;
+            margin-top: 6px;
+            font-size: 0.85rem;
+        }
+
+        /* Grid: column on desktop, stack on mobile */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 6px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e9edf2;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f8;
+            background: #ffffff;
+        }
+        .card-header h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-header h2 i {
+            color: #2c7da0;
+            font-size: 1.3rem;
+        }
+        .card-body {
+            padding: 20px;
+        }
+
+        /* form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #3e5a76;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .required:after {
+            content: "*";
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+        select, textarea, input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            font-family: 'Inter', monospace;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 28px;
+            background: #fff;
+            transition: 0.2s;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.1);
+        }
+        textarea {
+            border-radius: 20px;
+            resize: vertical;
+        }
+
+        /* buttons */
+        .btn {
+            border: none;
+            padding: 12px 18px;
+            font-weight: 600;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .btn-primary {
+            background: #1e4668;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0f3552;
+            transform: translateY(-1px);
+        }
+        .btn-outline-sm {
+            background: #f0f4fa;
+            border: 1px solid #cbdde9;
+            color: #1e5a7a;
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            width: auto;
+        }
+        .add-row-btn {
+            background: #f8fafd;
+            border: 1px dashed #b9d0e3;
+            border-radius: 40px;
+            padding: 10px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+        .add-row-btn i {
+            margin-right: 6px;
+        }
+
+        /* Product lines table -> card style on mobile */
+        .items-table-container {
+            border-radius: 24px;
+            border: 1px solid #edf2f7;
+            background: #ffffff;
+            overflow-x: auto;
+            margin: 16px 0 8px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 280px;
+        }
+        .items-table th {
+            text-align: left;
+            padding: 12px 10px;
+            background: #fafcff;
+            font-weight: 700;
+            color: #2c4c6e;
+            border-bottom: 1px solid #e9eff5;
+            font-size: 0.75rem;
+        }
+        .items-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f0f4fa;
+            vertical-align: middle;
+        }
+        .remove-item {
+            background: none;
+            border: none;
+            color: #c2410c;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 30px;
+        }
+        .remove-item:hover {
+            background: #ffe6e5;
+            color: #b91c1c;
+        }
+
+        /* search dropdown inside table */
+        .search-dropdown {
+            position: relative;
+            width: 100%;
+            min-width: 180px;
+        }
+        .search-dropdown input {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-radius: 30px;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 200;
+            border: 1px solid #dce5ec;
+            display: none;
+        }
+        .result-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f4f8;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .selected-product-info {
+            font-size: 0.65rem;
+            color: #2a6f8f;
+            margin-top: 4px;
+            padding-left: 4px;
+        }
+
+        /* alerts */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 24px;
+            margin-bottom: 18px;
+            font-size: 0.8rem;
+        }
+        .alert-success {
+            background: #e0f2e9;
+            color: #1e6f3f;
+            border-left: 4px solid #2b9348;
+        }
+        .alert-error {
+            background: #ffe6e5;
+            color: #b91c1c;
+            border-left: 4px solid #e53e3e;
+        }
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            margin: 6px 0;
+        }
+        hr {
+            margin: 10px 0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.7rem;
+            color: #7e95af;
+        }
+
+        /* ✨ MOBILE FIRST RESPONSIVE */
+        @media (max-width: 780px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            body {
+                padding: 12px 10px;
+            }
+            .card-body {
+                padding: 16px;
+            }
+            .items-table th, .items-table td {
+                padding: 10px 6px;
+            }
+            .btn, .add-row-btn {
+                font-size: 0.85rem;
+            }
+            .page-header h1 {
+                font-size: 1.6rem;
+            }
+            .search-dropdown input {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* tiny adjustments */
+        .stock-badge {
+            background: #eef2fa;
+            border-radius: 40px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .loading-spinner-sm {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-cubes"></i> MultiStock Pro</h1>
+        <p>Bulk adjustments & transfers • Add multiple products • Fully mobile responsive</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- STOCK ADJUSTMENT CARD (MULTI) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-sliders-h"></i> Stock Adjustment</h2>
+            </div>
+            <div class="card-body">
+                <div id="adjGlobalAlert"></div>
+                <div class="form-group">
+                    <label class="required"><i class="fas fa-store"></i> Shop</label>
+                    <select id="adjShopSelect" required>
+                        <option value="">-- Load shops --</option>
+                    </select>
+                </div>
+                <div id="adjustmentItemsArea">
+                    <div class="items-table-container">
+                        <table class="items-table" id="adjustmentItemsTable">
+                            <thead>
+                                <tr><th>Product</th><th>Quantity (+/-)</th><th style="width:40px"></th></tr>
+                            </thead>
+                            <tbody id="adjustmentTbody"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="add-row-btn" id="addAdjustmentRow"><i class="fas fa-plus-circle"></i> Add product line</button>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-pen"></i> Global Reason</label>
+                    <textarea id="adjGlobalReason" placeholder="Reason for adjustment (applies to all products)"></textarea>
+                </div>
+                <button type="button" id="submitAdjustmentBatch" class="btn btn-primary"><i class="fas fa-check-double"></i> Apply Bulk Adjustment</button>
+            </div>
+        </div>
+
+        <!-- STOCK TRANSFER CARD (MULTI) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-exchange-alt"></i> Stock Transfer</h2>
+            </div>
+            <div class="card-body">
+                <div id="transferGlobalAlert"></div>
+                <div class="form-group">
+                    <label class="required"><i class="fas fa-arrow-right-from-bracket"></i> From Shop</label>
+                    <select id="transferFromShop" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="required"><i class="fas fa-arrow-right-to-bracket"></i> To Shop</label>
+                    <select id="transferToShop" required></select>
+                </div>
+                <div id="transferItemsArea">
+                    <div class="items-table-container">
+                        <table class="items-table" id="transferItemsTable">
+                            <thead><tr><th>Product</th><th>Qty</th><th style="width:40px"></th></tr></thead>
+                            <tbody id="transferTbody"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="add-row-btn" id="addTransferRow"><i class="fas fa-plus-circle"></i> Add transfer line</button>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-pen"></i> Global Reason</label>
+                    <textarea id="transferGlobalReason" placeholder="Reason for transfer (stock relocation, etc.)"></textarea>
+                </div>
+                <button type="button" id="submitTransferBatch" class="btn btn-primary"><i class="fas fa-arrow-right-arrow-left"></i> Execute Bulk Transfers</button>
+            </div>
+        </div>
+    </div>
+    <footer><i class="fas fa-mobile-alt"></i> Responsive design • Multi‑product lines processed individually</footer>
+</div>
+
+<script>
+    // ---------- GLOBALS ----------
+    let shopsList = [];                // {shopid, name}
+    let productCache = new Map();      // id -> full product object
+    let adjRowCounter = 0, transferRowCounter = 0;
+
+    // Helper: escape HTML
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // Alert helper
+    function showAlert(containerId, message, type) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+        alertDiv.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-triangle'}"></i> ${message}`;
+        container.innerHTML = '';
+        container.appendChild(alertDiv);
+        setTimeout(() => { if(container.firstChild === alertDiv) alertDiv.remove(); }, 4500);
+    }
+
+    // Load shops from API
+    async function loadShops() {
+        try {
+            const resp = await fetch('/api/user-shops', { credentials: 'same-origin' });
+            const data = await resp.json();
+            if(data.success && data.shops) {
+                shopsList = data.shops;
+                const adjShopSel = document.getElementById('adjShopSelect');
+                const fromSel = document.getElementById('transferFromShop');
+                const toSel = document.getElementById('transferToShop');
+                [adjShopSel, fromSel, toSel].forEach(sel => { sel.innerHTML = '<option value="">-- Select Shop --</option>'; });
+                shopsList.forEach(shop => {
+                    const option = `<option value="${shop.shopid}">${escapeHtml(shop.name)} (ID:${shop.shopid})</option>`;
+                    adjShopSel.insertAdjacentHTML('beforeend', option);
+                    fromSel.insertAdjacentHTML('beforeend', option);
+                    toSel.insertAdjacentHTML('beforeend', option);
+                });
+                if(data.selected_shop_id && shopsList.some(s=> s.shopid == data.selected_shop_id)){
+                    adjShopSel.value = data.selected_shop_id;
+                }
+            } else {
+                showAlert('adjGlobalAlert', 'Failed to load shops', 'error');
+            }
+        } catch(e) { console.error(e); showAlert('adjGlobalAlert', 'Shop load error', 'error'); }
+    }
+
+    // search products API
+    async function searchProducts(term) {
+        if(!term || term.trim().length < 2) return [];
+        try {
+            const resp = await fetch(`/api/products?search=${encodeURIComponent(term)}`, { credentials: 'same-origin' });
+            const data = await resp.json();
+            if(data.success && data.products) {
+                for(let p of data.products) productCache.set(p.id, p);
+                return data.products;
+            }
+            return [];
+        } catch(e) { return []; }
+    }
+
+    // Create product search cell (returns DOM elements)
+    function createProductSearchCell(rowId, currentProductId = null) {
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'search-dropdown';
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = '🔍 Search by name / SPID...';
+        searchInput.autocomplete = 'off';
+        const resultsDiv = document.createElement('div');
+        resultsDiv.className = 'search-results';
+        wrapperDiv.appendChild(searchInput);
+        wrapperDiv.appendChild(resultsDiv);
+
+        let selectedProduct = currentProductId ? productCache.get(parseInt(currentProductId)) : null;
+        if(selectedProduct) {
+            searchInput.value = `${selectedProduct.name} (${selectedProduct.SPID || 'N/A'})`;
+        }
+        const infoSpan = document.createElement('div');
+        infoSpan.className = 'selected-product-info';
+        if(selectedProduct) infoSpan.innerText = `📦 Stock: ${selectedProduct.stock ?? '?'} ${selectedProduct.unit || 'pcs'}`;
+        wrapperDiv.appendChild(infoSpan);
+
+        let debounceTimer;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            const val = e.target.value.trim();
+            if(val.length < 2) { resultsDiv.style.display = 'none'; return; }
+            debounceTimer = setTimeout(async () => {
+                const products = await searchProducts(val);
+                resultsDiv.innerHTML = '';
+                if(products.length === 0) {
+                    resultsDiv.innerHTML = '<div class="result-item">No products found</div>';
+                    resultsDiv.style.display = 'block'; return;
+                }
+                products.forEach(prod => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.innerHTML = `<strong>${escapeHtml(prod.name)}</strong> <span style="font-size:0.7rem;">(${prod.SPID || ''})</span><br><span style="font-size:0.65rem;">Stock: ${prod.stock} ${prod.unit || ''}</span>`;
+                    div.addEventListener('click', () => {
+                        const row = document.getElementById(rowId);
+                        const hiddenId = row.querySelector('.product-id-hidden');
+                        if(hiddenId) hiddenId.value = prod.id;
+                        searchInput.value = `${prod.name} (${prod.SPID || ''})`;
+                        infoSpan.innerText = `📦 Stock: ${prod.stock ?? 0} ${prod.unit || 'pcs'} | ₹${prod.price}`;
+                        resultsDiv.style.display = 'none';
+                        productCache.set(prod.id, prod);
+                    });
+                    resultsDiv.appendChild(div);
+                });
+                resultsDiv.style.display = 'block';
+            }, 280);
+        });
+        document.addEventListener('click', (e) => { if(!wrapperDiv.contains(e.target)) resultsDiv.style.display = 'none'; });
+        const hiddenId = document.createElement('input');
+        hiddenId.type = 'hidden';
+        hiddenId.className = 'product-id-hidden';
+        if(selectedProduct) hiddenId.value = selectedProduct.id;
+        wrapperDiv.appendChild(hiddenId);
+        return { wrapper: wrapperDiv, hiddenInput: hiddenId, infoSpan };
+    }
+
+    // ADD Adjustment Row
+    function addAdjustmentRow(productId = null, qtyVal = '') {
+        adjRowCounter++;
+        const rowId = `adj_row_${adjRowCounter}`;
+        const tbody = document.getElementById('adjustmentTbody');
+        const tr = document.createElement('tr');
+        tr.id = rowId;
+        // Product cell
+        const tdProd = document.createElement('td');
+        const { wrapper, hiddenInput } = createProductSearchCell(rowId, productId);
+        tdProd.appendChild(wrapper);
+        // Quantity cell
+        const tdQty = document.createElement('td');
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.placeholder = 'e.g., +10 / -3';
+        qtyInput.step = '1';
+        qtyInput.value = qtyVal;
+        qtyInput.style.width = '110px';
+        qtyInput.style.borderRadius = '30px';
+        tdQty.appendChild(qtyInput);
+        // Remove btn
+        const tdRemove = document.createElement('td');
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        removeBtn.className = 'remove-item';
+        removeBtn.onclick = () => tr.remove();
+        tdRemove.appendChild(removeBtn);
+        tr.appendChild(tdProd);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdRemove);
+        tbody.appendChild(tr);
+        tr.dataset.productField = hiddenInput;
+        tr.dataset.qtyField = qtyInput;
+        return tr;
+    }
+
+    // ADD Transfer Row
+    function addTransferRow(productId = null, qtyVal = '') {
+        transferRowCounter++;
+        const rowId = `tr_row_${transferRowCounter}`;
+        const tbody = document.getElementById('transferTbody');
+        const tr = document.createElement('tr');
+        tr.id = rowId;
+        const tdProd = document.createElement('td');
+        const { wrapper, hiddenInput } = createProductSearchCell(rowId, productId);
+        tdProd.appendChild(wrapper);
+        const tdQty = document.createElement('td');
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.placeholder = 'Qty';
+        qtyInput.min = '1';
+        qtyInput.step = '1';
+        qtyInput.value = qtyVal;
+        qtyInput.style.width = '100px';
+        tdQty.appendChild(qtyInput);
+        const tdRemove = document.createElement('td');
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        removeBtn.className = 'remove-item';
+        removeBtn.onclick = () => tr.remove();
+        tdRemove.appendChild(removeBtn);
+        tr.appendChild(tdProd);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdRemove);
+        tbody.appendChild(tr);
+        tr.dataset.productField = hiddenInput;
+        tr.dataset.qtyField = qtyInput;
+        return tr;
+    }
+
+    // Collect adjustment items
+    function collectAdjustmentItems() {
+        const rows = document.querySelectorAll('#adjustmentTbody tr');
+        const items = [];
+        for(let row of rows) {
+            const productIdInput = row.querySelector('.product-id-hidden');
+            const qtyInput = row.querySelector('td:nth-child(2) input');
+            if(!productIdInput || !qtyInput) continue;
+            const productId = productIdInput.value;
+            const quantity = parseInt(qtyInput.value, 10);
+            if(!productId) continue;
+            if(isNaN(quantity)) continue;
+            items.push({ product_id: productId, quantity });
+        }
+        return items;
+    }
+
+    function collectTransferItems() {
+        const rows = document.querySelectorAll('#transferTbody tr');
+        const items = [];
+        for(let row of rows) {
+            const productIdInput = row.querySelector('.product-id-hidden');
+            const qtyInput = row.querySelector('td:nth-child(2) input');
+            if(!productIdInput || !qtyInput) continue;
+            const productId = productIdInput.value;
+            const quantity = parseInt(qtyInput.value, 10);
+            if(!productId) continue;
+            if(isNaN(quantity) || quantity <= 0) continue;
+            items.push({ product_id: productId, quantity });
+        }
+        return items;
+    }
+
+    // SUBMIT ADJUSTMENT BATCH
+    document.getElementById('submitAdjustmentBatch').addEventListener('click', async () => {
+        const shopId = document.getElementById('adjShopSelect').value;
+        if(!shopId) { showAlert('adjGlobalAlert', 'Please select a shop', 'error'); return; }
+        const items = collectAdjustmentItems();
+        if(items.length === 0) { showAlert('adjGlobalAlert', 'Add at least one product line', 'error'); return; }
+        const globalReason = document.getElementById('adjGlobalReason').value;
+        const btn = document.getElementById('submitAdjustmentBatch');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        let success = 0, failed = 0;
+        for(let it of items) {
+            try {
+                const payload = { product_id: it.product_id, quantity: it.quantity, shopid: shopId, reason: globalReason || 'bulk adjustment', created_by: window.currentUser || 'batch' };
+                const resp = await fetch('/api/stock-adjustment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(payload) });
+                const res = await resp.json();
+                if(res.success) success++; else failed++;
+            } catch(e) { failed++; }
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-double"></i> Apply Bulk Adjustment';
+        if(success) showAlert('adjGlobalAlert', `✅ ${success} adjusted, ${failed} failed.`, 'success');
+        else showAlert('adjGlobalAlert', `❌ All ${failed} failed. Check product IDs/stock rules.`, 'error');
+        if(success) document.getElementById('adjustmentTbody').innerHTML = '';
+    });
+
+    // SUBMIT TRANSFER BATCH
+    document.getElementById('submitTransferBatch').addEventListener('click', async () => {
+        const fromShop = document.getElementById('transferFromShop').value;
+        const toShop = document.getElementById('transferToShop').value;
+        if(!fromShop || !toShop) { showAlert('transferGlobalAlert', 'Select source & destination shops', 'error'); return; }
+        if(fromShop === toShop) { showAlert('transferGlobalAlert', 'Shops must be different', 'error'); return; }
+        const items = collectTransferItems();
+        if(items.length === 0) { showAlert('transferGlobalAlert', 'Add at least one product', 'error'); return; }
+        const globalReason = document.getElementById('transferGlobalReason').value;
+        const btn = document.getElementById('submitTransferBatch');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transferring...';
+        let success = 0, failed = 0;
+        for(let it of items) {
+            try {
+                const payload = { product_id: it.product_id, quantity: it.quantity, from_shopid: fromShop, to_shopid: toShop, reason: globalReason || 'bulk transfer', created_by: window.currentUser || 'batch' };
+                const resp = await fetch('/api/stock-transfer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(payload) });
+                const res = await resp.json();
+                if(res.success) success++; else failed++;
+            } catch(e) { failed++; }
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-arrow-right-arrow-left"></i> Execute Bulk Transfers';
+        if(success) showAlert('transferGlobalAlert', `✅ ${success} transfers ok, ${failed} failed.`, 'success');
+        else showAlert('transferGlobalAlert', `❌ All transfers failed. Verify stock levels.`, 'error');
+        if(success) document.getElementById('transferTbody').innerHTML = '';
+    });
+
+    // fetch current user for created_by
+    async function fetchCurrentUser() {
+        try {
+            const resp = await fetch('/api/current-user', { credentials: 'same-origin' });
+            if(resp.ok) { const data = await resp.json(); window.currentUser = data.username || 'bulk_worker';}
+            else window.currentUser = 'batch_user';
+        } catch(e) { window.currentUser = 'batch_user'; }
+    }
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', async () => {
+        await loadShops();
+        await fetchCurrentUser();
+        // add one initial row each for better UX
+        addAdjustmentRow();
+        addTransferRow();
+    });
+
+    // event listeners for add row buttons
+    document.getElementById('addAdjustmentRow').addEventListener('click', () => addAdjustmentRow());
+    document.getElementById('addTransferRow').addEventListener('click', () => addTransferRow());
+</script>
+</body>
+</html>

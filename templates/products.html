@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Product Manager</title>
+    <p>Note : Strictly Use it for initial product creation in system do not override existing products.</p>
   <style>
     /* ALL ORIGINAL STYLES REMAIN EXACTLY THE SAME */
     :root{
@@ -50,90 +51,66 @@
       outline:none;
     }
     
-    /* SPID Search Styles */
-    .spid-search-container {
-      position: relative;
-      grid-column: span 2;
-    }
-    .spid-dropdown {
+    
+    /* Dropdown common styles (unified for SPID, Category and inline cell dropdowns) */
+    .spid-search-container, .category-search { position: relative; }
+
+    .dropdown {
       position: absolute;
       top: 100%;
       left: 0;
       right: 0;
-      background: var(--panel);
-      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(15,17,19,0.98), rgba(10,11,12,0.98));
+      border: 1px solid rgba(0,209,178,0.16);
       border-top: none;
       border-radius: 0 0 10px 10px;
       max-height: 300px;
       overflow-y: auto;
-      z-index: 1000;
+      z-index: 1200;
       display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
     }
-    .spid-dropdown.active {
-      display: block;
-    }
-    .spid-dropdown-item {
-      padding: 12px 15px;
+    .dropdown.active { display: block; }
+
+    .dropdown-item {
+      padding: 12px 14px;
       cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.2s;
-    }
-    .spid-dropdown-item:hover {
-      background: rgba(0,209,178,0.1);
-    }
-    .spid-dropdown-item.selected {
-      background: rgba(0,209,178,0.15);
-    }
-    .spid-code {
-      font-weight: bold;
-      color: var(--accent);
-      font-size: 12px;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .spid-name {
-      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      transition: background 0.16s ease, color 0.16s ease;
       color: #e6eef0;
     }
-    .spid-details {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .spid-badge {
-      display: inline-block;
-      padding: 2px 6px;
-      background: rgba(0,209,178,0.15);
-      border-radius: 4px;
-      font-size: 10px;
-      margin-right: 8px;
-    }
+    .dropdown-item:hover { background: rgba(0,209,178,0.07); }
+    .dropdown-item.selected { background: rgba(0,209,178,0.12); }
+    /* Backwards-compatible aliases for existing markup/classes */
+    .spid-dropdown-item { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); transition: background 0.16s ease, color 0.16s ease; color: #e6eef0 }
+    .spid-dropdown-item:hover { background: rgba(0,209,178,0.07) }
+    .spid-dropdown-item.selected { background: rgba(0,209,178,0.12) }
 
-    .category-search{position:relative}
-    .category-dropdown{
-      position:absolute;
-      top:100%;
-      left:0;
-      right:0;
-      background:var(--panel);
-      border:1px solid var(--accent);
-      border-top:none;
-      border-radius:0 0 10px 10px;
-      max-height:200px;
-      overflow-y:auto;
-      z-index:1000;
-      display:none;
-    }
-    .category-dropdown.active{display:block}
-    .category-item{
-      padding:10px 12px;
-      border-bottom:1px solid rgba(255,255,255,0.04);
-      cursor:pointer;
-      transition:background 0.2s;
-    }
-    .category-item:hover{background:rgba(0,209,178,0.1)}
-    .category-item:last-child{border-bottom:none}
+    /* SPID-specific tweaks */
+    .spid-dropdown { max-height: 320px; }
+    .spid-dropdown .spid-code { font-weight:700; color: var(--accent); font-size:12px; display:block; margin-bottom:4px }
+    .spid-dropdown .spid-name { font-size:14px; color:#e6eef0 }
+    .spid-dropdown .spid-details { font-size:11px; color:var(--muted); margin-top:6px }
+    .spid-dropdown .spid-badge { display:inline-block; padding:2px 6px; background:rgba(0,209,178,0.12); border-radius:4px; font-size:11px; margin-right:8px }
+
+    /* Category-specific tweaks */
+    .category-dropdown { max-height: 220px; }
+    .category-item { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; color: #e6eef0 }
+    .category-item:hover { background: rgba(0,209,178,0.07) }
+    .category-item:last-child { border-bottom: none }
+
+    /* Inline category input dropdown (table cell) */
+    .cat-dropdown { position:absolute; top:100%; left:0; right:0; background: linear-gradient(180deg, rgba(15,17,19,0.98), rgba(10,11,12,0.98)); border:1px solid rgba(0,209,178,0.18); border-radius:4px; box-shadow:0 10px 30px rgba(0,0,0,0.7); max-height:250px; overflow-y:auto; display:none; margin-top:2px; z-index:1300 }
+    .cat-dropdown.show { display:block }
+    .cat-item { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.02); cursor:pointer; font-size:12px; color:#e6eef0 }
+    .cat-item:hover { background: rgba(0,209,178,0.12) }
+    .cat-item:last-child { border-bottom:none }
+
+    /* Scrollbar styling (subtle, theme-aware) */
+    .dropdown::-webkit-scrollbar, .cat-dropdown::-webkit-scrollbar { width:8px; height:8px }
+    .dropdown::-webkit-scrollbar-thumb, .cat-dropdown::-webkit-scrollbar-thumb { background: rgba(0,209,178,0.14); border-radius:999px }
+    .dropdown::-webkit-scrollbar-track, .cat-dropdown::-webkit-scrollbar-track { background: transparent }
 
     .sheet{margin-top:20px;border-radius:10px;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
@@ -408,6 +385,17 @@
           <input type="number" id="qPrice" step="0.01" value="0.00">
         </div>
         <div class="form-group">
+          <label for="qunit">Unit</label>
+          <select id="qunit" class="form-control">
+            <option value="PC">PC</option>
+            <option value="KG">KG</option>
+            <option value="GM">GM</option>
+            <option value="LTR">LTR</option>
+            <option value="ML">ML</option>
+            <option value="TON">TON</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Tax (%)</label>
           <input type="number" id="qTax" step="0.01" value="0.00">
         </div>
@@ -475,6 +463,7 @@
               <th style="width:100px">Location</th>
               <th style="width:80px">Status</th>
               <th style="width:100px">Price</th>
+              <th style="width:80px">Unit</th>
               <th style="width:80px">Tax %</th>
               <th style="width:80px">Stock</th>
               <th style="width:100px">Safe Stock</th>
@@ -636,6 +625,7 @@
       document.getElementById('qHSN').value = product.HSN_code || '';
       document.getElementById('qLocation').value = product.location || '';
       document.getElementById('qStatus').value = product.status || 'active';
+      document.getElementById('qunit').value = product.unit || 'PC';
       
       // Try to get category name if available
       if (product.category_name) {
@@ -928,6 +918,7 @@
         <td><input data-field="location" type="text" value="${escapeHtml(obj.location||'')}" style="width:100%;min-width:150px"></td>
         <td><input data-field="status" type="text" value="${escapeHtml(obj.status||'')}" style="width:100%;min-width:150px"></td>
         <td><input data-field="price" type="number" step="0.01" value="${obj.price}" style="width:100%"></td>
+        <td><input data-field="unit" type="text" value="${escapeHtml(obj.unit||'')}" style="width:100%"></td>
         <td><input data-field="tax" type="number" step="0.01" value="${obj.tax}" style="width:100%"></td>
         <td><input data-field="stock" type="number" value="${obj.stock}" style="width:100%"></td>
         <td><input data-field="safe_stock" type="number" value="${obj.safe_stock}" style="width:100%"></td>
@@ -1076,6 +1067,7 @@
       const obj = {
         name: name,
         price: parseFloat(document.getElementById('qPrice').value||0).toFixed(2),
+        unit: document.getElementById('qunit').value.trim() || '',
         tax: parseFloat(document.getElementById('qTax').value||0).toFixed(2),
         stock: document.getElementById('qStock').value||0,
         safe_stock: document.getElementById('qSafeStock').value||0,
@@ -1221,16 +1213,25 @@
           return;
         }
         
-        const header = ['ID','Name','Price','Tax','Stock','Safe Stock','Category'];
+        const header = ['ID', 'Name', 'HSN Code', 'Location', 'Status', 'Price', 'Tax', 'Unit', 'Stock', 'Safe Stock', 'Category', 'Description 1', 'Description 2', 'Description 3', 'Description 4', 'Description 5'];
         const csv = [header.join(',')].concat(products.map(p=>
           [
-            p.products_id,
+            p.product_id || p.products_id || '',
             '"' + String(p.name||'').replace(/"/g,'""') + '"',
+            '"' + String(p.hsn_code||'').replace(/"/g,'""') + '"',
+            '"' + String(p.location||'').replace(/"/g,'""') + '"',
+            '"' + String(p.status||'').replace(/"/g,'""') + '"',
             p.price,
             p.tax,
+            '"' + String(p.unit||'').replace(/"/g,'""') + '"',
             p.stock,
             p.safe_stock,
-            '"' + String(p.category_name||'').replace(/"/g,'""') + '"'
+            '"' + String(p.category_name||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description1||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description2||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description3||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description4||'').replace(/"/g,'""') + '"',
+            '"' + String(p.description5||'').replace(/"/g,'""') + '"'
           ].join(',')
         )).join('\n');
         
@@ -1308,6 +1309,7 @@
       return {
         name: map(['name','product_name','title'])||'',
         price: (map(['price','mrp','cost'])||'0').toString(),
+        unit: map(['unit','uom','qty_type'])||'',
         tax: (map(['tax','tax_percent'])||'0').toString(),
         stock: map(['stock','quantity','qty'])||'0',
         safe_stock: map(['safe_stock','safestock'])||'0',
