@@ -6355,6 +6355,301 @@ def update_gate_receipt(gate_id):
 @admin_required
 def stock_adjustment():
     return render_template("stock_adj.html")
+    
+@app.route('/api/stock-adjustment', methods=['POST'])
+@admin_required
+def handle_stock_adjustment():
+    """Handle stock adjustments (increase or decrease stock)"""
+    conn, cur = get_db()
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        shopid = data.get('shopid')
+        reason = data.get('reason', 'stock adjustment')
+        products = data.get('products', [])
+        user = session.get('user', 'system')
+        
+        if not shopid:
+            return jsonify({
+                'success': False,
+                'message': 'Shop ID is required'
+            }), 400
+        
+        if not products or len(products) == 0:
+            return jsonify({
+                'success': False,
+                'message': 'At least one product is required'
+            }), 400
+        
+        # Process each product adjustment
+        for product in products:
+            product_id = product.get('product_id')
+            quantity = product.get('quantity')
+            
+            if not product_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'Product ID is required for each product'
+                }), 400
+            
+            if quantity is None or quantity == 0:
+                return jsonify({
+                    'success': False,
+                    'message': f'Quantity cannot be zero for product ID {product_id}'
+                }), 400
+            
+            # Insert into stock_adjustment table
+            cur.execute("""
+                INSERT INTO stock_adjustment 
+                (product_id, quantity, shopid, Reason, created_by, updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (product_id, quantity, shopid, reason, user, user))
+            
+            # Update product stock (add the quantity - can be negative for reduction)
+            cur.execute("""
+                UPDATE Products 
+                SET stock = stock + %s 
+                WHERE product_id = %s AND shop_id = %s
+            """, (quantity, product_id, shopid))
+            
+            if cur.rowcount == 0:
+                conn.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Product ID {product_id} not found in shop {shopid}'
+                }), 404
+        
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully adjusted {len(products)} product(s)'
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error in stock adjustment: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error processing adjustment: {str(e)}'
+        }), 500
+    finally:
+        cur.close()
+        conn.close()
 
+@app.route('/api/stock_transfer', methods=['POST'])
+@app.route('/api/stock-transfer', methods=['POST'])
+@admin_required
+def handle_stock_transfer():
+    """Handle stock transfer for multiple products from one shop to another"""
+    conn = None
+    cur = None
+    try:
+        conn, cur = get_db()
+        
+        # Get request data
+        data = request.get_json()
+        print(f"[DEBUG] Received transfer request: {data}")
+        
+        from_shopid = data.get('from_shopid')
+        to_shopid = data.get('to_shopid')
+        reason = data.get('reason', 'stock transfer')
+        products = data.get('products', [])
+        user = session.get('user', 'system')
+        
+        # Validation
+        if not from_shopid or not to_shopid:
+            return jsonify({
+                'success': False,
+                'message': 'Both source and destination shop IDs are required'
+            }), 400
+        
+        if from_shopid == to_shopid:
+            return jsonify({
+                'success': False,
+                'message': 'Source and destination shops cannot be the same'
+            }), 400
+        
+        if not products or len(products) == 0:
+            return jsonify({
+                'success': False,
+                'message': 'At least one product is required for transfer'
+            }), 400
+        
+        # Start transaction
+        conn.autocommit = False
+        successful_transfers = []
+        failed_transfers = []
+        
+        # Process each product
+        for product in products:
+            try:
+                product_id = product.get('product_id')
+                quantity = product.get('quantity')
+                location = product.get('location', '')
+                
+                from_shopid_int = int(from_shopid)
+                to_shopid_int = int(to_shopid)
+                product_id_int = int(product_id)
+                quantity_int = int(quantity)
+
+                if quantity_int <= 0:
+                    failed_transfers.append({
+                        'product_id': product_id_int,
+                        'reason': 'Quantity must be greater than zero.'
+                    })
+                    continue
+
+                # 1. Get product from source shop
+                cur.execute("""
+                    SELECT 
+                        product_id, stock, name, price, Bprice, Unit, tax, 
+                        SPID, categoryid, HSN_code, location, status, safe_stock, image
+                    FROM Products 
+                    WHERE product_id = %s AND shop_id = %s
+                """, (product_id_int, from_shopid_int))
+                source_product = cur.fetchone()
+
+                if not source_product:
+                    failed_transfers.append({
+                        'product_id': product_id_int,
+                        'reason': f'Product not found in source shop {from_shopid_int}.'
+                    })
+                    continue
+
+                source_stock = int(source_product.get('stock', 0))
+                source_name = source_product.get('name')
+                source_price = source_product.get('price', 0)
+                source_bprice = source_product.get('Bprice', 0)
+                source_unit = source_product.get('Unit')
+                source_tax = source_product.get('tax', 0)
+                source_spid = source_product.get('SPID')
+                source_categoryid = source_product.get('categoryid')
+                source_hsn = source_product.get('HSN_code')
+                source_location = source_product.get('location') or ''
+                source_status = source_product.get('status') or 'active'
+                source_safe_stock = source_product.get('safe_stock') or 0
+                source_image = source_product.get('image')
+                print(f"[DEBUG] Source product details: {source_product}")
+
+                # Check stock
+                if source_stock < quantity_int:
+                    failed_transfers.append({
+                        'product_id': product_id_int,
+                        'name': source_name,
+                        'reason': f'Insufficient stock. Available: {source_stock}, Requested: {quantity_int}'
+                    })
+                    continue
+
+                # 2. Insert into stock_transfer table
+                cur.execute("""
+                    INSERT INTO stock_transfer 
+                    (product_id, quantity, from_shopid, to_shopid, Reason, created_by, updated_by)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (product_id_int, quantity_int, from_shopid_int, to_shopid_int, reason, user, user))
+
+                # 3. Decrease stock from source shop
+                cur.execute("""
+                    UPDATE Products 
+                    SET stock = stock - %s,
+                        updated_at = CURRENT_TIMESTAMP,
+                        updated_by = %s
+                    WHERE product_id = %s AND shop_id = %s
+                """, (quantity_int, user, product_id_int, from_shopid_int))
+
+                # 4. Check if product exists in destination shop
+                cur.execute("""
+                    SELECT product_id, stock FROM Products 
+                    WHERE product_id = %s AND shop_id = %s
+                """, (product_id_int, to_shopid_int))
+
+                dest_product = cur.fetchone()
+
+                # Determine location
+                final_location = location if location and location.strip() else source_location
+                if not final_location or final_location == 'N/A':
+                    final_location = f"Transferred from shop {from_shopid_int}"
+
+                # 5. Update or create in destination
+                if dest_product:
+                    # Update existing
+                    cur.execute("""
+                        UPDATE Products 
+                        SET stock = stock + %s,
+                            location = %s,
+                            updated_at = CURRENT_TIMESTAMP,
+                            updated_by = %s
+                        WHERE product_id = %s AND shop_id = %s
+                    """, (quantity_int, final_location, user, product_id_int, to_shopid_int))
+                else:
+                    cur.execute("""select name from Categories where shopid=%s and categories_id=%s""", (to_shopid_int, source_categoryid))
+                    category = cur.fetchone()
+                    if not category:
+                        cur.execute("""select name from Categories where shopid=%s and categories_id=%s""", (from_shopid_int, source_categoryid))
+                        category = cur.fetchone()
+                        cat = category.get("name")
+                        print(f"[DEBUG] Category fetched from source shop: {cat}")
+                        # If category doesn't exist in destination, create it
+                        cur.execute("""
+                            INSERT INTO Categories (shopid, name, created_by, updated_by)
+                            VALUES (%s, %s, %s, %s)
+                        """, (to_shopid_int, cat, user, user))
+                        source_categoryid = cur.lastrowid  # Get the new category ID
+                    # Create new product (new row for destination shop)
+                    cur.execute("""
+                        INSERT INTO Products (shop_id, stock, location, created_by, updated_by,price,Bprice,SPID,categoryid,HSN_code,Unit,tax,name,status,safe_stock,image)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (to_shopid_int, quantity_int, final_location, user, user, source_price, source_bprice, source_spid, source_categoryid, source_hsn, source_unit, source_tax, source_name, source_status, 0, source_image))
+
+                successful_transfers.append({
+                    'product_id': product_id_int,
+                    'name': source_name,
+                    'quantity': quantity_int,
+                    'location': final_location
+                })
+                
+                print(f"[DEBUG] Successfully transferred: {source_name} x{quantity_int}")
+                
+            except Exception as e:
+                print(f"[ERROR] Failed to transfer product {product.get('product_id')}: {str(e)}")
+                failed_transfers.append({
+                    'product_id': product.get('product_id'),
+                    'reason': str(e)
+                })
+                continue
+        
+        # Commit if at least one successful transfer
+        if successful_transfers:
+            conn.commit()
+            return jsonify({
+                'success': True,
+                'message': f'Successfully transferred {len(successful_transfers)} product(s)',
+                'successful_transfers': successful_transfers,
+                'failed_transfers': failed_transfers if failed_transfers else None
+            })
+        else:
+            conn.rollback()
+            return jsonify({
+                'success': False,
+                'message': 'No products were transferred',
+                'failed_transfers': failed_transfers
+            }), 400
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"[ERROR] Stock transfer error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': f'Error processing transfer: {str(e)}'
+        }), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 if __name__ == '__main__':
     app.run(debug = True,port=5500)

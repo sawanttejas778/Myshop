@@ -33,7 +33,7 @@ CREATE TABLE Shops (
 -- Categories table
 CREATE TABLE Categories (
     categories_id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
     shopid int not null,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255) NOT NULL,
