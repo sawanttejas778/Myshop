@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise ERP – Help & User Guide</title>
+  <!-- Bootstrap 5 & Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+    }
+    .wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 20px 0;
+      flex-shrink: 0;
+      border-right: 1px solid #1a2632;
+    }
+    .sidebar-brand {
+      text-align: center;
+      padding: 0 15px 25px 15px;
+      border-bottom: 1px solid #3e546c;
+      margin-bottom: 15px;
+    }
+    .sidebar-brand h4 {
+      font-weight: 300;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+    .sidebar-brand small {
+      color: #aab8c9;
+      font-size: 0.75rem;
+    }
+    .sidebar .nav-link {
+      color: #d1dbe6;
+      padding: 10px 25px;
+      border-radius: 0;
+      border-left: 3px solid transparent;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .sidebar .nav-link i {
+      width: 24px;
+      text-align: center;
+      margin-right: 10px;
+      color: #7f96b3;
+    }
+    .sidebar .nav-link:hover {
+      background: #34495e;
+      color: #fff;
+      border-left-color: #3498db;
+    }
+    .sidebar .nav-link.active {
+      background: #1a2632;
+      color: #fff;
+      border-left-color: #f1c40f;
+    }
+    .sidebar .nav-link.active i {
+      color: #f1c40f;
+    }
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 40px 50px;
+      max-width: calc(100% - 300px);
+      background: #f4f6f9;
+    }
+    .help-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px 30px;
+      margin-bottom: 35px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      border-left: 5px solid #3498db;
+    }
+    .help-card h3 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    .help-card h3 i {
+      color: #3498db;
+      margin-right: 12px;
+    }
+    .step-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .step-list li {
+      padding: 10px 0 10px 45px;
+      border-bottom: 1px solid #f0f2f5;
+      position: relative;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+    .step-list li:last-child {
+      border-bottom: none;
+    }
+    .step-list li strong {
+      color: #2c3e50;
+    }
+    .step-list li .badge-step {
+      position: absolute;
+      left: 0;
+      top: 10px;
+      background: #3498db;
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .badge-success-light {
+      background: #d4edda;
+      color: #155724;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    .badge-warning-light {
+      background: #fff3cd;
+      color: #856404;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    .badge-info-light {
+      background: #d1ecf1;
+      color: #0c5460;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    @media (max-width: 992px) {
+      .wrapper {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid #1a2632;
+        padding: 10px 0;
+      }
+      .main-content {
+        max-width: 100%;
+        padding: 20px;
+      }
+    }
+    /* Scrollbar styling */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: #2c3e50;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #5d7a9a;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <!-- ========== SIDEBAR ========== -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <h4><i class="fas fa-cubes me-2"></i>ERP System</h4>
+      <small>Enterprise Help Guide v2.0</small>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a class="nav-link active" href="#getting-started"><i class="fas fa-rocket"></i> Getting Started</a></li>
+      <li class="nav-item"><a class="nav-link" href="#shop-mgmt"><i class="fas fa-store"></i> Shop Management</a></li>
+      <li class="nav-item"><a class="nav-link" href="#products"><i class="fas fa-boxes"></i> Products</a></li>
+      <li class="nav-item"><a class="nav-link" href="#customers"><i class="fas fa-user-friends"></i> Customers</a></li>
+      <li class="nav-item"><a class="nav-link" href="#suppliers"><i class="fas fa-truck"></i> Suppliers</a></li>
+      <li class="nav-item"><a class="nav-link" href="#p2p"><i class="fas fa-random"></i> Procure‑to‑Pay (PR/PO/GR)</a></li>
+      <li class="nav-item"><a class="nav-link" href="#sales"><i class="fas fa-shopping-cart"></i> Sales & Orders</a></li>
+      <li class="nav-item"><a class="nav-link" href="#returns"><i class="fas fa-undo-alt"></i> Returns</a></li>
+      <li class="nav-item"><a class="nav-link" href="#invoicing"><i class="fas fa-file-invoice"></i> Quotations & Invoices</a></li>
+      <li class="nav-item"><a class="nav-link" href="#khatabook"><i class="fas fa-book"></i> Khatabook (Ledger)</a></li>
+      <li class="nav-item"><a class="nav-link" href="#stock-mgmt"><i class="fas fa-warehouse"></i> Stock Adjustments</a></li>
+      <li class="nav-item"><a class="nav-link" href="#transfer"><i class="fas fa-exchange-alt"></i> Stock Transfers</a></li>
+      <li class="nav-item"><a class="nav-link" href="#reports"><i class="fas fa-chart-pie"></i> Reports & Settings</a></li>
+    </ul>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="main-content">
+    <h1 class="display-6 fw-bold mb-4"><i class="fas fa-life-ring text-primary me-2"></i>Enterprise ERP – User Help Manual</h1>
+    <p class="text-muted mb-5">This guide explains every core process in the system. Use the sidebar to navigate through sections.</p>
+
+    <!-- ===================== GETTING STARTED ===================== -->
+    <div id="getting-started" class="help-card">
+      <h3><i class="fas fa-rocket"></i> Getting Started</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Login / Signup:</strong> Use your registered email and password. If you don't have an account, click <strong>Sign Up</strong> – an OTP will be sent to your email for verification. Complete the OTP step to activate your account.</li>
+        <li><span class="badge-step">2</span> <strong>Role & Permissions:</strong> Your role (<span class="badge-success-light">Admin</span>, <span class="badge-warning-light">Owner</span>, or <span class="badge-info-light">User</span>) controls what you see. Admins manage shops and users; Users only have access to assigned shops.</li>
+        <li><span class="badge-step">3</span> <strong>Forgot Password:</strong> On the login page, click <i>Forgot Password</i>. You will receive a reset link via email (valid for 1 hour). Follow the link to set a new password.</li>
+        <li><span class="badge-step">4</span> <strong>First Login:</strong> Admins must <strong>select a shop</strong> from the top bar (or via the Shop switcher) to start managing inventory, orders, and customers for that specific shop.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== SHOP MANAGEMENT ===================== -->
+    <div id="shop-mgmt" class="help-card">
+      <h3><i class="fas fa-store"></i> Shop Management</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Create a New Shop:</strong> Go to <i>Add Shop</i>. Enter the Shop Name, GSTN, Address, Phone, and Tax ID. Only Admins/Owners can create shops.</li>
+        <li><span class="badge-step">2</span> <strong>Switch Between Shops:</strong> Use the <strong>Shop Selector</strong> dropdown at the top of the dashboard. All data (products, customers, orders) will switch to the selected shop context.</li>
+        <li><span class="badge-step">3</span> <strong>Dashboard KPIs:</strong> Once a shop is selected, the dashboard shows <strong>Total Sales</strong> (completed/delivered orders), <strong>Orders Today</strong>, <strong>Total Products</strong>, and <strong>Low Stock Items</strong> (where stock ≤ safe_stock).</li>
+      </ul>
+    </div>
+
+    <!-- ===================== PRODUCTS ===================== -->
+    <div id="products" class="help-card">
+      <h3><i class="fas fa-boxes"></i> Products</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Add Product:</strong> Navigate to <i>Products</i> → <i>Add New</i>. Fill in Name, Price, Buying Price (Bprice), Tax %, Stock, Safe Stock, Unit (e.g., KG, PC), HSN Code, and Location. Assign an existing Category or type a new one to create it on the fly.</li>
+        <li><span class="badge-step">2</span> <strong>Upload Image:</strong> In the product edit screen, use the image uploader. The system saves images as <code>product_{id}.jpg/png</code> and automatically cleans up old images.</li>
+        <li><span class="badge-step">3</span> <strong>Descriptions:</strong> You can add a multi-line description. The system splits it into 5 distinct description fields (Description1 to Description5) for structured product details.</li>
+        <li><span class="badge-step">4</span> <strong>SPID Generation:</strong> The system auto-generates a unique SPID (Stock Keeping ID) based on the product name and timestamp, ensuring traceability.</li>
+        <li><span class="badge-step">5</span> <strong>Bulk Import/Export:</strong> Admins can use the <i>Import Products</i> endpoint (JSON/API) to quickly add multiple products at once. Export products via <i>Export</i> to get a full JSON list.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== CUSTOMERS ===================== -->
+    <div id="customers" class="help-card">
+      <h3><i class="fas fa-user-friends"></i> Customers</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Create Customer:</strong> Go to <i>Customer</i> → <i>Add New</i>. Required fields: Name, Mobile, Address, City, Pincode, Village, and Email. Optional: GSTN, Bank IFSC, Bank Account, and Bank Name.</li>
+        <li><span class="badge-step">2</span> <strong>Global vs Shop Linking:</strong> If a customer already exists in the system (by email), they are automatically linked to the current shop. If not, a new customer record is created and linked.</li>
+        <li><span class="badge-step">3</span> <strong>Search:</strong> Use the <i>Customer Search</i> bar to find customers by Name, Mobile, Email, City, Village, or Pincode. Results are filtered by the selected shop.</li>
+        <li><span class="badge-step">4</span> <strong>Customer Details:</strong> Clicking on a customer shows their full profile, transaction history, and linked quotations/invoices.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== SUPPLIERS ===================== -->
+    <div id="suppliers" class="help-card">
+      <h3><i class="fas fa-truck"></i> Suppliers</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Add Supplier:</strong> Navigate to <i>Suppliers</i> → <i>Add New</i>. Enter Name, Email, Phone, Address, Pincode, State, City, Country, GSTN, Bank details, and Payment Terms.</li>
+        <li><span class="badge-step">2</span> <strong>Search Suppliers:</strong> The search bar filters suppliers by Name, Email, Phone, GSTN, City, or State within the current shop.</li>
+        <li><span class="badge-step">3</span> <strong>Supplier Count:</strong> The dashboard or supplier list shows the total number of suppliers linked to your active shop.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== PROCURE TO PAY (P2P) ===================== -->
+    <div id="p2p" class="help-card">
+      <h3><i class="fas fa-random"></i> Procure‑to‑Pay (PR/PO/GR)</h3>
+      <p class="text-muted">The system supports a complete internal procurement cycle.</p>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Create Purchase Requisition (PR):</strong> Go to <i>PR/PO</i> → <i>New PR</i>. Select Supplier, add items (Product, Quantity, Unit Price, Tax Rate), and provide a Reason. The system calculates Subtotal, Tax, and Grand Total automatically.</li>
+        <li><span class="badge-step">2</span> <strong>Convert PR to Purchase Order (PO):</strong> In the PR list, click <i>Convert to PO</i> on a pending PR. The system creates a PO with status <code>pending</code>. You can update the PO status later (<i>Approved</i>, <i>Received</i>, <i>Cancelled</i>).</li>
+        <li><span class="badge-step">3</span> <strong>Print PO:</strong> Once a PO is created, use the <i>Print PO</i> button to generate a PDF/printable version. This marks the PO as printed (<code>Print_status = Y</code>), preventing further edits.</li>
+        <li><span class="badge-step">4</span> <strong>Gate Receipt (GR) – Receive Goods:</strong> Go to <i>Gate Receipt</i>. Select a PO, enter the quantities actually received (partial receipts are allowed). The system checks the remaining PO quantity and validates against it.</li>
+        <li><span class="badge-step">5</span> <strong>Automatic Stock Update:</strong> Upon creating a Gate Receipt, the system <strong>increases</strong> the product stock in the <code>Products</code> table. The PO's <code>recieved_QTY</code> is updated. If the full PO quantity is received, the PO is marked as completed.</li>
+        <li><span class="badge-step">6</span> <strong>Update PR/PO:</strong> You can update PRs and POs as long as they haven't been printed or converted to a higher stage.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== SALES & ORDERS ===================== -->
+    <div id="sales" class="help-card">
+      <h3><i class="fas fa-shopping-cart"></i> Sales & Orders</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Add to Cart:</strong> Browse products on the customer dashboard, and click <i>Add to Cart</i>. You can adjust quantities directly in the cart view.</li>
+        <li><span class="badge-step">2</span> <strong>Checkout:</strong> Go to <i>View Cart</i> → <i>Proceed to Checkout</i>. The system calculates Subtotal, Tax (based on product tax rates), and Grand Total.</li>
+        <li><span class="badge-step">3</span> <strong>Place Order:</strong> Enter shipping/contact details (Phone, Address, City, State, Zip, Country). Click <i>Place Order</i>. The system creates an Order with status <code>pending</code>, clears the cart, and inserts the order items & descriptions.</li>
+        <li><span class="badge-step">4</span> <strong>Manage Orders (Admin):</strong> Admins see a list of all orders in <i>Manage Orders</i>. They can update the status (e.g., <code>pending</code> → <code>delivered</code> → <code>cancelled</code>). <br><span class="badge-warning-light">Important:</span> Moving an order to <code>delivered</code> <strong>deducts</strong> stock. Moving it back to <code>cancelled</code> <strong>restores</strong> stock.</li>
+        <li><span class="badge-step">5</span> <strong>Order History:</strong> Users can view their <i>My Orders</i> page, showing all past orders with dates and statuses.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== RETURNS ===================== -->
+    <div id="returns" class="help-card">
+      <h3><i class="fas fa-undo-alt"></i> Order Returns</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Eligibility:</strong> Only <span class="badge-success-light">Delivered</span> orders are eligible. The return window is <strong>7 days</strong> from the delivery date.</li>
+        <li><span class="badge-step">2</span> <strong>Request Return:</strong> In <i>My Orders</i>, click <i>Return</i> next to the eligible item. The system submits a <code>return_requested</code> status for that order.</li>
+        <li><span class="badge-step">3</span> <strong>Return Status:</strong> You can view the return status, estimated refund amount, and return-by date on the <i>Return Status</i> page (accessible from the order history).</li>
+      </ul>
+    </div>
+
+    <!-- ===================== QUOTATIONS & INVOICES ===================== -->
+    <div id="invoicing" class="help-card">
+      <h3><i class="fas fa-file-invoice"></i> Quotations & Invoices</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Create Quotation:</strong> Go to <i>Quotations</i> → <i>New Quotation</i>. Select an existing Customer, add items with quantities and unit prices. The system calculates CGST/SGST/IGST and total.</li>
+        <li><span class="badge-step">2</span> <strong>Convert to Invoice:</strong> In the quotations list, click <i>Convert to Invoice</i>. This creates an invoice, moves the quotation status to <code>sent</code>, and <strong>deducts the stock</strong> (since the goods are effectively sold).</li>
+        <li><span class="badge-step">3</span> <strong>View Invoices:</strong> Admins can see all invoices in <i>Invoices</i> (filtered by shop). Customers can see their own invoices in <i>My Invoices</i>.</li>
+        <li><span class="badge-step">4</span> <strong>Update Invoices:</strong> Invoices can be updated (e.g., change status to <code>paid</code>, edit items) as long as they are not locked. The system automatically handles stock adjustments if quantities change.</li>
+        <li><span class="badge-step">5</span> <strong>Invoice Printing:</strong> The invoice page provides a print-friendly view for physical billing.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== KHATABOOK (LEDGER) ===================== -->
+    <div id="khatabook" class="help-card">
+      <h3><i class="fas fa-book"></i> Khatabook (Ledger)</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Parties:</strong> Add parties (vendors or customers) with Name, Phone, Address, and Type (e.g., <i>Supplier</i> or <i>Customer</i>). Each party has a running <strong>Balance</strong>.</li>
+        <li><span class="badge-step">2</span> <strong>Add Transaction:</strong> For a selected party, add a new transaction (Credit or Debit). Enter the Amount, Description, and Date. The balance updates automatically.</li>
+        <li><span class="badge-step">3</span> <strong>View History:</strong> Click on any party to see the last 10 transactions in reverse chronological order. This gives a quick snapshot of outstanding dues.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== STOCK ADJUSTMENTS ===================== -->
+    <div id="stock-mgmt" class="help-card">
+      <h3><i class="fas fa-warehouse"></i> Stock Adjustments</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Manual Adjustment:</strong> Go to <i>Stock Adjustment</i>. Select a Product, enter the Quantity (positive for <strong>increase</strong>, negative for <strong>decrease</strong>), and add a Reason. The system logs the adjustment in the <code>stock_adjustment</code> table and updates the product stock instantly.</li>
+        <li><span class="badge-step">2</span> <strong>Why Use This?</strong> Use for cycle counts, damaged goods write-offs, or correcting data entry errors. All adjustments are auditable with user and timestamp.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== STOCK TRANSFERS ===================== -->
+    <div id="transfer" class="help-card">
+      <h3><i class="fas fa-exchange-alt"></i> Stock Transfers (Between Shops)</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Initiate Transfer:</strong> Go to <i>Stock Transfer</i>. Select <strong>Source Shop</strong> (where stock exists) and <strong>Destination Shop</strong>. Add products with quantities and optional location override.</li>
+        <li><span class="badge-step">2</span> <strong>Validation:</strong> The system checks if the source shop has sufficient stock. If not, the transfer fails for that product.</li>
+        <li><span class="badge-step">3</span> <strong>Automatic Product Creation:</strong> If the destination shop does NOT have this product, the system <strong>creates a new product</strong> in the destination shop, copying all attributes (Name, Price, Bprice, SPID, Category, HSN, Unit, Tax, etc.). The stock is set to the transferred quantity.</li>
+        <li><span class="badge-step">4</span> <strong>Stock Update:</strong> The source shop's stock is decreased, and the destination shop's stock is increased. The transfer is logged in the <code>stock_transfer</code> table for auditing.</li>
+        <li><span class="badge-step">5</span> <strong>Partial Transfers:</strong> You can transfer a portion of the available stock. The remaining stock stays in the source shop.</li>
+      </ul>
+    </div>
+
+    <!-- ===================== REPORTS & SETTINGS ===================== -->
+    <div id="reports" class="help-card">
+      <h3><i class="fas fa-chart-pie"></i> Reports & Settings</h3>
+      <ul class="step-list">
+        <li><span class="badge-step">1</span> <strong>Reports:</strong> The <i>Reports</i> section (accessible from the top nav) provides detailed insights into sales trends, product performance, and transaction logs. Data is filterable by shop and date range.</li>
+        <li><span class="badge-step">2</span> <strong>Settings:</strong> Under <i>Settings</i>, users can update their profile, change passwords, and configure shop-specific preferences (e.g., default tax rates, currency, etc.).</li>
+        <li><span class="badge-step">3</span> <strong>System Logs:</strong> All critical actions (orders, stock changes, adjustments) are logged. Admins can monitor system health and user activities via the logs directory (configured in <code>app.py</code>).</li>
+      </ul>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="mt-5 p-4 bg-white rounded shadow-sm border">
+      <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> This help guide covers all primary workflows. For technical issues, check the application logs or contact your system administrator.</p>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /wrapper -->
+
+<!-- Smooth scrolling for sidebar links -->
+<script>
+  document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      // Remove active class from all links
+      document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Nexus Portal | Shop Link Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* smooth UI feel, no accidental text select on buttons */
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+            font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* animated glassmorphic canvas background effect */
+        .bg-orb {
+            position: fixed;
+            width: 50vmax;
+            height: 50vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.05));
+            filter: blur(70px);
+            animation: floatOrb 18s infinite alternate ease-in-out;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .orb1 {
+            top: -15%;
+            left: -10%;
+            background: radial-gradient(circle, #00ccff33, #ff66cc22);
+            animation-duration: 22s;
+        }
+
+        .orb2 {
+            bottom: -10%;
+            right: -5%;
+            width: 40vmax;
+            height: 40vmax;
+            background: radial-gradient(circle, #ff6ec733, #3b82f622);
+            animation-duration: 19s;
+            animation-delay: -3s;
+        }
+
+        .orb3 {
+            top: 40%;
+            left: 30%;
+            width: 35vmax;
+            height: 35vmax;
+            background: radial-gradient(circle, #f0a3ff22, #00c6ff22);
+            filter: blur(90px);
+            animation-duration: 26s;
+            animation-direction: alternate-reverse;
+        }
+
+        @keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.4;
+            }
+            100% {
+                transform: translate(8%, 12%) scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        /* main card container */
+        .card {
+            position: relative;
+            z-index: 10;
+            max-width: 580px;
+            width: 100%;
+            background: rgba(15, 25, 45, 0.55);
+            backdrop-filter: blur(14px);
+            border-radius: 3rem;
+            border: 1px solid rgba(110, 200, 255, 0.3);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
+            padding: 2rem 1.8rem 2.5rem;
+            transition: all 0.3s ease;
+            animation: cardGlow 4s infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            0% {
+                box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 255, 0.2) inset;
+                border-color: rgba(80, 180, 255, 0.3);
+            }
+            100% {
+                box-shadow: 0 30px 55px rgba(0, 20, 40, 0.6), 0 0 0 2px rgba(0, 230, 250, 0.5) inset;
+                border-color: rgba(0, 210, 255, 0.7);
+            }
+        }
+
+        /* icon & animation zone */
+        .icon-area {
+            text-align: center;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .broken-shop {
+            display: inline-block;
+            font-size: 5.5rem;
+            filter: drop-shadow(0 8px 18px rgba(0,0,0,0.4));
+            animation: iconPulse 2.2s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+            transform-origin: center;
+        }
+
+        @keyframes iconPulse {
+            0% {
+                transform: scale(0.96);
+                text-shadow: 0 0 0px #7ff0ff;
+            }
+            50% {
+                transform: scale(1.08);
+                text-shadow: 0 0 12px #6efff0, 0 0 20px #3a86ff;
+            }
+            100% {
+                transform: scale(0.96);
+                text-shadow: 0 0 0px #7ff0ff;
+            }
+        }
+
+        /* animated floating particles around icon */
+        .glow-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .glow-dots span {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: cyan;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 6px cyan;
+            animation: dotFloat 3s infinite ease-in-out;
+        }
+
+        @keyframes dotFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(10px) scale(0.5);
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-35px) scale(1.2);
+            }
+        }
+
+        /* creative main message */
+        .title-message {
+            text-align: center;
+            margin: 0.5rem 0 0.8rem;
+        }
+
+        .glitch-text {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e0f2fe, #a0e9ff, #c084fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            position: relative;
+            display: inline-block;
+            animation: textFlicker 3s infinite;
+        }
+
+        @keyframes textFlicker {
+            0%, 100% { opacity: 1; text-shadow: 0 0 1px cyan; }
+            92% { opacity: 0.92; text-shadow: 0 0 2px #ff66cc; }
+            96% { opacity: 0.98; }
+        }
+
+        .sub-message {
+            font-size: 1rem;
+            color: #bfd9ff;
+            background: rgba(0, 20, 40, 0.5);
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            font-weight: 500;
+            margin-top: 8px;
+            border: 0.5px solid rgba(255,255,200,0.2);
+        }
+
+        .shop-prompt {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 2rem;
+            padding: 1.3rem 1rem;
+            margin: 1.8rem 0 2rem;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border-left: 3px solid #5ee0fa;
+            border-right: 3px solid #c67eff;
+            transition: all 0.2s;
+        }
+
+        .shop-prompt p {
+            font-size: 1.08rem;
+            line-height: 1.4;
+            color: #eef5ff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .highlight-action {
+            background: linear-gradient(145deg, #2d4d8a, #1e3a6b);
+            padding: 0.2rem 0.9rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #aaf0ff;
+            display: inline-block;
+            box-shadow: 0 0 5px #00ccff66;
+            font-size: 0.9rem;
+            margin: 0 4px;
+            animation: subtleGlow 1.8s infinite alternate;
+        }
+
+        @keyframes subtleGlow {
+            from { box-shadow: 0 0 0px #6bcbff; text-shadow: 0 0 0px; }
+            to { box-shadow: 0 0 10px #4effdc; text-shadow: 0 0 2px white; }
+        }
+
+        /* action buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(20, 30, 55, 0.8);
+            border: 1.5px solid rgba(255, 100, 100, 0.7);
+            padding: 0.9rem 2.8rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: #ffbcbc;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+        }
+
+        .logout-btn:hover {
+            background: rgba(180, 40, 50, 0.85);
+            border-color: #ff7e7e;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 0 16px #ff5e6e80;
+            gap: 16px;
+        }
+
+        .logout-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* animated loader / ripple effect for logout confirmation */
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: #c3ffd6;
+            font-weight: 500;
+            border-left: 4px solid #4effb5;
+            border-right: 4px solid #ff66cc;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.2s cubic-bezier(0.2, 1.2, 0.4, 1);
+            pointer-events: none;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .toast-notify.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* cool decorative line */
+        .divider-custom {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, cyan, magenta, transparent);
+            margin: 0.5rem auto 1.2rem;
+            border-radius: 5px;
+            animation: widthShift 3s infinite alternate;
+        }
+
+        @keyframes widthShift {
+            0% { width: 60px; opacity: 0.5; }
+            100% { width: 140px; opacity: 1; }
+        }
+
+        /* responsive fluidity */
+        @media (max-width: 550px) {
+            .card {
+                padding: 1.5rem 1.2rem 2rem;
+            }
+            .glitch-text {
+                font-size: 1.6rem;
+            }
+            .shop-prompt p {
+                font-size: 0.9rem;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .logout-btn {
+                padding: 0.7rem 2rem;
+                font-size: 1rem;
+            }
+            .broken-shop {
+                font-size: 4.2rem;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .glitch-text {
+                font-size: 1.35rem;
+            }
+            .sub-message {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* additional ripple & micro interactions */
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect:after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #fff 10%, transparent 10%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.6s;
+        }
+
+        .ripple-effect:active:after {
+            transform: scale(0);
+            opacity: 0.4;
+            transition: 0s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<div class="card">
+    <div class="icon-area">
+        <div class="broken-shop" id="animatedIcon">🏪🔗❌</div>
+        <div class="glow-dots" id="particlesContainer"></div>
+    </div>
+
+    <div class="title-message">
+        <div class="glitch-text">✨ No Linked Shops ✨</div>
+        <div class="divider-custom"></div>
+        <div class="sub-message">✨ connection bridge inactive ✨</div>
+    </div>
+
+    <div class="shop-prompt">
+        <p>
+            <span>📦</span> 
+            <span>This account has no shops linked.</span>
+            <span>🔗</span>
+        </p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">
+            ⚡ Please ask a shop owner to <span class="highlight-action">add you to their customer list</span> ⚡
+        </p>
+        <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.8;">
+            ➕ Invite link required | merchant approval pending
+        </p>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/logout" class="logout-btn ripple-effect" id="logoutButton">
+            🚪 Logout
+            <span style="font-size: 1.2rem;">→</span>
+        </a>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast-notify">✨ Session closed. Redirecting... ✨</div>
+
+<script>
+    (function() {
+        // ---------- CREATIVE DYNAMIC ANIMATIONS ----------
+        // 1) Floating particles around the icon (always running)
+        const particlesContainer = document.getElementById('particlesContainer');
+        function generateParticles() {
+            if(!particlesContainer) return;
+            // clear old particles to keep fresh each few seconds? but we can create a set that updates
+            // we want continuous movement, but avoid too many. Instead, we will create a dynamic set of particles 
+            // that regenerate every 3 seconds for fresh twinkles? Let's make a rotating pool: 12 particles with random positions.
+            const existingSpans = particlesContainer.querySelectorAll('span');
+            if(existingSpans.length > 15) {
+                // limit, but we can keep moderate
+                for(let i = 0; i < existingSpans.length - 12; i++) {
+                    if(existingSpans[i]) existingSpans[i].remove();
+                }
+            }
+            // ensure we have between 10 and 15 particles
+            let currentCount = particlesContainer.querySelectorAll('span').length;
+            const targetCount = 12;
+            if(currentCount < targetCount) {
+                for(let i = 0; i < targetCount - currentCount; i++) {
+                    createParticleSpan();
+                }
+            } else if(currentCount > targetCount + 3) {
+                const extra = particlesContainer.querySelectorAll('span');
+                for(let i = targetCount; i < extra.length; i++) {
+                    if(extra[i]) extra[i].remove();
+                }
+            }
+        }
+
+        function createParticleSpan() {
+            const span = document.createElement('span');
+            // random position relative to icon-area
+            const leftPos = 20 + Math.random() * 60; // % within icon area width
+            const topPos = 10 + Math.random() * 70;
+            const duration = 2 + Math.random() * 3;
+            const delay = Math.random() * 2;
+            span.style.left = leftPos + '%';
+            span.style.top = topPos + '%';
+            span.style.animationDuration = duration + 's';
+            span.style.animationDelay = delay + 's';
+            span.style.width = 4 + Math.random() * 6 + 'px';
+            span.style.height = span.style.width;
+            span.style.background = `hsl(${170 + Math.random() * 80}, 100%, 65%)`;
+            span.style.boxShadow = `0 0 8px ${Math.random() > 0.6 ? '#0ff' : '#f0f'}`;
+            particlesContainer.appendChild(span);
+            // auto removal after animation end? we can remove after finishing to keep fresh but we manage regeneration.
+            span.addEventListener('animationend', () => {
+                if(span.parentNode) {
+                    span.remove();
+                    // recreate a new one to keep constant flow
+                    createParticleSpan();
+                }
+            });
+        }
+
+        // initial particles fill
+        for(let i=0; i<12; i++) {
+            createParticleSpan();
+        }
+        // also refresh the generator to keep number stable
+        setInterval(() => {
+            const spans = particlesContainer.querySelectorAll('span');
+            if(spans.length < 8) {
+                for(let i=0; i<3; i++) createParticleSpan();
+            } else if(spans.length > 18) {
+                // remove some oldest? we will not overkill
+                for(let i=0; i<3; i++) {
+                    if(spans[i]) spans[i].remove();
+                }
+            }
+        }, 4000);
+
+        // 2) Dynamic icon transformation: additional playful effect: cycle emojis and transform
+        const iconElement = document.getElementById('animatedIcon');
+        let iconCycleInterval;
+        let iconState = 0;
+        const iconPhases = [
+            "🏪💔🔗", 
+            "🏬🚫📋", 
+            "📭❌🏪", 
+            "🔍🏪✨", 
+            "🏪➕👤"
+        ];
+        function startIconAnimation() {
+            if(iconCycleInterval) clearInterval(iconCycleInterval);
+            iconCycleInterval = setInterval(() => {
+                iconState = (iconState + 1) % iconPhases.length;
+                if(iconElement) {
+                    iconElement.style.transition = "all 0.2s ease";
+                    iconElement.style.transform = "scale(0.97)";
+                    iconElement.textContent = iconPhases[iconState];
+                    setTimeout(() => {
+                        if(iconElement) iconElement.style.transform = "scale(1)";
+                    }, 100);
+                }
+            }, 2800);
+        }
+        startIconAnimation();
+
+        // also add a subtle hover tilt effect on card (optional dynamic)
+        const cardEl = document.querySelector('.card');
+        if(cardEl) {
+            cardEl.addEventListener('mousemove', (e) => {
+                const rect = cardEl.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                cardEl.style.transform = `perspective(800px) rotateX(${y * 3}deg) rotateY(${x * 3}deg)`;
+                cardEl.style.transition = 'transform 0.1s linear';
+            });
+            cardEl.addEventListener('mouseleave', () => {
+                cardEl.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+                cardEl.style.transition = 'transform 0.4s ease';
+            });
+        }
+
+        // 3) LOGOUT functionality: interactive + creative toast animation + redirect simulation
+        const logoutBtn = document.getElementById('logoutButton');
+        const toast = document.getElementById('toastMsg');
+        
+        // also simulate ripple for logout button (CSS ripple-effect already there)
+        function showLogoutAnimation() {
+            // disable button while logging out
+            if(logoutBtn.disabled) return;
+            logoutBtn.disabled = true;
+            logoutBtn.style.opacity = '0.8';
+            logoutBtn.style.cursor = 'wait';
+            // creative micro animation on icon: zoom out & in
+            if(iconElement) {
+                iconElement.style.animation = 'none';
+                iconElement.style.transform = 'scale(0.6)';
+                iconElement.style.opacity = '0.4';
+                setTimeout(() => {
+                    if(iconElement) {
+                        iconElement.style.transition = 'all 0.5s cubic-bezier(0.34, 1.2, 0.64, 1)';
+                        iconElement.style.transform = 'scale(1)';
+                        iconElement.style.opacity = '1';
+                        iconElement.style.animation = 'iconPulse 2.2s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95)';
+                    }
+                }, 380);
+            }
+            // show toast
+            toast.classList.add('show');
+            // change text based on dynamic
+            toast.textContent = '🔓 Logging out... Session terminated. Goodbye! 👋';
+            setTimeout(() => {
+                toast.textContent = '✨ Redirecting to login portal ✨';
+            }, 1200);
+            // After animation fully reset UI, simulate logout (message and demo reset)
+            setTimeout(() => {
+                // dynamic reset: but we simulate fully logged out experience: replace content with "logged out" state?
+                // per requirement, just a creative logout action but the user expects a logout confirmation.
+                // we will show a final state inside card for 1 sec? Actually we keep main message but we show new floating alert.
+                const newToast = document.createElement('div');
+                newToast.className = 'toast-notify';
+                newToast.textContent = '✅ You have been logged out. Page will refresh demo mode?';
+                document.body.appendChild(newToast);
+                newToast.classList.add('show');
+                setTimeout(() => {
+                    newToast.classList.remove('show');
+                    setTimeout(() => newToast.remove(), 500);
+                }, 2000);
+                // reset button state but display final "Logged Out" overlay? Let's modify the main prompt softly:
+                const shopPromptDiv = document.querySelector('.shop-prompt');
+                if(shopPromptDiv) {
+                    shopPromptDiv.style.transition = 'all 0.3s';
+                    shopPromptDiv.style.opacity = '0.6';
+                    const originalHtml = shopPromptDiv.innerHTML;
+                    shopPromptDiv.innerHTML = `<p style="color:#ffdd99;">🔐 Logged out successfully. No active session.</p><p style="font-size:0.8rem;">⟳ Refresh to reconnect demo</p>`;
+                    setTimeout(() => {
+                        // optional: but we keep logout ui, but they can refresh manually, we also add a mini reload hint
+                        logoutBtn.textContent = '🔄 Reload Demo';
+                        logoutBtn.style.background = '#2c3e66';
+                        logoutBtn.style.borderColor = '#ffaa66';
+                        logoutBtn.disabled = false;
+                        logoutBtn.style.cursor = 'pointer';
+                        logoutBtn.style.opacity = '1';
+                        // change logout function to reload instead
+                        const newLogout = logoutBtn.cloneNode(true);
+                        logoutBtn.parentNode.replaceChild(newLogout, logoutBtn);
+                        newLogout.addEventListener('click', () => {
+                            location.reload();
+                        });
+                        newLogout.textContent = '🔄 Refresh / Reconnect';
+                    }, 800);
+                } else {
+                    logoutBtn.disabled = false;
+                    logoutBtn.style.opacity = '1';
+                    logoutBtn.textContent = 'Reload';
+                    logoutBtn.onclick = () => location.reload();
+                }
+                // hide main toast after 2.5 sec
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2800);
+            }, 1800);
+        }
+        
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLogoutAnimation();
+            });
+        }
+
+        // Additional floating highlight on "add you to their customer list" animation infinite
+        const highlightSpan = document.querySelector('.highlight-action');
+        if(highlightSpan) {
+            setInterval(() => {
+                highlightSpan.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    if(highlightSpan) highlightSpan.style.transform = 'scale(1)';
+                }, 400);
+            }, 2300);
+        }
+        
+        // creative background parallax effect on mousemove for orbs?
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            const orb1 = document.querySelector('.orb1');
+            const orb2 = document.querySelector('.orb2');
+            if(orb1) orb1.style.transform = `translate(${x * 12}px, ${y * 8}px)`;
+            if(orb2) orb2.style.transform = `translate(${-x * 10}px, ${-y * 7}px)`;
+        });
+        
+        // tiny console note for fun
+        console.log("✨ Nexus | ShopLink status: waiting for merchant addition ✨");
+        
+        // ensure responsive resize doesn't break particles
+        window.addEventListener('resize', () => {
+            // no heavy action, just keep particles limit
+            const allSpans = particlesContainer.querySelectorAll('span');
+            if(allSpans.length > 18) {
+                for(let i=0; i<5; i++) if(allSpans[i]) allSpans[i].remove();
+            }
+        });
+        
+        // infinite rotating edge animation for divider, glitch continuous
+        setInterval(() => {
+            const glitch = document.querySelector('.glitch-text');
+            if(glitch && Math.random() > 0.85) {
+                glitch.style.transform = 'skew(2deg, 0.5deg)';
+                setTimeout(() => { if(glitch) glitch.style.transform = ''; }, 100);
+            }
+        }, 3500);
+    })();
+</script>
+</body>
+</html>

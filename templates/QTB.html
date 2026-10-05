@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Quotation Entry | eCommerce Billing System</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #3498db;
+            --accent-hover: #2980b9;
+            --border-color: #333333;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --tax-color: #f1c40f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .quotation-details {
+            text-align: right;
+        }
+
+        .quotation-details p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .badge-draft {
+            background: #f59e0b;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .quotation-form {
+            background-color: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .product-selector {
+            background-color: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .product-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: var(--bg-primary);
+            border-radius: 6px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .category-btn {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .product-search {
+            margin-bottom: 15px;
+        }
+
+        .product-search input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 15px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 6px;
+        }
+
+        .product-card {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .product-card.low-stock {
+            border-color: var(--warning-color);
+        }
+
+        .product-card.out-of-stock {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: var(--danger-color);
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .product-price {
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .product-tax, .product-stock {
+            font-size: 0.7rem;
+            margin-top: 6px;
+        }
+
+        .product-stock.normal { color: var(--success-color); }
+        .product-stock.low { color: var(--warning-color); }
+        .product-stock.critical { color: var(--danger-color); }
+
+        .items-table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+            background-color: var(--bg-tertiary);
+        }
+
+        .items-table th {
+            background-color: var(--bg-primary);
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .item-input {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.85rem;
+        }
+
+        .item-input[readonly] {
+            background-color: var(--bg-secondary);
+        }
+
+        .remove-item {
+            background-color: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        .invoice-summary {
+            background-color: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-row.total {
+            border-bottom: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .status-message.success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            display: block;
+        }
+
+        .status-message.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            display: block;
+        }
+        
+        .status-message.info {
+            background-color: rgba(52, 152, 219, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            display: block;
+        }
+
+        .auto-save-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media print {
+            .btn, .product-selector, .category-filter, .remove-item, .auto-save-indicator { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        }
+        
+        .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+        .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .flash-message.success { background: #22c55e; }
+        .flash-message.error { background: #ef4444; }
+        .flash-message.warning { background: #f59e0b; }
+        .flash-message.info { background: #3b82f6; }
+        .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+        
+        .shop-loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div id="flashOverlay" class="flash-overlay"></div>
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <h1><i class="fas fa-file-invoice-dollar"></i> Quotation Builder</h1>
+            <p style="color: var(--text-secondary);">Create & manage quotations</p>
+            <a href="{{ url_for('quotations_list') }}" class="btn btn-secondary" style="margin-top:12px; display:inline-flex; align-items:center; gap:8px;"><i class="fas fa-list"></i> Saved Quotations</a>
+        </div>
+        <div class="quotation-details">
+            <p>Quotation #: <strong id="quotationNumber">DRAFT</strong></p>
+            <p>Date: <span id="quotationDate"></span></p>
+            <p><span class="badge-draft" id="statusBadge">DRAFT</span></p>
+            <div class="auto-save-indicator">
+                <span class="auto-save-dot" style="width:8px;height:8px;background:#2ecc71;border-radius:50%;"></span>
+                <span id="autoSaveStatus">Auto-save ready</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+    <div id="loadingSpinner" class="spinner"></div>
+
+    <div class="quotation-form">
+        <h2 style="margin-bottom: 18px; font-size:1.2rem;"><i class="fas fa-store"></i> Shop & Customer Details</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Select Shop *</label>
+                <select id="shopSelect">
+                    <option value="">Loading shops...</option>
+                </select>
+            </div>
+            <div class="form-group" style="position:relative;">
+                <label>Customer Name *</label>
+                <input type="text" id="customerName" placeholder="Type customer name or phone to search..." autocomplete="off">
+                <div id="customerSuggestions" style="position:absolute; z-index:2000; left:0; right:0; background:var(--bg-primary); border:1px solid var(--border-color); max-height:220px; overflow:auto; display:none; border-radius:6px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Customer Email</label>
+                <input type="email" id="customerEmail" placeholder="customer@example.com" readonly>
+            </div>
+            <div class="form-group">
+                <label>Customer ID</label>
+                <input type="text" id="customerIdDisplay" placeholder="Auto-filled on selection" readonly>
+                <input type="hidden" id="customerIdHidden">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="customerPhone" placeholder="Phone number" readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Billing Address</label>
+            <textarea id="billingAddress" rows="2" placeholder="Customer address" readonly></textarea>
+        </div>
+        <div class="form-group">
+            <label>Payment Terms</label>
+            <input type="text" id="paymentTerms" value="Net 15" placeholder="Payment terms">
+        </div>
+    </div>
+
+    <div class="product-selector">
+        <h2 style="margin-bottom: 12px;"><i class="fas fa-boxes"></i> Products</h2>
+        <div class="product-stats" id="productStats"></div>
+        <div class="category-filter" id="categoryFilter"></div>
+        <div class="product-search">
+            <input type="text" id="productSearchInput" placeholder="🔍 Search products by name...">
+        </div>
+        <div class="product-grid" id="productGrid">
+            <div style="text-align:center; padding:30px;">Select a shop to load products</div>
+        </div>
+    </div>
+
+    <h2 style="margin: 10px 0 12px 0;"><i class="fas fa-list-ul"></i> Quotation Items</h2>
+    <div class="items-table-container">
+        <table class="items-table" id="itemsTable">
+            <thead>
+                <tr><th>Product</th><th>Description</th><th>Qty</th><th>Unit Price (₹)</th><th>Tax %</th><th>Tax Amt (₹)</th><th>Total (₹)</th><th>Action</th></tr>
+            </thead>
+            <tbody id="quotationItemsBody">
+                <tr id="emptyRowMsg"><td colspan="8" style="text-align:center;">No items added. Click a product card above.</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-secondary" onclick="addBlankItem()"><i class="fas fa-plus"></i> Add Manual Item</button>
+
+    <div class="invoice-summary">
+        <div class="summary-row"><span>Subtotal (₹)</span><span id="subtotalVal">0.00</span></div>
+        <div class="summary-row"><span>Total Tax (₹)</span><span id="totalTaxVal">0.00</span></div>
+        <div class="summary-row" id="taxBreakdownRow" style="font-size:0.75rem; color:#f1c40f;"></div>
+        <div class="summary-row total"><span>Grand Total (₹)</span><span id="grandTotalVal">0.00</span></div>
+    </div>
+
+    <div class="button-group">
+        <button class="btn btn-success" onclick="saveQuotation()"><i class="fas fa-save"></i> Save Quotation</button>
+        <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Print Preview</button>
+        <button class="btn btn-secondary" onclick="resetForm()"><i class="fas fa-redo-alt"></i> Reset</button>
+        <button class="btn btn-warning" id="retrySaveBtn" style="display:none;" onclick="retrySaveQuotation()"><i class="fas fa-sync-alt"></i> Retry Failed Save</button>
+        <a id="viewQuotationLink" href="#" class="btn btn-secondary" target="_blank" style="display:none;"><i class="fas fa-eye"></i> View Quotation</a>
+    </div>
+</div>
+
+<script>
+    const API_BASE = '';
+    let productsArray = [];
+    let quotationItems = [];
+    let currentQuotationId = null;
+    let selectedCustomerId = null;
+    let autoSaveTimer = null;
+    let nextItemId = 1;
+    let currentShopId = null;
+
+    function showStatus(msg, type) {
+        const el = document.getElementById('statusMessage');
+        el.textContent = msg;
+        el.className = `status-message ${type}`;
+        setTimeout(() => { if(el) el.style.display = 'none'; }, 4000);
+        el.style.display = 'block';
+    }
+
+    function setLoading(show) {
+        document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+    }
+
+    // Load shops - using the shop select element directly from template
+    function initializeShops() {
+        const shopSelect = document.getElementById('shopSelect');
+        // Check if shops were passed from Flask template
+        const shopsData = {{ shops | tojson | safe }};
+        
+        if(shopsData && shopsData.length > 0) {
+            shopSelect.innerHTML = '<option value="">Select a shop</option>';
+            shopsData.forEach(shop => {
+                const option = document.createElement('option');
+                option.value = shop.shopid;
+                option.textContent = `${shop.name} (ID: ${shop.shopid})`;
+                shopSelect.appendChild(option);
+            });
+        } else {
+            shopSelect.innerHTML = '<option value="">No shops available</option>';
+        }
+    }
+
+    async function selectShop(shopId) {
+        if (!shopId) return false;
+        
+        setLoading(true);
+        const shopSelect = document.getElementById('shopSelect');
+        shopSelect.disabled = true;
+        
+        try {
+            const response = await fetch('/api/select-shop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ shop_id: shopId })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                currentShopId = shopId;
+                showStatus(`✓ ${data.message}`, 'success');
+                clearCustomerSelection();
+                await loadProducts();
+                return true;
+            } else {
+                showStatus(data.message || 'Failed to select shop', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error selecting shop:', error);
+            showStatus('Network error while selecting shop', 'error');
+            return false;
+        } finally {
+            setLoading(false);
+            shopSelect.disabled = false;
+        }
+    }
+
+    function clearCustomerSelection() {
+        selectedCustomerId = null;
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerName').dataset.originalName = '';
+        document.getElementById('customerIdDisplay').value = '';
+        document.getElementById('customerIdHidden').value = '';
+        document.getElementById('customerEmail').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('billingAddress').value = '';
+        document.getElementById('customerSuggestions').style.display = 'none';
+    }
+
+    async function loadProducts() {
+        if (!currentShopId) {
+            document.getElementById('productGrid').innerHTML = '<div style="text-align:center; padding:30px;">Please select a shop first</div>';
+            return;
+        }
+        
+        setLoading(true);
+        try {
+            const resp = await fetch(`${API_BASE}/api/products`, { credentials: 'include' });
+            if(!resp.ok) throw new Error('Product API error');
+            const data = await resp.json();
+            if(data.success && data.products) {
+                productsArray = data.products;
+                const cats = new Set();
+                productsArray.forEach(p => { if(p.category) cats.add(p.category); });
+                renderCategoryFilters(Array.from(cats));
+                renderProductGrid(productsArray);
+                updateProductStats(productsArray);
+            } else {
+                showStatus('Failed to load products', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showStatus('Cannot connect to products API', 'error');
+            productsArray = [];
+            renderProductGrid([]);
+        }
+        setLoading(false);
+    }
+
+    function updateProductStats(products) {
+        const statsDiv = document.getElementById('productStats');
+        if(!products.length) { statsDiv.innerHTML = '<div>No products</div>'; return; }
+        const total = products.length;
+        const lowStock = products.filter(p => p.stock > 0 && p.stock < 5).length;
+        statsDiv.innerHTML = `<div class="stat-item"><span class="stat-label">Total Products:</span><span class="stat-value">${total}</span></div>
+                              <div class="stat-item"><span class="stat-label">Low Stock (<5):</span><span class="stat-value">${lowStock}</span></div>`;
+    }
+
+    function renderCategoryFilters(cats) {
+        const filterDiv = document.getElementById('categoryFilter');
+        filterDiv.innerHTML = `<button class="category-btn active" data-cat="all">All</button>`;
+        cats.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'category-btn';
+            btn.textContent = cat;
+            btn.dataset.cat = cat;
+            btn.onclick = () => filterProductsByCategory(cat);
+            filterDiv.appendChild(btn);
+        });
+        document.querySelector('.category-btn')?.addEventListener('click', () => filterProductsByCategory('all'));
+    }
+
+    function filterProductsByCategory(cat) {
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        if(cat === 'all') {
+            document.querySelector('.category-btn')?.classList.add('active');
+            renderProductGrid(productsArray);
+        } else {
+            const filtered = productsArray.filter(p => p.category === cat);
+            renderProductGrid(filtered);
+            const activeBtn = Array.from(document.querySelectorAll('.category-btn')).find(b => b.textContent === cat);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+    }
+
+    function renderProductGrid(products) {
+        const grid = document.getElementById('productGrid');
+        if(!products.length) { grid.innerHTML = '<div style="padding:20px;">No products available</div>'; return; }
+        grid.innerHTML = '';
+        products.forEach(prod => {
+            const card = document.createElement('div');
+            card.className = `product-card ${prod.stock <= 0 ? 'out-of-stock' : (prod.stock < 5 ? 'low-stock' : '')}`;
+            if(prod.stock > 0) card.onclick = () => addProductToQuotation(prod);
+            else card.style.cursor = 'not-allowed';
+            card.innerHTML = `
+                <div class="product-name"><strong>${escapeHtml(prod.name)}</strong></div>
+                <div class="product-price">₹ ${Number(prod.price).toFixed(2)}</div>
+                <div class="product-tax">Tax: ${prod.tax}%</div>
+                <div class="product-stock ${prod.stock <= 0 ? 'critical' : (prod.stock < 5 ? 'low' : 'normal')}">Stock: ${prod.stock}</div>
+                <div style="font-size:0.7rem;color:#666">${prod.category || 'General'}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function addProductToQuotation(product) {
+        if(product.stock <= 0) { showStatus(`${product.name} out of stock`, 'error'); return; }
+        const existing = quotationItems.find(i => i.productId === product.id);
+        if(existing) {
+            existing.quantity += 1;
+            if(existing.quantity > product.stock) existing.quantity = product.stock;
+            recalcItemTotals(existing);
+        } else {
+            const newItem = {
+                id: nextItemId++,
+                productId: product.id,
+                name: product.name,
+                description: product.name,
+                quantity: 1,
+                unitPrice: product.price,
+                taxRate: product.tax,
+                taxAmount: (product.price * 1 * product.tax / 100),
+                total: product.price * 1 * (1 + product.tax/100)
+            };
+            quotationItems.push(newItem);
+        }
+        renderQuotationTable();
+        calculateTotals();
+        scheduleAutoSave();
+        showStatus(`Added ${product.name}`, 'success');
+    }
+
+    function addBlankItem() {
+        const newItem = {
+            id: nextItemId++,
+            productId: null,
+            name: '',
+            description: '',
+            quantity: 1,
+            unitPrice: 0,
+            taxRate: 0,
+            taxAmount: 0,
+            total: 0
+        };
+        quotationItems.push(newItem);
+        renderQuotationTable();
+        calculateTotals();
+        scheduleAutoSave();
+    }
+
+    function recalcItemTotals(item) {
+        const subtotalItem = item.quantity * item.unitPrice;
+        item.taxAmount = subtotalItem * (item.taxRate / 100);
+        item.total = subtotalItem + item.taxAmount;
+        if(isNaN(item.total)) item.total = 0;
+    }
+
+    function renderQuotationTable() {
+        const tbody = document.getElementById('quotationItemsBody');
+        if(quotationItems.length === 0) {
+            tbody.innerHTML = '<tr id="emptyRowMsg"><td colspan="8" style="text-align:center;">No items added. Click a product card above.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        quotationItems.forEach((it) => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerHTML = `<input type="text" class="item-input" value="${escapeHtml(it.name)}" onchange="updateItemField(${it.id}, 'name', this.value)">`;
+            row.insertCell(1).innerHTML = `<input type="text" class="item-input" value="${escapeHtml(it.description)}" onchange="updateItemField(${it.id}, 'description', this.value)">`;
+            row.insertCell(2).innerHTML = `<input type="number" class="item-input" value="${it.quantity}" min="0.01" step="1" onchange="updateItemField(${it.id}, 'quantity', parseFloat(this.value))">`;
+            row.insertCell(3).innerHTML = `<input type="number" class="item-input" value="${it.unitPrice.toFixed(2)}" step="0.01" onchange="updateItemField(${it.id}, 'unitPrice', parseFloat(this.value))">`;
+            row.insertCell(4).innerHTML = `<input type="number" class="item-input" value="${it.taxRate}" step="0.1" onchange="updateItemField(${it.id}, 'taxRate', parseFloat(this.value))">`;
+            row.insertCell(5).innerHTML = `<span>₹ ${it.taxAmount.toFixed(2)}</span>`;
+            row.insertCell(6).innerHTML = `<strong>₹ ${it.total.toFixed(2)}</strong>`;
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '✖ Remove';
+            delBtn.className = 'remove-item';
+            delBtn.onclick = () => { removeItemById(it.id); };
+            const cellAction = row.insertCell(7);
+            cellAction.appendChild(delBtn);
+        });
+    }
+
+    function updateItemField(id, field, value) {
+        const item = quotationItems.find(i => i.id === id);
+        if(item) {
+            if(field === 'quantity') item.quantity = Math.max(0.01, value);
+            else if(field === 'unitPrice') item.unitPrice = Math.max(0, value);
+            else if(field === 'taxRate') item.taxRate = Math.max(0, value);
+            else if(field === 'name') item.name = value;
+            else if(field === 'description') item.description = value;
+            recalcItemTotals(item);
+            renderQuotationTable();
+            calculateTotals();
+            scheduleAutoSave();
+        }
+    }
+
+    function removeItemById(id) {
+        quotationItems = quotationItems.filter(i => i.id !== id);
+        renderQuotationTable();
+        calculateTotals();
+        scheduleAutoSave();
+    }
+
+    function calculateTotals() {
+        let subtotal = 0, totalTax = 0, cgst = 0, sgst = 0;
+        quotationItems.forEach(it => {
+            const itemSub = it.quantity * it.unitPrice;
+            subtotal += itemSub;
+            totalTax += it.taxAmount;
+            if(it.taxRate > 0) {
+                const half = (it.taxAmount / 2);
+                cgst += half;
+                sgst += half;
+            }
+        });
+        const grand = subtotal + totalTax;
+        document.getElementById('subtotalVal').innerText = subtotal.toFixed(2);
+        document.getElementById('totalTaxVal').innerText = totalTax.toFixed(2);
+        document.getElementById('grandTotalVal').innerText = grand.toFixed(2);
+        const taxBreakDiv = document.getElementById('taxBreakdownRow');
+        taxBreakDiv.innerHTML = `<span>CGST: ₹${cgst.toFixed(2)}</span> | <span>SGST: ₹${sgst.toFixed(2)}</span>`;
+    }
+
+    function buildQuotationPayload() {
+        const customerId = parseInt(document.getElementById('customerIdHidden').value);
+        
+        return {
+            quotation_id: currentQuotationId,
+            shopid: currentShopId,
+            customer: {
+                id: customerId || null,
+                name: document.getElementById('customerName').value,
+                email: document.getElementById('customerEmail').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('billingAddress').value
+            },
+            payment_terms: document.getElementById('paymentTerms').value,
+            items: quotationItems.map(it => ({
+                product_id: it.productId,
+                description: it.description,
+                quantity: it.quantity,
+                unit_price: it.unitPrice,
+                tax_rate: it.taxRate,
+                tax_amount: it.taxAmount,
+                total: it.total
+            })),
+            subtotal: parseFloat(document.getElementById('subtotalVal').innerText),
+            total_tax: parseFloat(document.getElementById('totalTaxVal').innerText),
+            grand_total: parseFloat(document.getElementById('grandTotalVal').innerText),
+            status: 'draft'
+        };
+    }
+
+    async function saveQuotation() {
+        const custName = document.getElementById('customerName').value.trim();
+        if(!custName) { showStatus('Please select a customer', 'error'); return false; }
+        
+        const customerId = parseInt(document.getElementById('customerIdHidden').value);
+        if(!customerId) { showStatus('Please select a customer from the search results', 'error'); return false; }
+        
+        if(!currentShopId) { showStatus('Please select a shop', 'error'); return false; }
+        
+        if(quotationItems.length === 0) { showStatus('Add at least one item', 'error'); return false; }
+        
+        const saveBtn = document.querySelector('.btn-success');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+        
+        try {
+            const payload = buildQuotationPayload();
+            const method = currentQuotationId ? 'PUT' : 'POST';
+            const url = currentQuotationId ? `${API_BASE}/api/quotations/${currentQuotationId}` : `${API_BASE}/api/quotations`;
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok && data.success) {
+                currentQuotationId = data.quotation_id || data.id;
+                showStatus('Quotation saved successfully!', 'success');
+                document.getElementById('quotationNumber').innerText = `Q-${currentQuotationId}`;
+                const viewLink = document.getElementById('viewQuotationLink');
+                if(currentQuotationId) {
+                    viewLink.style.display = 'inline-flex';
+                    viewLink.href = `/quotation/${currentQuotationId}`;
+                }
+                localStorage.removeItem('quotation_backup');
+                document.getElementById('retrySaveBtn').style.display = 'none';
+                return true;
+            } else {
+                showStatus(data.message || 'Save failed', 'error');
+                localStorage.setItem('quotation_backup', JSON.stringify(payload));
+                document.getElementById('retrySaveBtn').style.display = 'inline-flex';
+                return false;
+            }
+        } catch(err) {
+            console.error('Save error:', err);
+            showStatus('Network error. Quotation saved to browser storage.', 'error');
+            localStorage.setItem('quotation_backup', JSON.stringify(buildQuotationPayload()));
+            document.getElementById('retrySaveBtn').style.display = 'inline-flex';
+            return false;
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+
+    function retrySaveQuotation() {
+        saveQuotation();
+    }
+
+    function scheduleAutoSave() { 
+        if(autoSaveTimer) clearTimeout(autoSaveTimer); 
+        autoSaveTimer = setTimeout(() => { saveQuotation(); }, 30000); 
+    }
+
+    function resetForm() {
+        if(confirm('Reset all fields and items?')) {
+            quotationItems = [];
+            currentQuotationId = null;
+            clearCustomerSelection();
+            renderQuotationTable();
+            calculateTotals();
+            showStatus('Form reset', 'success');
+            document.getElementById('retrySaveBtn').style.display = 'none';
+            localStorage.removeItem('quotation_backup');
+            document.getElementById('quotationNumber').innerText = 'DRAFT';
+            document.getElementById('viewQuotationLink').style.display = 'none';
+        }
+    }
+
+    document.getElementById('productSearchInput')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = productsArray.filter(p => p.name.toLowerCase().includes(term));
+        renderProductGrid(filtered);
+    });
+
+    function debounce(fn, wait) {
+        let t;
+        return function(...args) {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), wait);
+        };
+    }
+
+    async function fetchCustomerSuggestions(q) {
+        if(!q || q.length < 2 || !currentShopId) return [];
+        try {
+            const resp = await fetch(`${API_BASE}/api/customers/search?q=${encodeURIComponent(q)}`, { credentials: 'include' });
+            if(!resp.ok) return [];
+            const data = await resp.json();
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Customer search error', e);
+            return [];
+        }
+    }
+
+    const onCustomerInput = debounce(async function(e) {
+        const term = e.target.value.trim();
+        const suggestionsBox = document.getElementById('customerSuggestions');
+        if(!term || term.length < 2 || !currentShopId) { 
+            suggestionsBox.style.display = 'none'; 
+            return; 
+        }
+        const items = await fetchCustomerSuggestions(term);
+        renderCustomerSuggestions(items);
+    }, 300);
+
+    function renderCustomerSuggestions(items) {
+        const box = document.getElementById('customerSuggestions');
+        box.innerHTML = '';
+        if(!items || items.length === 0) { 
+            box.style.display = 'none'; 
+            return; 
+        }
+        items.forEach(c => {
+            const div = document.createElement('div');
+            div.style.padding = '8px 10px';
+            div.style.cursor = 'pointer';
+            div.style.borderBottom = '1px solid var(--border-color)';
+            div.style.color = 'var(--text-primary)';
+            div.innerHTML = `<strong>${escapeHtml(c.customer_name)}</strong> 
+                            <span style="color:var(--text-secondary);font-size:0.85rem; display:block;">
+                            ${c.customer_mobile_number ? '📱 ' + c.customer_mobile_number : ''} 
+                            ${c.email ? '✉️ ' + c.email : ''}
+                            </span>`;
+            div.onclick = () => selectCustomerFromList(c);
+            box.appendChild(div);
+        });
+        box.style.display = 'block';
+    }
+
+    function selectCustomerFromList(c) {
+        selectedCustomerId = c.customer_id;
+        document.getElementById('customerIdDisplay').value = selectedCustomerId;
+        document.getElementById('customerIdHidden').value = selectedCustomerId;
+        document.getElementById('customerName').value = c.customer_name;
+        document.getElementById('customerName').dataset.originalName = c.customer_name;
+        document.getElementById('customerEmail').value = c.email || '';
+        document.getElementById('customerPhone').value = c.customer_mobile_number || '';
+        
+        let address = '';
+        if(c.address1) address += c.address1;
+        if(c.address2) address += (address ? ', ' : '') + c.address2;
+        if(c.city) address += (address ? ', ' : '') + c.city;
+        if(c.pincode) address += ' - ' + c.pincode;
+        document.getElementById('billingAddress').value = address;
+        
+        document.getElementById('customerSuggestions').style.display = 'none';
+        scheduleAutoSave();
+    }
+
+    document.getElementById('customerName')?.addEventListener('input', function(e){
+        const v = e.target.value.trim();
+        const originalName = document.getElementById('customerName').dataset.originalName || '';
+        if(selectedCustomerId && v !== originalName) {
+            selectedCustomerId = null;
+            document.getElementById('customerIdDisplay').value = '';
+            document.getElementById('customerIdHidden').value = '';
+        }
+        onCustomerInput(e);
+    });
+    
+    document.addEventListener('click', function(e){
+        const box = document.getElementById('customerSuggestions');
+        if(!box) return;
+        if(!box.contains(e.target) && e.target.id !== 'customerName') box.style.display = 'none';
+    });
+
+    document.getElementById('shopSelect')?.addEventListener('change', async function(e) {
+        const shopId = parseInt(e.target.value);
+        if(shopId) {
+            await selectShop(shopId);
+        }
+    });
+
+    document.getElementById('quotationDate').innerText = new Date().toLocaleDateString('en-IN');
+
+    // Initialize shops from template data
+    initializeShops();
+    renderQuotationTable();
+    calculateTotals();
+
+    // Check for backup
+    const backup = localStorage.getItem('quotation_backup');
+    if(backup) { 
+        if(confirm('Found unsaved quotation. Restore?')) {
+            localStorage.removeItem('quotation_backup');
+            showStatus('Backup cleared', 'info');
+        }
+    }
+</script>
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+</body>
+</html>

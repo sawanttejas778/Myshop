@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ order.orderid }}</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .invoice-id {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .details-box {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .details-box p {
+            margin: 6px 0;
+        }
+
+        .address-box {
+            background: #111;
+            border: 1px solid #444;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .address-box p {
+            margin: 6px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th {
+            background: #222;
+            padding: 12px;
+            border-bottom: 2px solid #444;
+            text-align: left;
+            color: #fff;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            color: #ddd;
+        }
+
+        tr:hover {
+            background: #111;
+        }
+
+        .total-box {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 20px;
+        }
+
+        .print-btn {
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: #000;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            float: right;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .print-btn:hover {
+            background: #444;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; color: black; }
+            .container {
+                box-shadow: none;
+                background: white;
+                color: black;
+            }
+            th { background: #eee !important; color: black; }
+            td { color: black; }
+        }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+
+    <script>
+        function printInvoice() {
+            window.print();
+        }
+    </script>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="container">
+
+    <h1>INVOICE</h1>
+    <div class="invoice-id">Order #{{ order.orderid }}</div>
+
+    <!-- Order Details -->
+    <div class="details-box">
+        <p><strong>User ID:</strong> {{ order.userid }}</p>
+        <p><strong>Shop ID:</strong> {{ order.shopid }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Date:</strong> {{ order.created_at }}</p>
+    </div>
+
+    <!-- Shipping Address -->
+    {% if shipping %}
+    <div class="address-box">
+        <h3 style="margin-top:0; color:#fff;">Shipping Address</h3>
+        <p><strong>Phone:</strong> {{ shipping.phone }}</p>
+        <p><strong>Street:</strong> {{ shipping.street }}</p>
+        <p><strong>City:</strong> {{ shipping.city }}</p>
+        <p><strong>State:</strong> {{ shipping.state }}</p>
+        <p><strong>ZIP:</strong> {{ shipping.zip_code }}</p>
+        <p><strong>Country:</strong> {{ shipping.country }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Items Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th style="width: 70px;">Qty</th>
+                <th style="width: 120px;">Price</th>
+                <th style="width: 120px;">Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ "%.2f"|format(item.price) }}</td>
+                <td>₹{{ "%.2f"|format(item.quantity * item.price) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Summary -->
+    <div class="total-box">
+        <p><strong>Total Price:</strong> ₹{{ "%.2f"|format(order.total_price) }}</p>
+        <p><strong>Tax:</strong> ₹{{ "%.2f"|format(order.tax_amount) }}</p>
+        <p><strong>Grand Total:</strong> ₹{{ "%.2f"|format(order.total_price + order.tax_amount) }}</p>
+    </div>
+
+    <!-- Print Button -->
+    <button class="print-btn" onclick="printInvoice()">Print Invoice</button>
+
+    <div style="clear: both;"></div>
+
+</div>
+
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>

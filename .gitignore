@@ -1,0 +1,36 @@
+# Environment variables
+.env
+.env.local
+
+# Logs
+logs/
+app.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Database (if using sqlite locally, but they use MySQL, still safe)
+*.db
+*.sqlite3
+
+# Uploads (optional, usually exclude user uploads from git, but if they have default images, they might keep it)
+# static/uploads/
+# But better to exclude everything except a placeholder:
+static/uploads/*
+!static/uploads/placeholder.txt
+
+# Flask session / instance
+instance/

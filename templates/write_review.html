@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review {{ product.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div id="flashOverlay" class="flash-overlay"></div>
+    <!-- Flash Messages -->
+    <div class="flash-container" id="flashContainer">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+              <span>{{ message }}</span>
+              <button class="close-flash">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm text-gray-600">
+            <a href="/" class="hover:text-blue-600">Home</a> ›
+            <a href="/products" class="hover:text-blue-600">Products</a> ›
+            <a href="/product/{{ product.id }}" class="hover:text-blue-600">{{ product.name }}</a> ›
+            <span class="font-medium">Write Review</span>
+        </nav>
+
+        <!-- Product Info -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6 border">
+            <div class="flex items-center gap-4">
+                <!-- Product Image - generates product_7.png for product.id = 7 -->
+                <img src="/static/uploads/product_{{ product.id }}.png" 
+                     alt="{{ product.name }}" 
+                     class="w-20 h-20 object-cover rounded-lg"
+                     onerror="this.onerror=null; this.src='/static/uploads/product_default.png'">
+                <div>
+                    <h1 class="text-2xl font-bold">{{ product.name }}</h1>
+                    <p class="text-gray-600">₹{{ product.price }}</p>
+                    <p class="text-gray-500 text-sm">{{ product.category }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Form / Existing Review -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Statistics -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm p-6 border mb-6">
+                    <h3 class="text-lg font-bold mb-4">Overall Rating</h3>
+                    <div class="text-center mb-4">
+                        <div class="text-4xl font-bold text-gray-900">{{ average_rating }}</div>
+                        <div class="text-gray-600">out of 5</div>
+                        <div class="my-2">
+                            {% for i in range(1, 6) %}
+                            <i class="fas fa-star {% if i <= average_rating_rounded %}text-yellow-400{% else %}text-gray-300{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <div class="text-gray-600">{{ total_reviews }} reviews</div>
+                    </div>
+
+                    <!-- Rating Distribution -->
+                    {% if rating_distribution %}
+                    <div class="space-y-2">
+                        {% for i in range(5, 0, -1) %}
+                        <div class="flex items-center text-sm">
+                            <div class="w-12">{{ i }} star</div>
+                            <div class="flex-1 h-2 bg-gray-200 rounded-full mx-2">
+                                <div class="h-full bg-yellow-400 rounded-full" 
+                                     style="width: {{ rating_distribution[i] if rating_distribution[i] is defined else 0 }}%"></div>
+                            </div>
+                            <div class="w-12 text-right">{{ rating_counts[i] if rating_counts[i] is defined else 0 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Reviews -->
+                {% if reviews and reviews|length > 0 %}
+                <div class="bg-white rounded-lg shadow-sm p-6 border">
+                    <h3 class="text-lg font-bold mb-4">Recent Reviews</h3>
+                    {% for review in reviews %}
+                    <div class="mb-4 pb-4 {% if not loop.last %}border-b border-gray-100{% endif %}">
+                        <div class="flex justify-between mb-1">
+                            <div>
+                                {% for i in range(1, 6) %}
+                                <i class="fas fa-star text-xs {% if i <= review.rating_value %}text-yellow-400{% else %}text-gray-300{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            {% if review.verified_purchase %}
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Verified</span>
+                            {% endif %}
+                        </div>
+                        <p class="font-medium text-sm">{{ review.rating_title|default('No title') }}</p>
+                        <p class="text-gray-600 text-sm mt-1">{{ review.username }}</p>
+                        <p class="text-gray-500 text-xs mt-1">{{ review.created_at }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Review Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm p-6 border">
+                    {% if existing_review %}
+                    <!-- Existing Review Display -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Your Review</h2>
+                            <div class="flex gap-2">
+                                <a href="/edit-review/{{ existing_review.rating_id }}" 
+                                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Edit Review
+                                </a>
+                                <button onclick="deleteReview({{ existing_review.rating_id }})" 
+                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                                    Delete Review
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="mb-2">
+                                {% for i in range(1, 6) %}
+                                <i class="fas fa-star {% if i <= existing_review.rating_value %}text-yellow-400{% else %}text-gray-300{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            {% if existing_review.rating_title %}
+                            <h3 class="text-lg font-semibold">{{ existing_review.rating_title }}</h3>
+                            {% endif %}
+                            {% if existing_review.rating_comment %}
+                            <p class="text-gray-700 mt-2">{{ existing_review.rating_comment }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-sm mt-2">
+                                Reviewed on {{ existing_review.created_at }}
+                                {% if has_purchased %}
+                                <span class="ml-2 text-green-600">✓ Verified Purchase</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- New Review Form -->
+                    <h2 class="text-xl font-bold mb-6">Write Your Review</h2>
+                    <form action="/submit-review/{{ product.id }}" method="POST" onsubmit="return validateForm()">
+                        <!-- Star Rating -->
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-medium mb-2">Your Rating</label>
+                            <div class="flex items-center space-x-1" id="starRating">
+                                {% for i in range(5, 0, -1) %}
+                                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" 
+                                       class="hidden" {% if loop.first %}checked{% endif %}>
+                                <label for="star{{ i }}" class="text-3xl cursor-pointer">
+                                    <i class="far fa-star text-gray-300 hover:text-yellow-400 transition"></i>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-1 text-sm text-gray-600" id="ratingText">Select your rating</div>
+                        </div>
+
+                        <!-- Review Title -->
+                        <div class="mb-6">
+                            <label for="title" class="block text-gray-700 font-medium mb-2">Review Title</label>
+                            <input type="text" id="title" name="title" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                   placeholder="Summarize your experience" maxlength="100">
+                        </div>
+
+                        <!-- Review Comment -->
+                        <div class="mb-6">
+                            <label for="comment" class="block text-gray-700 font-medium mb-2">Your Review</label>
+                            <textarea id="comment" name="comment" rows="6"
+                                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                      placeholder="Share your experience with this product..."></textarea>
+                            <div class="text-right text-sm text-gray-500 mt-1">
+                                <span id="charCount">0</span>/1000 characters
+                            </div>
+                        </div>
+
+                        <!-- Verified Purchase Info -->
+                        {% if has_purchased %}
+                        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                <span class="text-green-700">You purchased this product. Your review will be marked as "Verified Purchase".</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-end gap-4 pt-4">
+                            <a href="/product/{{ product.id }}" 
+                               class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition">
+                                Submit Review
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Star rating interaction
+    const starInputs = document.querySelectorAll('#starRating input');
+    const starLabels = document.querySelectorAll('#starRating label');
+    const ratingText = document.getElementById('ratingText');
+    const commentTextarea = document.getElementById('comment');
+    const charCount = document.getElementById('charCount');
+    
+    const ratingTexts = {
+        5: "Excellent - I love it!",
+        4: "Good - I like it",
+        3: "Average - It's okay",
+        2: "Poor - I don't like it",
+        1: "Terrible - I hate it"
+    };
+    
+    // Star rating click handler
+    starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            ratingText.textContent = ratingTexts[value];
+            
+            // Update star display
+            starLabels.forEach((label, index) => {
+                const starIcon = label.querySelector('i');
+                const starValue = 5 - index;
+                if (starValue <= value) {
+                    starIcon.className = 'fas fa-star text-yellow-400';
+                } else {
+                    starIcon.className = 'far fa-star text-gray-300';
+                }
+            });
+        });
+    });
+    
+    // Character count for comment
+    if (commentTextarea) {
+        commentTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    }
+    
+    // Form validation
+    function validateForm() {
+        const title = document.getElementById('title').value.trim();
+        const comment = document.getElementById('comment').value.trim();
+        
+        if (title.length < 3) {
+            alert('Please enter a title with at least 3 characters');
+            return false;
+        }
+        
+        if (comment.length < 10) {
+            alert('Please write a review with at least 10 characters');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Delete review function
+    async function deleteReview(ratingId) {
+        if (!confirm('Are you sure you want to delete your review?')) return;
+        
+        try {
+            const response = await fetch(`/delete-review/${ratingId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Review deleted successfully');
+                window.location.href = result.redirect;
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error deleting review');
+            console.error(error);
+        }
+    }
+    
+    // Image fallback with multiple extension support
+    document.addEventListener('DOMContentLoaded', function() {
+        const productImg = document.querySelector('.flex.items-center.gap-4 img');
+        
+        if (productImg) {
+            // Enhanced image fallback
+            productImg.addEventListener('error', function() {
+                const currentSrc = this.src;
+                const basePath = currentSrc.split('product_')[0];
+                const productId = currentSrc.match(/product_(\d+)\./)[1];
+                
+                const extensions = ['.jpg', '.jpeg', '.webp', '.gif', '.png'];
+                let extensionIndex = 0;
+                
+                function tryNextExtension() {
+                    if (extensionIndex < extensions.length) {
+                        const newSrc = `${basePath}product_${productId}${extensions[extensionIndex]}`;
+                        extensionIndex++;
+                        
+                        // Create test image
+                        const testImg = new Image();
+                        testImg.onload = () => {
+                            this.src = newSrc; // Use found image
+                        };
+                        testImg.onerror = tryNextExtension; // Try next extension
+                        testImg.src = newSrc;
+                    } else {
+                        // All extensions failed, use default
+                        this.src = '/static/uploads/product_default.png';
+                    }
+                }
+                
+                // Start trying extensions
+                tryNextExtension();
+            });
+        }
+        
+        // Initialize star rating display
+        if (starInputs.length > 0) {
+            const checkedInput = document.querySelector('#starRating input:checked');
+            if (checkedInput) {
+                checkedInput.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+    </script>
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html> 

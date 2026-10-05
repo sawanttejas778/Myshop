@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>eCommerce Quotation | A4 Invoice Template</title>
+    <!-- Google Fonts for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            padding: 30px 20px;
+        }
+
+        /* A4 size container (standard print dimensions) */
+        .quotation-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        /* Actual A4 content area with proper padding for print */
+        .quotation-inner {
+            background: white;
+            padding: 2rem 2rem 2rem 2rem;
+            /* 210mm width equivalent ≈ 793px, but flexible */
+        }
+
+        /* Header section with shop details */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #1e3a8a;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .shop-info h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+        }
+        .shop-info .shop-address {
+            color: #334155;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-top: 5px;
+            max-width: 320px;
+        }
+        .quotation-title {
+            text-align: right;
+        }
+        .quotation-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            letter-spacing: 1px;
+        }
+        .quotation-title .ref {
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* customer & payment terms row */
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+        }
+        .bill-to h3, .payment-terms h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .customer-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+        .customer-detail {
+            font-size: 0.85rem;
+            color: #334155;
+            margin-top: 4px;
+        }
+        .payment-terms p {
+            font-weight: 600;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            display: inline-block;
+            border: 1px solid #cbd5e1;
+        }
+        .status-badge {
+            margin-top: 8px;
+        }
+        .badge-status {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 40px;
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        /* items table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0 1.2rem 0;
+            font-size: 0.85rem;
+        }
+        .items-table th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 12px 8px;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .items-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+            color: #0f172a;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        /* totals section */
+        .totals-card {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+        .totals-box {
+            width: 320px;
+            background: #fefefe;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9rem;
+        }
+        .total-row.grand {
+            font-weight: 800;
+            font-size: 1.2rem;
+            border-top: 2px dashed #cbd5e1;
+            margin-top: 6px;
+            padding-top: 12px;
+            color: #0f3b5f;
+        }
+        .tax-break {
+            font-size: 0.75rem;
+            color: #475569;
+            margin-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 6px;
+        }
+
+        /* footer */
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.3rem;
+            margin-top: 0.8rem;
+        }
+
+        /* print optimization: A4 exact */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .quotation-wrapper {
+                max-width: 100%;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .quotation-inner {
+                padding: 0.6in 0.5in;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .badge-status {
+                border: 1px solid #ccc;
+                background: #f3f4f6;
+                print-color-adjust: exact;
+            }
+        }
+
+        button {
+            background: #1e3a8a;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 20px;
+            margin-left: 20px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .demo-info {
+            background: #fef9e6;
+            margin: 10px 20px 0 20px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+        /* Flash Messages */
+        .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+        .flash-overlay.active { opacity: 1; visibility: visible; }
+        .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+        .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .flash-message.success { background: #22c55e; }
+        .flash-message.error { background: #ef4444; }
+        .flash-message.warning { background: #f59e0b; }
+        .flash-message.info { background: #3b82f6; }
+        .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+    </style>
+</head>
+<body>
+<div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="quotation-wrapper" id="quotationApp">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 0 20px;" class="no-print">
+        <div class="demo-info">
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+            <button id="printBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+        </div>
+    </div>
+    <div class="quotation-inner" id="quotationContent">
+        <!-- Header: shop & title -->
+        <div class="header-section">
+            <div class="shop-info">
+                <h2 id="shopName">[Shop Name]</h2>
+                <div class="shop-address" id="shopAddress">
+                    [Shop Address Line]<br>
+                    [City, State - Pin code] | GST: XX-XXXXX
+                </div>
+                <div id="shopExtra" style="font-size:0.75rem; margin-top:6px;"></div>
+            </div>
+            <div class="quotation-title">
+                <h1>QUOTATION</h1>
+                <div class="ref">
+                    <span id="quotationRef">#Q-0000</span>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 6px;" id="quotationDate"></div>
+            </div>
+        </div>
+
+        <!-- Customer & Payment Terms row -->
+        <div class="details-row">
+            <div class="bill-to">
+                <h3><i class="far fa-user"></i> BILL TO</h3>
+                <div class="customer-name" id="customerName">Customer Name</div>
+                <div class="customer-detail" id="customerDetails">Email / Phone / Address</div>
+                <div class="status-badge" id="statusBadge"></div>
+            </div>
+            <div class="payment-terms">
+                <h3><i class="far fa-credit-card"></i> PAYMENT TERMS</h3>
+                <p id="paymentTermsText">Net 15</p>
+                <div style="font-size:0.7rem; margin-top:8px;" id="createdInfo"></div>
+            </div>
+        </div>
+
+        <!-- Quotation Items Table -->
+        <table class="items-table" id="itemsTable">
+            <thead>
+                <tr>
+                    <th>#</th><th>Product</th><th>Quantity</th><th>Unit Price (₹)</th><th>Tax Rate</th><th>Tax Amt (₹)</th><th>Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <tr><td colspan="7" class="text-center">Loading items...</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Totals Section -->
+        <div class="totals-card">
+            <div class="totals-box">
+                <div class="total-row"><span>Subtotal</span><span id="subtotalVal">0.00</span></div>
+                <div class="total-row"><span>Total Tax</span><span id="totalTaxVal">0.00</span></div>
+                <div class="tax-break" id="taxBreakdown">
+                    <!-- CGST, SGST, IGST details dynamically -->
+                </div>
+                <div class="total-row grand"><span>GRAND TOTAL</span><span id="grandTotalVal">0.00</span></div>
+            </div>
+        </div>
+
+        <!-- Footer note -->
+        <div class="footer-note">
+            <span id="footerText">Thank you for your business! This is a system generated quotation.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // This script renders quotation data injected from the Flask backend.
+    // In production, Flask passes the prepared objects via Jinja2.
+    // The structure matches your DB schema: Quotations + quotation_items + shop + customer
+    // --------------------------------------------------------------
+
+    // Flask passes the template variables: quotation, shop, customer, items
+    
+    // ----- DATA INJECTED FROM FLASK BACKEND -----
+    const quotationData = {{ quotation | tojson | safe }};
+    const shopDetails = {{ shop | tojson | safe }};
+    const customerDetails = {{ customer | tojson | safe }};
+    const quotationItems = {{ items | tojson | safe }};
+
+    function renderQuotation() {
+        const quotation = quotationData || {};
+        const shop = shopDetails || {};
+        const customer = customerDetails || {};
+        const items = Array.isArray(quotationItems) ? quotationItems : [];
+
+        document.getElementById('shopName').textContent = shop.shop_name || shop.name || 'Shop Name';
+        document.getElementById('shopAddress').innerHTML = [shop.shop_address, shop.city, shop.state, shop.pincode]
+            .filter(Boolean).join('<br>');
+        const extra = [];
+        if (shop.shop_phone) extra.push(`Phone: ${shop.shop_phone}`);
+        if (shop.shop_gst) extra.push(`GST: ${shop.shop_gst}`);
+        document.getElementById('shopExtra').textContent = extra.join(' | ');
+
+        document.getElementById('quotationRef').textContent = quotation.QID ? `#Q-${quotation.QID}` : '#Q-0000';
+        document.getElementById('quotationDate').textContent = quotation.created_at ? new Date(quotation.created_at).toLocaleDateString('en-IN') : '';
+
+        document.getElementById('customerName').textContent = customer.name || 'Customer Name';
+        const customerInfo = [customer.email, customer.phone, customer.billing_address].filter(Boolean).join(' | ');
+        document.getElementById('customerDetails').textContent = customerInfo || 'Email / Phone / Address';
+        document.getElementById('statusBadge').innerHTML = quotation.status ? `<span class="badge-status">${quotation.status.toUpperCase()}</span>` : '';
+        document.getElementById('paymentTermsText').textContent = quotation.payment_terms || 'Net 15';
+        document.getElementById('createdInfo').textContent = quotation.created_at ? `Created at ${new Date(quotation.created_at).toLocaleString('en-IN')}` : '';
+
+        const tbody = document.getElementById('itemsBody');
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No quotation items available.</td></tr>';
+        } else {
+            tbody.innerHTML = items.map((item, index) => {
+                const product = item.product_name || item.description || item.name || 'Item';
+                return `<tr>
+                    <td>${index + 1}</td>
+                    <td>${product}</td>
+                    <td>${item.quantity || 0}</td>
+                    <td>₹ ${parseFloat(item.unit_price || 0).toFixed(2)}</td>
+                    <td>${parseFloat(item.tax_rate || 0).toFixed(2)}%</td>
+                    <td>₹ ${parseFloat(item.tax_amount || 0).toFixed(2)}</td>
+                    <td>₹ ${parseFloat(item.total || 0).toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        document.getElementById('subtotalVal').textContent = parseFloat(quotation.subtotal || 0).toFixed(2);
+        document.getElementById('totalTaxVal').textContent = parseFloat(quotation.total_tax || 0).toFixed(2);
+        document.getElementById('grandTotalVal').textContent = parseFloat(quotation.grand_total || 0).toFixed(2);
+        document.getElementById('taxBreakdown').textContent = `CGST: ₹${parseFloat(quotation.cgst || 0).toFixed(2)} | SGST: ₹${parseFloat(quotation.sgst || 0).toFixed(2)} | IGST: ₹${parseFloat(quotation.igst || 0).toFixed(2)}`;
+        document.getElementById('footerText').textContent = `Quotation generated for ${customer.name || 'your customer'}.`;
+    }
+
+    if (!quotationData || !shopDetails || !customerDetails) {
+        const itemsBody = document.getElementById('itemsBody');
+        if (itemsBody) {
+            itemsBody.innerHTML = '<tr><td colspan="7" class="text-center">Quotation data is unavailable.</td></tr>';
+        }
+    }
+
+// Print handler
+    const printBtn = document.getElementById('printBtn');
+    if(printBtn) {
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+    
+    // optional: ensure that on page load we also check for any URL hash or simulated dynamic?
+    // Provide a way to update if needed by query param (for demo, ignore)
+    
+    // Render on window load
+    window.addEventListener('DOMContentLoaded', () => {
+        renderQuotation();
+        // For a true dynamic scenario, you could also fetch data from API endpoint.
+        // but given assignment, the static simulation perfectly matches database schema.
+        console.log("Quotation template ready - A4 size & Flask compatible");
+    });
+    
+    // EXTRA: show how to integrate with backend - we simulate that if ?qid= exists via fetch call.
+    // But not needed for demo completeness, just to illustrate dynamic back-end integration.
+    // This is just an additional advanced pattern comment:
+    /*
+        async function loadQuotationFromAPI(qid) {
+            const res = await fetch(`/api/quotation/${qid}`);
+            const data = await res.json();
+            // assign quotationData, shopDetails, customerDetails, quotationItems from data...
+            renderQuotation();
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('qid')) loadQuotationFromAPI(urlParams.get('qid'));
+    */
+</script>
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+</body>
+</html>

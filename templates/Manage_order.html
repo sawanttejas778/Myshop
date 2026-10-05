@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Management</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0aff9d;
+            font-size: 24px;
+            padding: 0 10px;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+            background: #111;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #222;
+            text-align: left;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        
+        th {
+            background: #0aff9d;
+            color: #000;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        tr:hover {
+            background: #1a1a1a;
+        }
+        
+        .status-cell {
+            min-width: 140px;
+        }
+        
+        .actions-cell {
+            min-width: 150px;
+        }
+        
+        .pill {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+            display: inline-block;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        /* Status pill colors */
+        .pill.pending { background: #555; color: #fff; }
+        .pill.confirmed { background: #007bff; color: #fff; }
+        .pill.shipped { background: #ff9800; color: #000; }
+        .pill.delivered { background: #4caf50; color: #fff; }
+        .pill.cancelled { background: #e53935; color: #fff; }
+        .pill.return_requested { background: #ff5722; color: #fff; }
+        .pill.request_accepted { background: #9c27b0; color: #fff; }
+        .pill.returned { background: #2196f3; color: #fff; }
+        
+        select.status-select {
+            background: #222;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            font-size: 14px;
+            width: 100%;
+            max-width: 180px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        select.status-select:focus {
+            outline: none;
+            border-color: #0aff9d;
+            box-shadow: 0 0 0 2px rgba(10, 255, 157, 0.2);
+        }
+        
+        select.status-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            background: #0aff9d;
+            color: #000;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            font-size: 14px;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .view-btn:hover {
+            background: #00cc7a;
+            transform: translateY(-1px);
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            display: none;
+            font-weight: bold;
+        }
+        
+        .message.success {
+            background: #4caf50;
+            color: white;
+            display: block;
+        }
+        
+        .message.error {
+            background: #e53935;
+            color: white;
+            display: block;
+        }
+        
+        .return-info {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255, 87, 34, 0.1);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .return-info .label {
+            color: #ff5722;
+            font-weight: bold;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            
+            .table-container {
+                margin: 0 -15px;
+                width: calc(100% + 30px);
+                border-radius: 0;
+            }
+            
+            table {
+                min-width: 700px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .pill {
+                font-size: 11px;
+                padding: 5px 10px;
+                min-width: 100px;
+            }
+            
+            select.status-select {
+                padding: 7px 10px;
+                font-size: 13px;
+                max-width: 150px;
+            }
+            
+            .view-btn {
+                padding: 7px 14px;
+                font-size: 13px;
+                min-width: 90px;
+            }
+        }
+    
+  /* Flash overlay */
+  .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
+  .flash-overlay.active { opacity: 1; visibility: visible; }
+  .flash-container { position: fixed; top: 18px; right: 18px; z-index: 1600; display: flex; flex-direction: column; gap: 10px; max-width: calc(100% - 36px); }
+  .flash-message { min-width: 240px; max-width: 380px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity: 1; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .flash-message.success { background: #22c55e; }
+  .flash-message.error { background: #ef4444; }
+  .flash-message.warning { background: #f59e0b; }
+  .flash-message.info { background: #3b82f6; }
+  .flash-message.fade-out { opacity: 0; transform: translateY(-10px); }
+
+</style>
+</head>
+<body>
+  <div id="flashOverlay" class="flash-overlay"></div>
+<!-- Flash Messages -->
+<div class="flash-container" id="flashContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"></i>
+          <span>{{ message }}</span>
+          <button class="close-flash">&times;</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<h1>Orders Management</h1>
+
+<div id="message" class="message"></div>
+
+<div class="table-container">
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Total</th>
+                <th class="status-cell">Status</th>
+                <th class="actions-cell">Change Status</th>
+                <th class="actions-cell">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr id="order-{{ o.orderid }}" data-order-id="{{ o.orderid }}" data-current-status="{{ o.status }}">
+                <td>{{ o.orderid }}</td>
+                <td>{{ o.userid }}</td>
+                <td>₹{{ o.total_price }}</td>
+
+                <td class="status-cell">
+                    <span class="pill {{ o.status }}">{{ o.status.replace('_', ' ') }}</span>
+                    
+                    {% if o.status in ['return_requested', 'request_accepted', 'returned'] %}
+                    <div class="return-info">
+                        <span class="label">Return Status:</span>
+                        {{ o.status.replace('_', ' ').title() }}
+                        {% if o.return_request_date %}
+                            <br><small>Requested: {{ o.return_request_date }}</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+
+                <td class="actions-cell">
+                    <!-- Complete status dropdown including all return statuses -->
+                    <select class="status-select" data-order-id="{{ o.orderid }}" 
+                            {% if o.status in ['cancelled', 'returned'] %}disabled{% endif %}>
+                        <option value="pending" {% if o.status=='pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if o.status=='confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="shipped" {% if o.status=='shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="delivered" {% if o.status=='delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if o.status=='cancelled' %}selected{% endif %}>Cancelled</option>
+                        
+                        <!-- Return-related statuses -->
+                        <option value="return_requested" {% if o.status=='return_requested' %}selected{% endif %}>Return Requested</option>
+                        <option value="request_accepted" {% if o.status=='request_accepted' %}selected{% endif %}>Return Accepted</option>
+                        <option value="returned" {% if o.status=='returned' %}selected{% endif %}>Returned</option>
+                    </select>
+                </td>
+
+                <td class="actions-cell">
+                    <!-- Only invoice button remains -->
+                    <a class="view-btn" href="/invoice?order_id={{ o.orderid }}" target="_blank">View Invoice</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Show message function
+function showMessage(text, type = 'success') {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    messageEl.style.display = 'block';
+    
+    setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 3000);
+}
+
+// Validate status transitions to prevent invalid changes
+function isValidStatusTransition(currentStatus, newStatus) {
+    const validTransitions = {
+        'pending': ['confirmed', 'cancelled'],
+        'confirmed': ['shipped', 'cancelled'],
+        'shipped': ['delivered', 'cancelled'],
+        'delivered': ['return_requested', 'cancelled'],
+        'return_requested': ['request_accepted', 'cancelled'],
+        'request_accepted': ['returned', 'cancelled'],
+        'cancelled': [],
+        'returned': []
+    };
+    
+    return validTransitions[currentStatus]?.includes(newStatus) || false;
+}
+
+// Update order status via AJAX
+async function updateStatus(id, status) {
+    const row = document.querySelector(`#order-${id}`);
+    const dropdown = row.querySelector(".status-select");
+    const pill = row.querySelector(".pill");
+    const currentStatus = row.dataset.currentStatus;
+    
+    // Validate the transition
+    if (!isValidStatusTransition(currentStatus, status)) {
+        showMessage(`Cannot change status from ${currentStatus} to ${status}`, 'error');
+        dropdown.value = currentStatus;
+        return;
+    }
+    
+    // Show loading state
+    const originalText = dropdown.value;
+    dropdown.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/update-order-status`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                order_id: id, 
+                status: status 
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to update status');
+        }
+        
+        // Update UI
+        pill.textContent = status.replace('_', ' ');
+        pill.className = `pill ${status}`;
+        row.dataset.currentStatus = status;
+        dropdown.value = status;
+        
+        // Disable dropdown for final statuses
+        if (status === 'cancelled' || status === 'returned') {
+            dropdown.disabled = true;
+        }
+        
+        showMessage('Status updated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error updating status:', error);
+        dropdown.value = originalText;
+        showMessage('Failed to update status: ' + error.message, 'error');
+    } finally {
+        if (status !== 'cancelled' && status !== 'returned') {
+            dropdown.disabled = false;
+        }
+    }
+}
+
+// When dropdown changes
+document.addEventListener("change", function(e) {
+    if (e.target.matches('.status-select')) {
+        const id = e.target.dataset.orderId;
+        const status = e.target.value;
+        updateStatus(id, status);
+    }
+});
+
+// Disable dropdowns for final statuses on page load
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#ordersTable tr[data-order-id]").forEach(row => {
+        const status = row.dataset.currentStatus;
+        if (status === 'cancelled' || status === 'returned') {
+            const dropdown = row.querySelector(".status-select");
+            if (dropdown) dropdown.disabled = true;
+        }
+    });
+});
+
+// Prevent form submission if page is inside a form
+document.addEventListener("submit", function(e) {
+    if (e.target.matches('form')) {
+        e.preventDefault();
+    }
+});
+</script>
+
+
+<script>
+(function(){
+  function setupFlashOverlay(){
+    var overlay=document.getElementById('flashOverlay');
+    if(!overlay){ overlay=document.createElement('div'); overlay.id='flashOverlay'; overlay.className='flash-overlay'; document.body.appendChild(overlay); }
+    var container=document.getElementById('flashContainer');
+    if(!container) return;
+    var messages=Array.from(container.querySelectorAll('.flash-message'));
+    function refreshOverlay(){ if(!overlay) return; overlay.classList.toggle('active', container.querySelectorAll('.flash-message').length>0); }
+    function dismiss(msg){ if(!msg || msg.classList.contains('fade-out')) return; msg.classList.add('fade-out'); setTimeout(function(){ if(msg.parentNode) msg.parentNode.removeChild(msg); refreshOverlay(); }, 300); }
+    messages.forEach(function(msg){ setTimeout(function(){ dismiss(msg); }, 2000); var close=msg.querySelector('.close-flash'); if(close){ close.addEventListener('click', function(){ dismiss(msg); }); } });
+    refreshOverlay();
+    container.addEventListener('click', function(ev){ if(ev.target.matches('.close-flash')){ var msg=ev.target.closest('.flash-message'); if(msg) dismiss(msg); } });
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', setupFlashOverlay); } else { setupFlashOverlay(); }
+})();
+</script>
+
+</body>
+</html>
