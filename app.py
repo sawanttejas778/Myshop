@@ -1,10 +1,12 @@
-from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify,abort
+from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify,abort,g
 import bcrypt, os, re, random, string
 from datetime import datetime,timedelta
 import json
 from werkzeug.utils import secure_filename
 import logging
 import traceback
+import time
+import uuid
 from functools import wraps
 #from flask_cors import CORS
 import smtplib,secrets
@@ -12,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import mysql.connector
 from sqlconnection import get_db
+from logging_config import configure_logging, log_access
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,17 +28,10 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # create the folder if not exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- Logging / Debug helpers ---
+# --- Logging ---
 LOG_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
-log_file = os.path.join(LOG_DIR, 'app.log')
-handler = logging.FileHandler(log_file)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-handler.setFormatter(formatter)
-root_logger = logging.getLogger()
-if not any(isinstance(h, logging.FileHandler) for h in root_logger.handlers):
-    root_logger.addHandler(handler)
-root_logger.setLevel(logging.DEBUG)
+configure_logging(LOG_DIR)
 app.logger.setLevel(logging.DEBUG)
 
 
@@ -2744,23 +2740,12 @@ def submit_order():
 
             tax_amount = round(tax_amount, 2)
             total_amount = round(subtotal + tax_amount, 2)
-            # DEBUG: log the exact payload we're about to insert into DB
-            try:
-                order_debug = {
-                    'userid': userid,
-                    'shopid': shop_id,
-                    'cart_used': cart_used,
-                    'items_count': len(items),
-                    'items': items,
-                    'subtotal': subtotal,
-                    'tax_amount': tax_amount,
-                    'total_amount': total_amount,
-                    'form_phone': form.get('phone'),
-                    'form_street': form.get('street') or form.get('address')
-                }
-                app.logger.debug('ORDER_INSERT DEBUG: ' + json.dumps(order_debug, default=str))
-            except Exception:
-                app.logger.exception('Failed to serialize order_debug')
+            app.logger.debug(
+                "Preparing order insert for user %s in shop %s with %s items",
+                userid,
+                shop_id,
+                len(items),
+            )
 
             # Use the connection default transaction behavior (avoid start_transaction() error)
             # Insert tax_amount and status to align with the live `orders` schema
@@ -2874,19 +2859,23 @@ def settings():
 
 @app.before_request
 def log_request_info():
-    try:
-        app.logger.debug(f"REQ {request.method} {request.path} from {request.remote_addr}")
-        if request.method in ('POST', 'PUT', 'PATCH'):
-            # avoid logging raw passwords, but log JSON body keys for debugging
-            try:
-                body = request.get_json(silent=True)
-                if body:
-                    safe_body = {k: ('<omitted>' if 'password' in k.lower() else v) for k, v in body.items()}
-                    app.logger.debug(f"Request JSON: {safe_body}")
-            except Exception:
-                pass
-    except Exception:
-        pass
+    g.request_start_time = time.perf_counter()
+    g.request_id = uuid.uuid4().hex
+    g.log_actor = {
+        "user_id": session.get("user", "anonymous"),
+        "full_name": session.get("full_name"),
+        "role": session.get("role", "anonymous"),
+        "shop_id": session.get("selected_shop_id"),
+        "request_id": g.request_id,
+    }
+
+
+@app.after_request
+def log_request_access(response):
+    start_time = getattr(g, "request_start_time", time.perf_counter())
+    log_access(response, (time.perf_counter() - start_time) * 1000)
+    response.headers["X-Request-ID"] = getattr(g, "request_id", "")
+    return response
 
 
 @app.errorhandler(Exception)
@@ -3832,8 +3821,11 @@ def convert_quotation_to_invoice(qid):
             return redirect(url_for('quotation_view', qid=qid))
 
         invoice_payload, item_payloads = _build_invoice_payload(quotation, items)
-        app.logger.debug('convert_quotation_to_invoice invoice_payload: %s', invoice_payload)
-        app.logger.debug('convert_quotation_to_invoice item_payloads: %s', item_payloads)
+        app.logger.debug(
+            "Converting quotation %s into an invoice with %s items",
+            qid,
+            len(item_payloads),
+        )
 
         cursor.execute(
             "INSERT INTO Invoices (invoice_number , customer_name, customer_email, customer_phone, customer_address, due_date, shop_id, subtotal, total_tax, cgst, sgst, igst, grand_total, status, created_by, updated_by, created_at, updated_at,QID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)",
@@ -4406,7 +4398,7 @@ def shop_customers_count(shopid):
 def create_customer():
     app.logger.debug("REQ POST /api/customers")
     data = request.json
-    app.logger.debug(f"Request data: {data}")
+    app.logger.debug("Customer create request fields: %s", sorted(data.keys()))
 
     # Validate required fields
     required_fields = ['customer_name', 'customer_mobile_number', 'address1',
@@ -4476,7 +4468,7 @@ def create_customer():
                 session.get('user_id', 1)
             )
 
-            app.logger.debug(f"Executing insert query with values: {values}")
+            app.logger.debug("Inserting customer record for shop %s", shop_id)
             cur.execute(query, values)
             conn.commit()
             customer_id = cur.lastrowid
@@ -5042,7 +5034,7 @@ def api_create_supplier():
         return jsonify({"success": False, "error": "Shop not selected"}), 400
 
     data = request.get_json()
-    app.logger.debug(f"Creating supplier with data: {data}")
+    app.logger.debug("Creating supplier with fields: %s", sorted(data.keys()))
 
     # Get current user from session
     current_user = session.get('username', 'admin')  # Adjust based on your auth system

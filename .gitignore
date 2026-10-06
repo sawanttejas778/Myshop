@@ -4,7 +4,6 @@
 
 # Logs
 logs/
-app.log
 
 # Python
 __pycache__/
