@@ -638,11 +638,23 @@
                         });
                     }
                 }
-                if(document.getElementById('customerName')) document.getElementById('customerName').innerText = inv.customer_name;
-                if(document.getElementById('customerDetails')) document.getElementById('customerDetails').innerHTML = `${inv.customer_email || ''}<br>${inv.customer_phone || ''}<br>${inv.customer_address || ''}`;
+                const customer = inv.customer || {};
+                const customerName = document.getElementById('customerName');
+                if (customerName) customerName.textContent = customer.name || 'Customer';
+                const customerDetails = document.getElementById('customerDetails');
+                if (customerDetails) {
+                    customerDetails.replaceChildren();
+                    [customer.email, customer.phone, customer.address].filter(Boolean).forEach((detail, index) => {
+                        if (index > 0) customerDetails.appendChild(document.createElement('br'));
+                        customerDetails.appendChild(document.createTextNode(detail));
+                    });
+                }
                 const dueP = document.querySelector('.invoice-meta p');
                 if(dueP && inv.due_date) dueP.innerHTML = `<i class="fas fa-hourglass-half"></i> Due: ${inv.due_date}`;
-                document.getElementById('footerText').innerHTML = `Thank you for your business! This invoice is system generated. Created by: user #${inv.created_by}`;
+                if (inv.created_by != null) {
+                    document.getElementById('footerText').textContent =
+                        `Thank you for your business! This invoice is system generated. Created by: user #${inv.created_by}`;
+                }
             }
         } catch(e) { console.warn("API fetch not critical, static data remains"); }
     }

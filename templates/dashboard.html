@@ -1731,6 +1731,12 @@ body {
         <i class="fas fa-home"></i>
         <span>Home</span>
       </a>
+      {% if session.get('role') != 'user' %}
+      <a href="{{ url_for('accounts') }}" class="action-item">
+        <i class="fas fa-calculator"></i>
+        <span>Accounts</span>
+      </a>
+      {% endif %}
       <a href="#" class="action-item" id="wishlistBtn">
         <i class="fas fa-heart"></i>
         <span>Wishlist</span>

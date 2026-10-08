@@ -19,6 +19,8 @@
         .status.sent { background:#3498db; }
         .status.paid { background:#2ecc71; }
         .status.cancelled { background:#e74c3c; }
+        .cancel-invoice-btn { background:#b42332; }
+        .cancel-invoice-btn:hover { background:#8f1d29; }
     
   /* Flash overlay */
   .flash-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1500; }
@@ -63,6 +65,7 @@
                 <th>Status</th>
                 <th>Edit</th>
                 <th>View</th>
+                <th>Cancel</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -78,15 +81,57 @@
                 tbody.innerHTML = '';
                 data.invoices.forEach(inv => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${inv.invoice_number || inv.invoice_id}</td>
-                        <td>${inv.customer_name}</td>
-                        <td>${inv.due_date}</td>
-                        <td>${parseFloat(inv.grand_total).toFixed(2)}</td>
-                        <td><span class="status ${inv.status}">${inv.status}</span></td>
-                        <td><a class="btn" href="/billing?invoice_id=${inv.invoice_id}">Edit</a></td>
-                        <td><a class="btn" href="/billing_view?invoice_id=${inv.invoice_id}">View Invoice</a></td>
-                    `;
+                    const invoiceId = String(inv.invoice_id);
+                    const invoiceNumber = inv.invoice_number || invoiceId;
+                    const cells = [
+                        invoiceNumber,
+                        inv.customer_name || '',
+                        inv.due_date || '',
+                        Number(inv.grand_total || 0).toFixed(2)
+                    ];
+                    cells.forEach(value => {
+                        const cell = document.createElement('td');
+                        cell.textContent = value;
+                        tr.appendChild(cell);
+                    });
+
+                    const statusCell = document.createElement('td');
+                    const statusBadge = document.createElement('span');
+                    statusBadge.className = `status ${inv.status || ''}`;
+                    statusBadge.textContent = inv.status || '';
+                    statusCell.appendChild(statusBadge);
+                    tr.appendChild(statusCell);
+
+                    const editCell = document.createElement('td');
+                    const editLink = document.createElement('a');
+                    editLink.className = 'btn';
+                    editLink.href = `/billing?invoice_id=${encodeURIComponent(invoiceId)}`;
+                    editLink.textContent = 'Edit';
+                    editCell.appendChild(editLink);
+                    tr.appendChild(editCell);
+
+                    const viewCell = document.createElement('td');
+                    const viewLink = document.createElement('a');
+                    viewLink.className = 'btn';
+                    viewLink.href = `/billing_view?invoice_id=${encodeURIComponent(invoiceId)}`;
+                    viewLink.textContent = 'View Invoice';
+                    viewCell.appendChild(viewLink);
+                    tr.appendChild(viewCell);
+
+                    const cancelCell = document.createElement('td');
+                    if (inv.status !== 'cancelled') {
+                        const cancelButton = document.createElement('button');
+                        cancelButton.className = 'btn cancel-invoice-btn';
+                        cancelButton.type = 'button';
+                        cancelButton.dataset.invoiceId = invoiceId;
+                        cancelButton.dataset.invoiceNumber = invoiceNumber;
+                        cancelButton.textContent = 'Cancel invoice';
+                        cancelButton.addEventListener('click', () => cancelInvoice(cancelButton));
+                        cancelCell.appendChild(cancelButton);
+                    } else {
+                        cancelCell.textContent = '—';
+                    }
+                    tr.appendChild(cancelCell);
                     tbody.appendChild(tr);
                 });
             } else {
@@ -95,6 +140,30 @@
         } catch (e) {
             console.error(e);
             document.getElementById('statusMessage').textContent = 'Error fetching invoices';
+        }
+    }
+
+    async function cancelInvoice(button) {
+        const invoiceId = button.dataset.invoiceId;
+        const invoiceNumber = button.dataset.invoiceNumber;
+        if (!window.confirm(`Cancel invoice ${invoiceNumber}? This will mark it cancelled.`)) return;
+
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}/cancel`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Invoice cancellation failed.');
+            }
+            document.getElementById('statusMessage').textContent = result.message;
+            await loadInvoices();
+        } catch (error) {
+            document.getElementById('statusMessage').textContent = error.message || 'Unable to cancel invoice.';
+            button.disabled = false;
         }
     }
 

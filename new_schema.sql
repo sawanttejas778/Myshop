@@ -566,3 +566,15 @@ create table supplier(
     updated_by varchar(255) not null,
     foreign key (shop_id) references Shops(shopid) on delete cascade
 );
+
+create table ledger(
+    ledger_id INT AUTO_INCREMENT PRIMARY KEY,
+    partyid VARCHAR(255) NOT NULL,
+    partytype ENUM('supplier','customer') NOT NULL,
+    transactiontype ENUM('credit','debit') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_id VARCHAR(255) NOT NULL UNIQUE,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

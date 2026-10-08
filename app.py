@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,flash,url_for,redirect,session,jsonify,abort,g
+from flask import Flask, Response, render_template,request,flash,url_for,redirect,session,jsonify,abort,g
 import bcrypt, os, re, random, string
 from datetime import datetime,timedelta
 import json
@@ -7,6 +7,9 @@ import logging
 import traceback
 import time
 import uuid
+import csv
+import io
+from decimal import Decimal, InvalidOperation
 from functools import wraps
 #from flask_cors import CORS
 import smtplib,secrets
@@ -14,6 +17,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import mysql.connector
 from sqlconnection import get_db
+from Financial_reporting import ledger as insert_ledger_entry
 from logging_config import configure_logging, log_access
 from dotenv import load_dotenv
 load_dotenv()
@@ -2846,6 +2850,11 @@ def submit_order():
 def inventory():
     return render_template('inventory.html', user=session.get("user"))
 
+@app.route("/accounts")
+@admin_required
+def accounts():
+    return render_template("accounts.html", user=session.get("user"))
+
 @app.route("/reports")
 @login_required
 def reports():
@@ -4226,6 +4235,43 @@ def update_invoice(invoice_id):
         if conn:
             conn.close()
 
+@app.route('/api/invoices/<int:invoice_id>/cancel', methods=['POST'])
+@admin_required
+def cancel_invoice(invoice_id):
+    shop_id = session.get("selected_shop_id")
+    if not shop_id:
+        return jsonify({"success": False, "message": "Please select a shop first."}), 400
+
+    conn = None
+    try:
+        conn, cur = get_db()
+        cur.execute(
+            "SELECT status FROM Invoices WHERE invoice_id = %s AND shop_id = %s FOR UPDATE",
+            (invoice_id, shop_id),
+        )
+        invoice = cur.fetchone()
+        if not invoice:
+            return jsonify({"success": False, "message": "Invoice not found."}), 404
+        if invoice["status"] == "cancelled":
+            return jsonify({"success": False, "message": "This invoice is already cancelled."}), 409
+
+        cur.execute(
+            """UPDATE Invoices
+               SET status = 'cancelled', updated_at = %s
+               WHERE invoice_id = %s AND shop_id = %s""",
+            (datetime.now(), invoice_id, shop_id),
+        )
+        conn.commit()
+        return jsonify({"success": True, "message": "Invoice cancelled successfully."}), 200
+    except mysql.connector.Error:
+        if conn:
+            conn.rollback()
+        app.logger.exception("Database error while cancelling invoice %s", invoice_id)
+        return jsonify({"success": False, "message": "Unable to cancel invoice right now."}), 500
+    finally:
+        if conn:
+            conn.close()
+
 @app.route('/api/invoices', methods=['GET'])
 @login_required
 def list_invoices():
@@ -4639,6 +4685,362 @@ def khatabook():
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for('dashboard'))
 
+@app.route("/ledger/entry", methods=["GET", "POST"])
+@admin_required
+def ledger_entry():
+    shop_id = session.get("selected_shop_id")
+    if not shop_id:
+        flash("Please select a shop first.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    conn = None
+    try:
+        if request.method == "POST":
+            conn, cur = get_db()
+            party_type = request.form.get("partytype", "").strip().lower()
+            party_id = request.form.get("partyid", "").strip()
+            transaction_type = request.form.get("transactiontype", "").strip().lower()
+            amount_text = request.form.get("amount", "").strip()
+            transaction_id = request.form.get("transaction_id", "").strip()
+            transaction_date = request.form.get("transaction_date", "").strip()
+
+            try:
+                amount = Decimal(amount_text)
+            except InvalidOperation:
+                amount = Decimal("0")
+
+            try:
+                datetime.strptime(transaction_date, "%Y-%m-%d")
+                valid_date = True
+            except ValueError:
+                valid_date = False
+
+            if (
+                party_type not in ("customer", "supplier")
+                or not party_id.isdigit()
+                or transaction_type not in ("credit", "debit")
+                or not amount.is_finite()
+                or amount <= 0
+                or not transaction_id
+                or not valid_date
+            ):
+                flash("Enter a valid party, transaction type, positive amount, reference ID, and date.", "error")
+            else:
+                if party_type == "customer":
+                    cur.execute(
+                        """SELECT c.customer_id
+                           FROM customer c
+                           JOIN user_customer uc ON uc.customer_id = c.customer_id
+                           WHERE c.customer_id = %s AND uc.shopid = %s
+                           LIMIT 1""",
+                        (party_id, shop_id),
+                    )
+                else:
+                    cur.execute(
+                        "SELECT supplier_id FROM supplier WHERE supplier_id = %s AND shop_id = %s LIMIT 1",
+                        (party_id, shop_id),
+                    )
+
+                if not cur.fetchone():
+                    flash("That party was not found for the selected shop.", "error")
+                else:
+                    try:
+                        insert_ledger_entry(
+                            cur,
+                            party_id,
+                            party_type,
+                            amount,
+                            transaction_type,
+                            transaction_id,
+                            transaction_date,
+                        )
+                        conn.commit()
+                        flash("Ledger entry added successfully.", "success")
+                        return redirect(url_for("ledger_entry"))
+                    except mysql.connector.Error as err:
+                        conn.rollback()
+                        flash(f"Could not save ledger entry: {err}", "error")
+
+        date_from = request.args.get("date_from", "").strip()
+        date_to = request.args.get("date_to", "").strip()
+        party_filter = request.args.get("party", "").strip()
+        filter_transaction_type = request.args.get("transactiontype", "").strip().lower()
+        reference_search = request.args.get("reference", "").strip()
+        filters_valid = True
+
+        for date_value in (date_from, date_to):
+            if date_value:
+                try:
+                    datetime.strptime(date_value, "%Y-%m-%d")
+                except ValueError:
+                    filters_valid = False
+                    break
+        if date_from and date_to and date_from > date_to:
+            filters_valid = False
+        if filter_transaction_type and filter_transaction_type not in ("credit", "debit"):
+            filters_valid = False
+        if party_filter:
+            selected_party_type, separator, selected_party_id = party_filter.partition(":")
+            if (
+                not separator
+                or selected_party_type not in ("customer", "supplier")
+                or not selected_party_id.isdigit()
+            ):
+                filters_valid = False
+        if not filters_valid:
+            flash("One or more ledger filters are invalid. Please check the date range and selections.", "error")
+            date_from = ""
+            date_to = ""
+            party_filter = ""
+            filter_transaction_type = ""
+            reference_search = ""
+
+        if not conn:
+            conn, cur = get_db()
+
+        ledger_query = """
+            SELECT l.ledger_id, l.partyid, l.partytype, l.transactiontype,
+                   l.amount, l.transaction_id, l.transaction_date,
+                   p.party_name, p.party_phone
+            FROM ledger l
+            JOIN (
+                SELECT CAST(c.customer_id AS CHAR) AS party_id,
+                       'customer' AS partytype,
+                       c.customer_name AS party_name,
+                       c.customer_mobile_number AS party_phone
+                FROM customer c
+                JOIN user_customer uc ON uc.customer_id = c.customer_id
+                WHERE uc.shopid = %s
+                GROUP BY c.customer_id, c.customer_name, c.customer_mobile_number
+                UNION ALL
+                SELECT CAST(s.supplier_id AS CHAR) AS party_id,
+                       'supplier' AS partytype,
+                       s.name AS party_name,
+                       s.phone AS party_phone
+                FROM supplier s
+                WHERE s.shop_id = %s
+            ) p ON p.party_id = l.partyid AND p.partytype = l.partytype
+            WHERE 1 = 1
+        """
+        query_params = [shop_id, shop_id]
+        if date_from:
+            ledger_query += " AND l.transaction_date >= %s"
+            query_params.append(date_from)
+        if date_to:
+            ledger_query += " AND l.transaction_date < DATE_ADD(%s, INTERVAL 1 DAY)"
+            query_params.append(date_to)
+        if party_filter:
+            ledger_query += " AND l.partytype = %s AND l.partyid = %s"
+            query_params.extend((selected_party_type, selected_party_id))
+        if filter_transaction_type:
+            ledger_query += " AND l.transactiontype = %s"
+            query_params.append(filter_transaction_type)
+        if reference_search:
+            ledger_query += " AND l.transaction_id LIKE %s"
+            query_params.append(f"%{reference_search}%")
+        ledger_query += " ORDER BY l.transaction_date DESC, l.ledger_id DESC LIMIT 200"
+        cur.execute(ledger_query, tuple(query_params))
+        ledger_entries = cur.fetchall()
+
+        return render_template(
+            "ledger_entry.html",
+            ledger_entries=ledger_entries,
+            ledger_filters={
+                "date_from": date_from,
+                "date_to": date_to,
+                "party": party_filter,
+                "transactiontype": filter_transaction_type,
+                "reference": reference_search,
+            },
+        )
+    except mysql.connector.Error as err:
+        if conn:
+            conn.rollback()
+        app.logger.exception("Database error while loading or saving a ledger entry")
+        flash(f"Database error: {err}", "error")
+        return redirect(url_for("admin_dashboard"))
+    finally:
+        if conn:
+            conn.close()
+
+
+@app.route("/ledger/entry/export/<file_format>", methods=["GET"])
+@admin_required
+def export_ledger_entries(file_format):
+    if file_format not in ("csv", "pdf"):
+        abort(404)
+
+    shop_id = session.get("selected_shop_id")
+    if not shop_id:
+        abort(400, description="Please select a shop first.")
+
+    date_from = request.args.get("date_from", "").strip()
+    date_to = request.args.get("date_to", "").strip()
+    party_filter = request.args.get("party", "").strip()
+    transaction_type = request.args.get("transactiontype", "").strip().lower()
+    reference_search = request.args.get("reference", "").strip()
+
+    try:
+        for date_value in (date_from, date_to):
+            if date_value:
+                datetime.strptime(date_value, "%Y-%m-%d")
+    except ValueError:
+        abort(400, description="Invalid date filter.")
+    if date_from and date_to and date_from > date_to:
+        abort(400, description="The start date must be on or before the end date.")
+    if transaction_type and transaction_type not in ("credit", "debit"):
+        abort(400, description="Invalid transaction type filter.")
+
+    selected_party_type = selected_party_id = ""
+    if party_filter:
+        selected_party_type, separator, selected_party_id = party_filter.partition(":")
+        if (
+            not separator
+            or selected_party_type not in ("customer", "supplier")
+            or not selected_party_id.isdigit()
+        ):
+            abort(400, description="Invalid party filter.")
+
+    conn = None
+    try:
+        conn, cur = get_db()
+        query = """
+            SELECT l.ledger_id, l.partyid, l.partytype, l.transactiontype,
+                   l.amount, l.transaction_id, l.transaction_date,
+                   p.party_name, p.party_phone
+            FROM ledger l
+            JOIN (
+                SELECT CAST(c.customer_id AS CHAR) AS party_id,
+                       'customer' AS partytype,
+                       c.customer_name AS party_name,
+                       c.customer_mobile_number AS party_phone
+                FROM customer c
+                JOIN user_customer uc ON uc.customer_id = c.customer_id
+                WHERE uc.shopid = %s
+                GROUP BY c.customer_id, c.customer_name, c.customer_mobile_number
+                UNION ALL
+                SELECT CAST(s.supplier_id AS CHAR) AS party_id,
+                       'supplier' AS partytype,
+                       s.name AS party_name,
+                       s.phone AS party_phone
+                FROM supplier s
+                WHERE s.shop_id = %s
+            ) p ON p.party_id = l.partyid AND p.partytype = l.partytype
+            WHERE 1 = 1
+        """
+        params = [shop_id, shop_id]
+        if date_from:
+            query += " AND l.transaction_date >= %s"
+            params.append(date_from)
+        if date_to:
+            query += " AND l.transaction_date < DATE_ADD(%s, INTERVAL 1 DAY)"
+            params.append(date_to)
+        if party_filter:
+            query += " AND l.partytype = %s AND l.partyid = %s"
+            params.extend((selected_party_type, selected_party_id))
+        if transaction_type:
+            query += " AND l.transactiontype = %s"
+            params.append(transaction_type)
+        if reference_search:
+            query += " AND l.transaction_id LIKE %s"
+            params.append(f"%{reference_search}%")
+        query += " ORDER BY l.transaction_date DESC, l.ledger_id DESC LIMIT 200"
+        cur.execute(query, tuple(params))
+        entries = cur.fetchall()
+
+        headers = (
+            "Date", "Party", "Party ID", "Party Type",
+            "Transaction Type", "Amount", "Reference ID",
+        )
+        if file_format == "csv":
+            output = io.StringIO(newline="")
+            writer = csv.writer(output)
+            writer.writerow(headers)
+
+            def safe_csv_text(value):
+                text = str(value or "")
+                if text.startswith(("=", "+", "-", "@", "\t", "\r")):
+                    return "'" + text
+                return text
+
+            for entry in entries:
+                writer.writerow((
+                    entry["transaction_date"],
+                    safe_csv_text(entry["party_name"]),
+                    safe_csv_text(entry["partyid"]),
+                    safe_csv_text(entry["partytype"]),
+                    safe_csv_text(entry["transactiontype"]),
+                    entry["amount"],
+                    safe_csv_text(entry["transaction_id"]),
+                ))
+            return Response(
+                output.getvalue(),
+                mimetype="text/csv",
+                headers={"Content-Disposition": 'attachment; filename="ledger_entries.csv"'},
+            )
+
+        from html import escape
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import landscape, letter
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.units import inch
+        from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, TableStyle
+
+        pdf_output = io.BytesIO()
+        document = SimpleDocTemplate(
+            pdf_output,
+            pagesize=landscape(letter),
+            rightMargin=0.4 * inch,
+            leftMargin=0.4 * inch,
+            topMargin=0.5 * inch,
+            bottomMargin=0.5 * inch,
+            title="Ledger entries",
+        )
+        styles = getSampleStyleSheet()
+        table_data = [[Paragraph(f"<b>{escape(header)}</b>", styles["BodyText"]) for header in headers]]
+        for entry in entries:
+            table_data.append([
+                Paragraph(escape(str(entry["transaction_date"])), styles["BodyText"]),
+                Paragraph(escape(str(entry["party_name"])), styles["BodyText"]),
+                Paragraph(escape(str(entry["partyid"])), styles["BodyText"]),
+                Paragraph(escape(str(entry["partytype"])), styles["BodyText"]),
+                Paragraph(escape(str(entry["transactiontype"])), styles["BodyText"]),
+                Paragraph(escape(f'{entry["amount"]}'), styles["BodyText"]),
+                Paragraph(escape(str(entry["transaction_id"])), styles["BodyText"]),
+            ])
+        table = LongTable(
+            table_data,
+            repeatRows=1,
+            colWidths=[1.2 * inch, 2.0 * inch, 0.8 * inch, 0.9 * inch, 1.2 * inch, 0.9 * inch, 2.0 * inch],
+        )
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1d3557")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#cbd5e1")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ]))
+        document.build([
+            Paragraph("Ledger entries", styles["Title"]),
+            Paragraph(f"Exported {len(entries)} entries · latest 200 matching records", styles["Normal"]),
+            table,
+        ])
+        pdf_output.seek(0)
+        return Response(
+            pdf_output.getvalue(),
+            mimetype="application/pdf",
+            headers={"Content-Disposition": 'attachment; filename="ledger_entries.pdf"'},
+        )
+    except mysql.connector.Error:
+        app.logger.exception("Database error while exporting ledger entries")
+        abort(500, description="Unable to export ledger entries.")
+    finally:
+        if conn:
+            conn.close()
 
 
 @app.route("/api/khatabook/parties", methods=["GET"])
@@ -5172,31 +5574,41 @@ def api_search_suppliers():
     try:
         conn, cur = get_db()
 
-        # Search across multiple fields
-        cur.execute("""
-            SELECT supplier_id, name, email, phone, Pincode, state, city,
-                   country, address, GSTN, Bank_IFSC, Bank_Account_Number,
-                   Bank_Name, Payment_Terms, created_at
-            FROM supplier
-            WHERE shop_id = %s
-            AND (
-                name LIKE %s OR
-                email LIKE %s OR
-                phone LIKE %s OR
-                GSTN LIKE %s OR
-                city LIKE %s OR
-                state LIKE %s
-            )
-            ORDER BY name
-        """, (
-            shop_id,
-            f'%{search_term}%',
-            f'%{search_term}%',
-            f'%{search_term}%',
-            f'%{search_term}%',
-            f'%{search_term}%',
-            f'%{search_term}%'
-        ))
+        if search_term.isdigit():
+            cur.execute("""
+                SELECT supplier_id, name, email, phone, Pincode, state, city,
+                       country, address, GSTN, Bank_IFSC, Bank_Account_Number,
+                       Bank_Name, Payment_Terms, created_at
+                FROM supplier
+                WHERE shop_id = %s AND supplier_id = %s
+                ORDER BY name
+            """, (shop_id, int(search_term)))
+        else:
+            # Search across multiple fields
+            cur.execute("""
+                SELECT supplier_id, name, email, phone, Pincode, state, city,
+                       country, address, GSTN, Bank_IFSC, Bank_Account_Number,
+                       Bank_Name, Payment_Terms, created_at
+                FROM supplier
+                WHERE shop_id = %s
+                AND (
+                    name LIKE %s OR
+                    email LIKE %s OR
+                    phone LIKE %s OR
+                    GSTN LIKE %s OR
+                    city LIKE %s OR
+                    state LIKE %s
+                )
+                ORDER BY name
+            """, (
+                shop_id,
+                f'%{search_term}%',
+                f'%{search_term}%',
+                f'%{search_term}%',
+                f'%{search_term}%',
+                f'%{search_term}%',
+                f'%{search_term}%'
+            ))
 
         suppliers = cur.fetchall()
 

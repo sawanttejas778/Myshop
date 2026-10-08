@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accounts & Finance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --page: #080b12;
+            --panel: rgba(18, 22, 32, .94);
+            --border: rgba(83, 110, 150, .38);
+            --muted: #9aaac4;
+            --blue: #3b82f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(16px, 4vw, 48px);
+            color: #e7edf8;
+            background: radial-gradient(ellipse at top left, #14223a 0, var(--page) 55%);
+            font-family: Inter, "Segoe UI", system-ui, sans-serif;
+        }
+        .page { width: min(100%, 1180px); margin: 0 auto; }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .eyebrow {
+            color: #8eace0;
+            font-size: .76rem;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+        h1 { margin: 5px 0 8px; font-size: clamp(1.8rem, 5vw, 2.7rem); }
+        .subtitle { color: var(--muted); }
+        .home-link { color: #a9c7ff; text-decoration: none; }
+        .home-link:hover { color: #fff; }
+        .section-title {
+            margin: 28px 0 14px;
+            color: #c4d5f3;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+            gap: 16px;
+        }
+        .module-card {
+            display: flex;
+            min-height: 160px;
+            flex-direction: column;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel);
+            color: inherit;
+            text-decoration: none;
+            box-shadow: 0 16px 38px rgba(0, 0, 0, .24);
+            transition: border-color .2s ease, transform .2s ease, background .2s ease;
+        }
+        a.module-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(59, 130, 246, .75);
+            background: rgba(24, 34, 52, .98);
+            color: #fff;
+        }
+        .module-icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            margin-bottom: 15px;
+            place-items: center;
+            border: 1px solid rgba(96, 165, 250, .28);
+            border-radius: 13px;
+            background: rgba(59, 130, 246, .14);
+            color: #8dbbff;
+            font-size: 1.05rem;
+        }
+        .module-card h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; }
+        .module-card p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.5; }
+        .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 16px;
+            color: #9fc2ff;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+        .module-card.disabled {
+            min-height: 160px;
+            border-style: dashed;
+            background: rgba(18, 22, 32, .58);
+        }
+        .module-card.disabled .module-icon { color: #8997ad; border-color: #344056; background: #1c2534; }
+        .status {
+            padding: 4px 9px;
+            border: 1px solid rgba(148, 163, 184, .25);
+            border-radius: 999px;
+            color: #aeb9ca;
+            font-size: .69rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .note {
+            margin-top: 26px;
+            padding: 14px 16px;
+            border: 1px solid rgba(245, 158, 11, .28);
+            border-radius: 12px;
+            background: rgba(120, 75, 10, .13);
+            color: #d7c39a;
+            font-size: .88rem;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">Finance workspace</div>
+                <h1>Accounts &amp; Finance</h1>
+                <div class="subtitle">Open your accounting, sales, and financial management tools.</div>
+            </div>
+            <a class="home-link" href="{{ url_for('dashboard') }}"><i class="fas fa-arrow-left me-2"></i>Back to dashboard</a>
+        </header>
+
+        <h2 class="section-title">Accounting</h2>
+        <section class="module-grid" aria-label="Accounting tools">
+            <a class="module-card" href="{{ url_for('ledger_entry') }}">
+                <span class="module-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                <h3>Ledger entries</h3>
+                <p>Add entries and review transaction history with filters and exports.</p>
+                <span class="card-action">Open ledger <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('khatabook') }}">
+                <span class="module-icon"><i class="fas fa-book-open"></i></span>
+                <h3>Khatabook</h3>
+                <p>View customer and supplier balances and record account transactions.</p>
+                <span class="card-action">Open Khatabook <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <div class="module-card disabled" aria-disabled="true">
+                <span class="module-icon"><i class="fas fa-scale-balanced"></i></span>
+                <h3>Balance sheet</h3>
+                <p>Financial statement setup is not available in the application yet.</p>
+                <span class="card-action"><span class="status">Not configured</span></span>
+            </div>
+        </section>
+
+        <h2 class="section-title">Sales &amp; purchases</h2>
+        <section class="module-grid" aria-label="Sales and purchase tools">
+            <a class="module-card" href="{{ url_for('invoices') }}">
+                <span class="module-icon"><i class="fas fa-file-invoice"></i></span>
+                <h3>Sales invoices</h3>
+                <p>Review and manage invoices recorded for your shop.</p>
+                <span class="card-action">Open invoices <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('billing') }}">
+                <span class="module-icon"><i class="fas fa-cash-register"></i></span>
+                <h3>Create invoice</h3>
+                <p>Create a new customer invoice and record a sale.</p>
+                <span class="card-action">Open billing <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('manage_orders') }}">
+                <span class="module-icon"><i class="fas fa-rotate-left"></i></span>
+                <h3>Sales returns</h3>
+                <p>Review shop order return requests and update their return status.</p>
+                <span class="card-action">Manage returns <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('invoices') }}">
+                <span class="module-icon"><i class="fas fa-ban"></i></span>
+                <h3>Cancel invoice</h3>
+                <p>Find an invoice and cancel it from the invoice list.</p>
+                <span class="card-action">Manage invoices <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('suppliers') }}">
+                <span class="module-icon"><i class="fas fa-truck-field"></i></span>
+                <h3>Supplier accounts</h3>
+                <p>Manage supplier records, payment details, and purchase costs.</p>
+                <span class="card-action">Manage suppliers <i class="fas fa-arrow-right"></i></span>
+            </a>
+            <a class="module-card" href="{{ url_for('customer') }}">
+                <span class="module-icon"><i class="fas fa-users"></i></span>
+                <h3>Customer accounts</h3>
+                <p>Manage customer records and their billing information.</p>
+                <span class="card-action">Manage customers <i class="fas fa-arrow-right"></i></span>
+            </a>
+        </section>
+
+        <h2 class="section-title">Financial reports &amp; setup</h2>
+        <section class="module-grid" aria-label="Financial reports and setup">
+            <div class="module-card disabled" aria-disabled="true">
+                <span class="module-icon"><i class="fas fa-receipt"></i></span>
+                <h3>GST reports</h3>
+                <p>GST return and tax summary pages are not implemented yet.</p>
+                <span class="card-action"><span class="status">Not configured</span></span>
+            </div>
+            <div class="module-card disabled" aria-disabled="true">
+                <span class="module-icon"><i class="fas fa-tags"></i></span>
+                <h3>Cost entry</h3>
+                <p>A dedicated operating-cost and expense entry page is not available yet.</p>
+                <span class="card-action"><span class="status">Not configured</span></span>
+            </div>
+            <div class="module-card disabled" aria-disabled="true">
+                <span class="module-icon"><i class="fas fa-chart-line"></i></span>
+                <h3>Profit analysis</h3>
+                <p>Profit and loss reporting is not available until financial reporting is configured.</p>
+                <span class="card-action"><span class="status">Not configured</span></span>
+            </div>
+        </section>
+
+        <div class="note" role="note">
+            <i class="fas fa-circle-info me-2"></i>
+            The active links open existing application pages. GST reports, balance sheet, cost entry, and profit analysis are shown for visibility but do not have working destinations yet.
+        </div>
+    </main>
+</body>
+</html>
