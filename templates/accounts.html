@@ -212,12 +212,12 @@
                 <p>GST return and tax summary pages are not implemented yet.</p>
                 <span class="card-action"><span class="status">Not configured</span></span>
             </div>
-            <div class="module-card disabled" aria-disabled="true">
+            <a class="module-card" href="{{ url_for('cost_centers') }}">
                 <span class="module-icon"><i class="fas fa-tags"></i></span>
-                <h3>Cost entry</h3>
-                <p>A dedicated operating-cost and expense entry page is not available yet.</p>
-                <span class="card-action"><span class="status">Not configured</span></span>
-            </div>
+                <h3>Cost centres</h3>
+                <p>Create cost centres, record dated expenses, and view cost reports by centre and date.</p>
+                <span class="card-action">Manage costs <i class="fas fa-arrow-right"></i></span>
+            </a>
             <div class="module-card disabled" aria-disabled="true">
                 <span class="module-icon"><i class="fas fa-chart-line"></i></span>
                 <h3>Profit analysis</h3>
@@ -228,7 +228,7 @@
 
         <div class="note" role="note">
             <i class="fas fa-circle-info me-2"></i>
-            The active links open existing application pages. GST reports, balance sheet, cost entry, and profit analysis are shown for visibility but do not have working destinations yet.
+            The active links open existing application pages. GST reports, balance sheet, and profit analysis are shown for visibility but do not have working destinations yet.
         </div>
     </main>
 </body>

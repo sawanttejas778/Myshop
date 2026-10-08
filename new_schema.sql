@@ -574,7 +574,53 @@ create table ledger(
     transactiontype ENUM('credit','debit') NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     transaction_id VARCHAR(255) NOT NULL UNIQUE,
+    shopid int not null,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    foreign key (shopid) references Shops(shopid) on delete cascade,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+
+    -- Apply once to an existing application database to enable cost centres.
+    -- The same tables are also included in schema.sql and new_schema.sql.
+
+    CREATE TABLE IF NOT EXISTS cost_centers (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        shop_id INT NOT NULL,
+        name VARCHAR(120) NOT NULL,
+        description TEXT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_by VARCHAR(255) NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_cost_centers_shop_name (shop_id, name),
+        UNIQUE KEY uq_cost_centers_shop_id (shop_id, id),
+        FOREIGN KEY (shop_id) REFERENCES Shops(shopid) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+    CREATE TABLE IF NOT EXISTS cost_entries (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        shop_id INT NOT NULL,
+        cost_center_id BIGINT UNSIGNED NOT NULL,
+        entry_date DATE NOT NULL,
+        amount DECIMAL(12,2) NOT NULL,
+        description VARCHAR(255) NOT NULL,
+        reference VARCHAR(100) NULL,
+        created_by VARCHAR(255) NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_cost_entries_shop_date (shop_id, entry_date),
+        INDEX idx_cost_entries_center_date (cost_center_id, entry_date),
+        FOREIGN KEY (shop_id) REFERENCES Shops(shopid) ON DELETE CASCADE,
+        FOREIGN KEY (shop_id, cost_center_id)
+            REFERENCES cost_centers(shop_id, id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE gate_reciept
+    MODIFY COLUMN cost_center VARCHAR(255) NULL,
+    ADD COLUMN cost_center_id BIGINT UNSIGNED NULL,
+    ADD INDEX idx_gate_reciept_shop_cost_center (shopid, cost_center_id),
+    ADD CONSTRAINT fk_gate_reciept_cost_center
+        FOREIGN KEY (shopid, cost_center_id)
+        REFERENCES cost_centers(shop_id, id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE;

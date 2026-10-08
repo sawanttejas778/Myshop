@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cost Centres · Accounts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --page: #080b12;
+            --panel: rgba(18, 22, 32, .94);
+            --border: rgba(83, 110, 150, .38);
+            --muted: #9aaac4;
+            --blue: #3b82f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(16px, 4vw, 44px);
+            color: #e7edf8;
+            background: radial-gradient(ellipse at top left, #14223a 0, var(--page) 55%);
+            font-family: Inter, "Segoe UI", system-ui, sans-serif;
+        }
+        .page { width: min(100%, 1180px); margin: 0 auto; }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .eyebrow {
+            color: #8eace0;
+            font-size: .76rem;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+        h1 { margin: 5px 0 8px; font-size: clamp(1.8rem, 5vw, 2.6rem); }
+        .subtitle, .muted { color: var(--muted); }
+        .back-link { color: #a9c7ff; text-decoration: none; }
+        .back-link:hover { color: #fff; }
+        .card {
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--panel);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, .28);
+        }
+        .card-heading { padding: 19px clamp(18px, 3vw, 28px); border-bottom: 1px solid var(--border); }
+        .card-heading h2 { margin: 0; font-size: 1.08rem; }
+        .card-body { padding: clamp(18px, 3vw, 28px); }
+        .form-label { color: #bac9e2; font-size: .88rem; font-weight: 600; }
+        .form-control, .form-select {
+            min-height: 46px;
+            color: #e7edf8;
+            border: 1px solid #34435a;
+            border-radius: 11px;
+            background-color: #111827;
+        }
+        textarea.form-control { min-height: 92px; }
+        .form-control::placeholder { color: #77859a; }
+        .form-control:focus, .form-select:focus {
+            color: #fff;
+            border-color: var(--blue);
+            background-color: #111827;
+            box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .2);
+        }
+        .form-select option { background: #111827; }
+        .btn-primary { min-height: 46px; border: 0; border-radius: 11px; background: linear-gradient(110deg, #3478ed, #2456c4); font-weight: 700; }
+        .btn-outline-light { border-radius: 10px; }
+        .alert { border-radius: 11px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 14px; margin-bottom: 18px; }
+        .summary-card { padding: 16px 18px; border: 1px solid var(--border); border-radius: 14px; background: rgba(12, 18, 29, .82); }
+        .summary-label { color: var(--muted); font-size: .8rem; }
+        .summary-value { margin-top: 5px; font-size: 1.45rem; font-weight: 750; }
+        .table-responsive { border-top: 1px solid var(--border); }
+        .table { min-width: 650px; margin: 0; color: #dce6f7; }
+        .table thead th { padding: 13px 16px; color: #a9c7ff; background: rgba(8, 12, 20, .7); border-bottom-color: var(--border); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+        .table tbody td { padding: 13px 16px; border-color: rgba(83, 110, 150, .2); vertical-align: middle; }
+        .empty-state { padding: 30px 16px !important; color: var(--muted); text-align: center; }
+        .badge-active { color: #86efac; background: rgba(34, 197, 94, .14); }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr)); gap: 14px; align-items: end; }
+        @media (max-width: 480px) {
+            body { padding: 16px 12px 28px; }
+            .card { border-radius: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">Accounts · Operating costs</div>
+                <h1>Cost centres</h1>
+                <div class="subtitle">Organize expenses by department, location, or business activity and review them by date.</div>
+            </div>
+            <a class="back-link" href="{{ url_for('accounts') }}"><i class="fas fa-arrow-left me-2"></i>Back to Accounts</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="card" id="create-center">
+            <div class="card-heading"><h2><i class="fas fa-folder-plus me-2 text-primary"></i>Create a cost centre</h2></div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('cost_centers') }}#create-center">
+                    <input type="hidden" name="action" value="create_center">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label" for="centerName">Centre name</label>
+                            <input class="form-control" id="centerName" name="name" maxlength="120" placeholder="e.g. Store operations" required>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label" for="centerDescription">Description <span class="muted">(optional)</span></label>
+                            <input class="form-control" id="centerDescription" name="description" maxlength="1000" placeholder="What costs belong here?">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button class="btn btn-primary w-100" type="submit"><i class="fas fa-plus me-1"></i>Create</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card" id="add-cost">
+            <div class="card-heading"><h2><i class="fas fa-receipt me-2 text-primary"></i>Record a cost</h2></div>
+            <div class="card-body">
+                {% if centers|selectattr('is_active')|list %}
+                    <form method="post" action="{{ url_for('cost_centers') }}#add-cost">
+                        <input type="hidden" name="action" value="add_cost">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label" for="entryCenter">Cost centre</label>
+                                <select class="form-select" id="entryCenter" name="cost_center_id" required>
+                                    <option value="" selected disabled>Select a cost centre</option>
+                                    {% for center in centers if center.is_active %}
+                                        <option value="{{ center.id }}">{{ center.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label" for="entryDate">Date</label>
+                                <input class="form-control" id="entryDate" name="entry_date" type="date" value="{{ today }}" required>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label" for="entryAmount">Amount</label>
+                                <input class="form-control" id="entryAmount" name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
+                            </div>
+                            <div class="col-12 col-md-8">
+                                <label class="form-label" for="entryDescription">What was the cost for?</label>
+                                <input class="form-control" id="entryDescription" name="description" maxlength="255" placeholder="e.g. Electricity bill for October" required>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label" for="entryReference">Reference <span class="muted">(optional)</span></label>
+                                <input class="form-control" id="entryReference" name="reference" maxlength="100" placeholder="Receipt or bill number">
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-save me-2"></i>Save cost entry</button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <p class="muted mb-0">Create a cost centre before recording costs.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="card" id="reports">
+            <div class="card-heading"><h2><i class="fas fa-chart-column me-2 text-primary"></i>Cost report by centre and date</h2></div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('cost_centers') }}#reports" class="mb-4">
+                    <div class="filter-grid">
+                        <div>
+                            <label class="form-label" for="filterDateFrom">From date</label>
+                            <input class="form-control" id="filterDateFrom" name="date_from" type="date" value="{{ report_filters.date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="filterDateTo">To date</label>
+                            <input class="form-control" id="filterDateTo" name="date_to" type="date" value="{{ report_filters.date_to }}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="filterCenter">Cost centre</label>
+                            <select class="form-select" id="filterCenter" name="cost_center_id">
+                                <option value="">All cost centres</option>
+                                {% for center in centers %}
+                                    <option value="{{ center.id }}" {% if report_filters.cost_center_id|string == center.id|string %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-grow-1" type="submit"><i class="fas fa-filter me-1"></i>Apply filters</button>
+                            <a class="btn btn-outline-light d-flex align-items-center" href="{{ url_for('cost_centers') }}#reports">Clear</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Total cost in this report</div>
+                        <div class="summary-value">₹{{ "%.2f"|format(report_total) }}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Cost entries</div>
+                        <div class="summary-value">{{ report_entry_count }}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Date / centre groups</div>
+                        <div class="summary-value">{{ report_rows|length }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Cost centre</th>
+                            <th>Number of entries</th>
+                            <th>Total cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report_rows %}
+                            <tr>
+                                <td>{{ row.entry_date }}</td>
+                                <td>{{ row.cost_center_name }}</td>
+                                <td>{{ row.entry_count }}</td>
+                                <td>₹{{ "%.2f"|format(row.total_amount) }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td class="empty-state" colspan="4">No cost entries match this date range and centre.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card" id="centres">
+            <div class="card-heading"><h2><i class="fas fa-list me-2 text-primary"></i>Your cost centres</h2></div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead><tr><th>Centre</th><th>Description</th><th>Status</th><th>Created</th></tr></thead>
+                    <tbody>
+                        {% for center in centers %}
+                            <tr>
+                                <td>{{ center.name }}</td>
+                                <td>{{ center.description or "—" }}</td>
+                                <td><span class="badge badge-active">{{ "Active" if center.is_active else "Inactive" }}</span></td>
+                                <td>{{ center.created_at }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td class="empty-state" colspan="4">No cost centres created yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

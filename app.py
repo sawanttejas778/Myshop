@@ -2855,6 +2855,180 @@ def inventory():
 def accounts():
     return render_template("accounts.html", user=session.get("user"))
 
+@app.route("/cost-centers", methods=["GET", "POST"])
+@admin_required
+def cost_centers():
+    shop_id = session.get("selected_shop_id")
+    if not shop_id:
+        flash("Please select a shop first.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    conn = None
+    try:
+        conn, cur = get_db()
+        if request.method == "POST":
+            action = request.form.get("action", "").strip()
+            if action == "create_center":
+                name = request.form.get("name", "").strip()
+                description = request.form.get("description", "").strip()
+                if not name or len(name) > 120:
+                    flash("Enter a cost centre name of 1 to 120 characters.", "error")
+                else:
+                    try:
+                        cur.execute(
+                            """INSERT INTO cost_centers (shop_id, name, description, created_by)
+                               VALUES (%s, %s, %s, %s)""",
+                            (shop_id, name, description or None, session.get("user")),
+                        )
+                        conn.commit()
+                        flash("Cost centre created successfully.", "success")
+                        return redirect(url_for("cost_centers"))
+                    except mysql.connector.IntegrityError:
+                        conn.rollback()
+                        flash("A cost centre with that name already exists in this shop.", "error")
+            elif action == "add_cost":
+                center_id = request.form.get("cost_center_id", "").strip()
+                amount_text = request.form.get("amount", "").strip()
+                entry_date = request.form.get("entry_date", "").strip()
+                description = request.form.get("description", "").strip()
+                reference = request.form.get("reference", "").strip()
+
+                try:
+                    amount = Decimal(amount_text)
+                except InvalidOperation:
+                    amount = Decimal("0")
+                try:
+                    datetime.strptime(entry_date, "%Y-%m-%d")
+                    valid_date = True
+                except ValueError:
+                    valid_date = False
+
+                if (
+                    not center_id.isdigit()
+                    or not amount.is_finite()
+                    or amount <= 0
+                    or not valid_date
+                    or not description
+                    or len(description) > 255
+                    or len(reference) > 100
+                ):
+                    flash("Enter a cost centre, positive amount, valid date, and description (up to 255 characters).", "error")
+                else:
+                    cur.execute(
+                        "SELECT id FROM cost_centers WHERE id = %s AND shop_id = %s AND is_active = 1",
+                        (center_id, shop_id),
+                    )
+                    if not cur.fetchone():
+                        flash("The selected cost centre is not available for this shop.", "error")
+                    else:
+                        cur.execute(
+                            """INSERT INTO cost_entries
+                               (shop_id, cost_center_id, entry_date, amount, description, reference, created_by)
+                               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                            (
+                                shop_id,
+                                center_id,
+                                entry_date,
+                                amount,
+                                description,
+                                reference or None,
+                                session.get("user"),
+                            ),
+                        )
+                        conn.commit()
+                        flash("Cost entry recorded successfully.", "success")
+                        return redirect(url_for("cost_centers"))
+            else:
+                flash("Unknown cost-centre action.", "error")
+
+        date_from = request.args.get("date_from", "").strip()
+        date_to = request.args.get("date_to", "").strip()
+        center_filter = request.args.get("cost_center_id", "").strip()
+        filters_valid = True
+        for date_value in (date_from, date_to):
+            if date_value:
+                try:
+                    datetime.strptime(date_value, "%Y-%m-%d")
+                except ValueError:
+                    filters_valid = False
+                    break
+        if date_from and date_to and date_from > date_to:
+            filters_valid = False
+        if center_filter and not center_filter.isdigit():
+            filters_valid = False
+        if not filters_valid:
+            flash("Check the report date range and cost centre filter.", "error")
+            date_from = ""
+            date_to = ""
+            center_filter = ""
+
+        cur.execute(
+            """SELECT id, name, description, is_active, created_at
+               FROM cost_centers
+               WHERE shop_id = %s
+               ORDER BY is_active DESC, name""",
+            (shop_id,),
+        )
+        centers = cur.fetchall()
+
+        if center_filter:
+            cur.execute(
+                "SELECT id FROM cost_centers WHERE id = %s AND shop_id = %s",
+                (center_filter, shop_id),
+            )
+            if not cur.fetchone():
+                flash("The selected cost centre was not found in this shop.", "error")
+                center_filter = ""
+
+        report_query = """
+            SELECT e.entry_date, c.id AS cost_center_id, c.name AS cost_center_name,
+                   COUNT(e.id) AS entry_count, SUM(e.amount) AS total_amount
+            FROM cost_entries e
+            JOIN cost_centers c ON c.id = e.cost_center_id AND c.shop_id = e.shop_id
+            WHERE e.shop_id = %s
+        """
+        report_params = [shop_id]
+        if date_from:
+            report_query += " AND e.entry_date >= %s"
+            report_params.append(date_from)
+        if date_to:
+            report_query += " AND e.entry_date <= %s"
+            report_params.append(date_to)
+        if center_filter:
+            report_query += " AND e.cost_center_id = %s"
+            report_params.append(center_filter)
+        report_query += """
+            GROUP BY e.entry_date, c.id, c.name
+            ORDER BY e.entry_date DESC, c.name
+        """
+        cur.execute(report_query, tuple(report_params))
+        report_rows = cur.fetchall()
+        report_total = sum((row["total_amount"] for row in report_rows), Decimal("0.00"))
+        report_entry_count = sum(row["entry_count"] for row in report_rows)
+
+        return render_template(
+            "cost_centers.html",
+            centers=centers,
+            report_rows=report_rows,
+            report_total=report_total,
+            report_entry_count=report_entry_count,
+            today=datetime.now().date().isoformat(),
+            report_filters={
+                "date_from": date_from,
+                "date_to": date_to,
+                "cost_center_id": center_filter,
+            },
+        )
+    except mysql.connector.Error:
+        if conn:
+            conn.rollback()
+        app.logger.exception("Database error while managing cost centres")
+        flash("Unable to load or save cost-centre data. Check that the cost-centre schema has been applied.", "error")
+        return redirect(url_for("accounts"))
+    finally:
+        if conn:
+            conn.close()
+
 @app.route("/reports")
 @login_required
 def reports():
@@ -6364,7 +6538,30 @@ def print_po_page(po_id):
 @app.route("/gate_reciept")
 @admin_required
 def gate_reciept():
-    return render_template("gr.html")
+    shop_id = session.get("selected_shop_id")
+    if not shop_id:
+        flash("Please select a shop first.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    conn = None
+    try:
+        conn, cur = get_db()
+        cur.execute(
+            """SELECT id, name
+               FROM cost_centers
+               WHERE shop_id = %s AND is_active = 1
+               ORDER BY name""",
+            (shop_id,),
+        )
+        cost_centers = cur.fetchall()
+        return render_template("gr.html", cost_centers=cost_centers)
+    except mysql.connector.Error:
+        app.logger.exception("Database error while loading gate receipt cost centres")
+        flash("Unable to load gate receipts. Check that the cost-centre schema has been applied.", "error")
+        return redirect(url_for("accounts"))
+    finally:
+        if conn:
+            conn.close()
 
 # ============================================
 # ADD THIS API ENDPOINT TO YOUR FLASK APP
@@ -6401,6 +6598,24 @@ def create_gate_receipt():
             return jsonify({'success': False, 'message': 'User not authenticated'}), 401
         
         with cur as cursor:
+            cost_center_id = data.get('cost_center_id')
+            if cost_center_id is not None and str(cost_center_id).strip():
+                cost_center_id = str(cost_center_id).strip()
+                if not cost_center_id.isdigit():
+                    return jsonify({'success': False, 'message': 'Invalid cost centre selected'}), 400
+                cursor.execute("""
+                    SELECT name FROM cost_centers
+                    WHERE id = %s AND shop_id = %s AND is_active = 1
+                """, (cost_center_id, shop_id))
+                selected_center = cursor.fetchone()
+                if not selected_center:
+                    return jsonify({'success': False, 'message': 'Cost centre not found for this shop'}), 400
+                cost_center_name = selected_center['name'] if isinstance(selected_center, dict) else selected_center[0]
+                cost_center_id = int(cost_center_id)
+            else:
+                cost_center_id = None
+                cost_center_name = ''
+
             # Get PO details with received quantity
             cursor.execute("""
                 SELECT PONO, PRID, Status, QTY, recieved_QTY, total 
@@ -6488,9 +6703,13 @@ def create_gate_receipt():
                 # Insert into gate_reciept table
                 cursor.execute("""
                     INSERT INTO gate_reciept 
-                    (product_id, PONO, quantity, shopid, Reason, payment_status, invno, created_by, updated_by)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (product_id, po_id, quantity, shop_id, reason, payment_status, invno, created_by, created_by))
+                    (product_id, PONO, quantity, shopid, Reason, payment_status, invno,
+                     created_by, updated_by, cost_center, cost_center_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    product_id, po_id, quantity, shop_id, reason, payment_status,
+                    invno, created_by, created_by, cost_center_name, cost_center_id,
+                ))
                 
                 gate_receipt_ids.append(cursor.lastrowid)
                 total_received_qty += quantity
@@ -6520,8 +6739,22 @@ def create_gate_receipt():
                 WHERE PONO = %s AND shopid = %s
             """, (new_received_qty, created_by, po_id, shop_id))
             
+            if cost_center_id is not None and total_amount > 0:
+                cursor.execute("""
+                    INSERT INTO cost_entries
+                        (shop_id, cost_center_id, entry_date, amount, description, reference, created_by)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    shop_id,
+                    cost_center_id,
+                    datetime.now().date(),
+                    total_amount,
+                    f"Gate receipt for PO {po_id}",
+                    f"PO-{po_id}",
+                    created_by,
+                ))
+
             conn.commit()
-            
             # Check if PO is now fully received
             remaining_qty = total_po_qty - new_received_qty
             status_message = f'Gate receipt created successfully. Received: {total_received_qty} units.'
@@ -6586,6 +6819,8 @@ def get_gate_receipts():
                     gr.Reason,
                     gr.payment_status,
                     gr.invno,
+                    gr.cost_center_id,
+                    COALESCE(cc.name, NULLIF(gr.cost_center, '')) AS cost_center,
                     gr.created_at,
                     gr.created_by,
                     gr.updated_at,
@@ -6593,6 +6828,8 @@ def get_gate_receipts():
                     CONCAT('PO-', gr.PONO) as po_number
                 FROM gate_reciept gr
                 LEFT JOIN Products p ON gr.product_id = p.product_id
+                LEFT JOIN cost_centers cc
+                    ON cc.id = gr.cost_center_id AND cc.shop_id = gr.shopid
                 WHERE gr.shopid = %s
                 ORDER BY gr.created_at DESC
             """, (shop_id,))
@@ -6612,6 +6849,8 @@ def get_gate_receipts():
                     'reason': receipt['Reason'],
                     'payment_status': receipt['payment_status'],
                     'invoice_number': receipt['invno'],
+                    'cost_center_id': receipt['cost_center_id'],
+                    'cost_center': receipt['cost_center'],
                     'created_at': receipt['created_at'].strftime('%Y-%m-%d %H:%M:%S') if receipt['created_at'] else None,
                     'created_by': receipt['created_by']
                 })
@@ -6658,6 +6897,8 @@ def get_gate_receipt(gate_id):
                     gr.Reason,
                     gr.payment_status,
                     gr.invno,
+                    gr.cost_center_id,
+                    COALESCE(cc.name, NULLIF(gr.cost_center, '')) AS cost_center,
                     gr.created_at,
                     gr.created_by,
                     gr.updated_at,
@@ -6665,6 +6906,8 @@ def get_gate_receipt(gate_id):
                     CONCAT('PO-', gr.PONO) as po_number
                 FROM gate_reciept gr
                 LEFT JOIN Products p ON gr.product_id = p.product_id
+                LEFT JOIN cost_centers cc
+                    ON cc.id = gr.cost_center_id AND cc.shop_id = gr.shopid
                 WHERE gr.gate_id = %s AND gr.shopid = %s
             """, (gate_id, shop_id))
             
@@ -6686,6 +6929,8 @@ def get_gate_receipt(gate_id):
                     'reason': receipt['Reason'],
                     'payment_status': receipt['payment_status'],
                     'invoice_number': receipt['invno'],
+                    'cost_center_id': receipt['cost_center_id'],
+                    'cost_center': receipt['cost_center'],
                     'created_at': receipt['created_at'].strftime('%Y-%m-%d %H:%M:%S') if receipt['created_at'] else None,
                     'created_by': receipt['created_by']
                 }

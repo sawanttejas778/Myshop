@@ -372,6 +372,16 @@
                     <textarea id="reasonText" rows="2" placeholder="Delivery notes, quality remarks..."></textarea>
                 </div>
 
+                <div class="input-group">
+                    <label for="costCenter"><i class="fas fa-sitemap"></i> Cost Centre (Optional)</label>
+                    <select id="costCenter">
+                        <option value="">-- No cost centre --</option>
+                        {% for center in cost_centers %}
+                        <option value="{{ center.id }}">{{ center.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                     <div style="flex:1; min-width: 140px;">
                         <div class="input-group">
@@ -441,10 +451,10 @@
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Product</th><th>PO #</th><th>Quantity</th><th>Payment</th><th>Invoice</th><th>Date</th><th>Created By</th><th>Actions</th></tr>
+                        <tr><th>ID</th><th>Product</th><th>PO #</th><th>Quantity</th><th>Payment</th><th>Invoice</th><th>Cost Centre</th><th>Date</th><th>Created By</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="receiptsListBody">
-                        <tr><td colspan="9" class="text-center">Loading receipts...</td></tr>
+                        <tr><td colspan="10" class="text-center">Loading receipts...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -611,7 +621,7 @@
     function displayReceipts(receipts, searchTerm = '') {
         const tbody = document.getElementById('receiptsListBody');
         if (!receipts.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No receipts found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center">No receipts found</td></tr>';
             return;
         }
         
@@ -628,6 +638,7 @@
                 <td>${r.quantity}</td>
                 <td>${statusBadge}</td>
                 <td>${escapeHtml(r.invoice_number || 'N/A')}</td>
+                <td>${escapeHtml(r.cost_center || '—')}</td>
                 <td>${r.created_at ? r.created_at.split(' ')[0] : 'N/A'}</td>
                 <td>${escapeHtml(r.created_by || 'N/A')}</td>
                 <td>
@@ -664,7 +675,11 @@
             if (!data.success) throw new Error(data.message || "Failed to load POs");
             
             const posList = data.pos || [];
-            const matched = posList.find(po => po.id === poId);
+            const enteredPo = poInput.trim().toUpperCase();
+            const matched = posList.find(po =>
+                String(po.id) === String(poId) ||
+                String(po.po_number || '').toUpperCase() === enteredPo
+            );
             
             if (!matched) throw new Error(`PO with ID ${poId} not found`);
             if (!matched.items || matched.items.length === 0) throw new Error("PO has no items");
@@ -748,6 +763,7 @@
             po_id: selectedPoId,
             reason: document.getElementById('reasonText').value,
             payment_status: document.getElementById('paymentStatus').value,
+            cost_center_id: document.getElementById('costCenter').value || null,
             invno: document.getElementById('invno').value.trim() || "N/A",
             items: itemsToReceive.map(i => ({
                 product_id: i.product_id,
@@ -773,6 +789,7 @@
                 }
                 updateCreateUI();
                 document.getElementById('reasonText').value = '';
+                document.getElementById('costCenter').value = '';
                 document.getElementById('invno').value = 'N/A';
                 loadReceiptsList();
             } else {
@@ -785,7 +802,7 @@
 
     async function loadReceiptsList() {
         const tbody = document.getElementById('receiptsListBody');
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Loading...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center">Loading...</td></tr>';
         try {
             const response = await fetch('/api/gate_receipts');
             if (!response.ok) throw new Error('Failed to fetch');
@@ -795,7 +812,7 @@
             allReceipts = data.receipts || [];
             filterReceipts();
         } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center">Error: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center">Error: ${err.message}</td></tr>`;
         }
     }
 
@@ -833,6 +850,7 @@
         document.getElementById('ponoInput').value = '';
         document.getElementById('reasonText').value = '';
         document.getElementById('paymentStatus').value = 'unpaid';
+        document.getElementById('costCenter').value = '';
         document.getElementById('invno').value = 'N/A';
         document.getElementById('productSelect').innerHTML = '<option value="">-- load PO first --</option>';
         showStatus("Form reset", "info", "create");
