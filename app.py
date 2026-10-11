@@ -2663,18 +2663,19 @@ def submit_order():
             return redirect(url_for('login'))
 
         form = request.form
-        shop_id = form.get('shop_id')
-
 
         try:
             # Try reading JSON payload (optional)
             payload = request.get_json(silent=True) or {}
+            is_ajax = request.is_json or \
+                request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            shop_id = (payload.get('shop_id') if isinstance(payload, dict) else None) or form.get('shop_id')
             items = []
             cart_used = False
 
             # Fetch cart
             if shop_id:
-                cur.execute("SELECT cartid FROM Carts WHERE userid = %s AND shopid = %s",
+                cur.execute("SELECT cartid, shopid FROM Carts WHERE userid = %s AND shopid = %s",
                             (userid, shop_id))
                 cart_row = cur.fetchone()
             else:
@@ -2727,6 +2728,8 @@ def submit_order():
             # No items → reject
             if not items:
                 conn.close()
+                if is_ajax:
+                    return jsonify({"success": False, "message": "Your cart is empty or no products provided."}), 400
                 flash('Your cart is empty or no products provided.', 'error')
                 return redirect(url_for('view_cart'))
 
@@ -2808,9 +2811,6 @@ def submit_order():
             conn.commit()
             conn.close()
 
-            is_ajax = request.is_json or \
-                request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-
             if is_ajax:
                 return jsonify({"success": True, "order_id": order_id, "total": total_amount}), 200
 
@@ -2841,6 +2841,8 @@ def submit_order():
     except Exception as e:
         # Log outer exceptions too
         app.logger.exception('submit_order: outer exception')
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': str(e)}), 500
         flash(f"Error placing order: {e}", 'error')
         return redirect(url_for('place_order'))
 
