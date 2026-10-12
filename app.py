@@ -833,7 +833,7 @@ def manage_orders():
     counts = {}
     if order_ids:
         placeholders = ','.join(['%s'] * len(order_ids))
-        cursor.execute(f"SELECT orderid, COUNT(*) AS cnt FROM Order_Items WHERE orderid IN ({placeholders}) GROUP BY orderid", tuple(order_ids))
+        cursor.execute(f"SELECT orderid, COUNT(*) AS cnt FROM order_items  WHERE orderid IN ({placeholders}) GROUP BY orderid", tuple(order_ids))
         for r in cursor.fetchall() or []:
             counts[r['orderid']] = r.get('cnt', 0)
 
@@ -1857,7 +1857,7 @@ def orders():
             SELECT oi.id AS id, oi.orderid AS orderid, oi.product_id, p.name AS product,
                    oi.quantity AS qty, oi.price AS price, o.created_at AS date,
                    o.updated_at, o.status AS status, o.delivered_at as delivery_date
-            FROM Order_Items oi
+            FROM order_items oi
             JOIN Orders o ON oi.orderid = o.orderid
             LEFT JOIN Products p ON oi.product_id = p.product_id
             WHERE o.userid = %s
@@ -1951,7 +1951,7 @@ def return_item(order_item_id):
         cur.execute("""
             SELECT oi.id, o.orderid, o.status, o.delivered_at, o.userid,
                    oi.product_id, oi.quantity, oi.price
-            FROM Order_Items oi
+            FROM order_items oi
             JOIN Orders o ON oi.orderid = o.orderid
             WHERE oi.id = %s AND o.userid = %s
         """, (order_item_id, userid))
@@ -2043,7 +2043,7 @@ def return_status(order_item_id):
                     AND status = 'return_requested'
                     LIMIT 1
                 ) AS return_requested_date
-            FROM Order_Items oi
+            FROM order_items oi
             JOIN Orders o ON oi.orderid = o.orderid
             LEFT JOIN Products p ON oi.product_id = p.product_id
             WHERE oi.id = %s AND o.userid = %s
@@ -2108,15 +2108,15 @@ def return_status(order_item_id):
 @login_required
 def cancel_order(item_id):
     conn, cur = get_db()
-    """Cancel the order associated with the given Order_Items.id (if owned by user).
-    This matches the current template which posts the Order_Items id.
+    """Cancel the order associated with the given order_items.id (if owned by user).
+    This matches the current template which posts the order_items id.
     """
     userid = session.get('user')
     try:
 
         # Find the parent order and verify ownership
         cur.execute(
-            "SELECT oi.orderid AS orderid, o.userid AS userid FROM Order_Items oi JOIN Orders o ON oi.orderid = o.orderid WHERE oi.id = %s",
+            "SELECT oi.orderid AS orderid, o.userid AS userid FROM order_items oi JOIN Orders o ON oi.orderid = o.orderid WHERE oi.id = %s",
             (item_id,)
         )
         row = cur.fetchone()
@@ -2535,7 +2535,7 @@ def api_create_order():
 
         # Insert order items
         for item in items:
-            cur.execute("INSERT INTO Order_Items (orderid, product_id, quantity, price) VALUES (%s, %s, %s, %s)", (order_id, item['product_id'], item['quantity'], item['price']))
+            cur.execute("INSERT INTO order_items (orderid, product_id, quantity, price) VALUES (%s, %s, %s, %s)", (order_id, item['product_id'], item['quantity'], item['price']))
 
         # Insert order_descriptions if provided
         try:
@@ -2604,9 +2604,9 @@ def api_update_order_status():
 
         shopid = order.get('shopid')
 
-        # Fetch order items - check the actual column names in your Order_Items table
+        # Fetch order items - check the actual column names in your order_items table
         # Based on your Orders table, it's likely orderid (not order_id)
-        cur.execute("SELECT product_id, quantity FROM Order_Items WHERE orderid = %s", (order_id,))
+        cur.execute("SELECT product_id, quantity FROM order_items WHERE orderid = %s", (order_id,))
         items = cur.fetchall() or []
         #change
         # Start transaction
@@ -2615,7 +2615,7 @@ def api_update_order_status():
             # Update order status
             cur.execute("UPDATE Orders SET status = %s WHERE orderid = %s", (new_status, order_id))
             if prev_status != 'delivered' and new_status == 'delivered':
-                cur.execute("update orders set delivered_at = %s where orderid  = %s",(current_time,order_id))
+                cur.execute("update Orders set delivered_at = %s where orderid  = %s",(current_time,order_id))
 
             # If moving to 'delivered' from non-delivered => subtract stock
             if prev_status != 'delivered' and new_status == 'delivered':
@@ -2768,12 +2768,12 @@ def submit_order():
             for item in items:
                 try:
                     cur.execute("""
-                        INSERT INTO Order_Items (orderid, order_id, product_id, quantity, price)
+                        INSERT INTO order_items  (orderid, order_id, product_id, quantity, price)
                         VALUES (%s, %s, %s, %s, %s)
                     """, (order_id, order_id, item['product_id'], item['quantity'], item['price']))
                 except mysql.connector.Error:
                     cur.execute("""
-                        INSERT INTO Order_Items (orderid, product_id, quantity, price)
+                        INSERT INTO order_items  (orderid, product_id, quantity, price)
                         VALUES (%s, %s, %s, %s)
                     """, (order_id, item['product_id'], item['quantity'], item['price']))
 
@@ -3100,7 +3100,7 @@ def invoice():
         # Fetch items
         cursor.execute("""
             SELECT oi.*, p.name
-            FROM Order_Items oi
+            FROM order_items  oi
             JOIN Products p ON p.product_id = oi.product_id
             WHERE oi.orderid = %s
         """, (order_id,))
@@ -3385,7 +3385,7 @@ def review_product(product_id):
             cur.execute("""
                 SELECT COUNT(*) as purchase_count
                 FROM Orders o
-                JOIN Order_items oi ON o.orderid = oi.order_id
+                JOIN order_items oi ON o.orderid = oi.order_id
                 WHERE o.userid = %s  # Changed to userid to match your schema
                   AND oi.product_id = %s
                   AND o.status = 'delivered'
@@ -3540,7 +3540,7 @@ def submit_review_route(product_id):
         try:
             cur.execute("""
                 SELECT COUNT(*) as purchase_count
-                FROM orders o
+                FROM Orders o
                 JOIN order_items oi ON o.orderid = oi.order_id
                 WHERE o.userid = %s
                   AND oi.product_id = %s
