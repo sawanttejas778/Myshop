@@ -482,7 +482,7 @@
                             <i class="fas fa-search me-1"></i> Search & Add Customer
                         </button>
                         <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
-                            <i class="fas fa-plus-circle me-1"></i> Add Supplier
+                            <i class="fas fa-plus-circle me-1"></i> Add Existing Supplier
                         </button>
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
                             <i class="fas fa-rupee-sign me-1"></i> Add Transaction
@@ -577,34 +577,29 @@
         </div>
     </div>
 
-    <!-- Add Supplier Modal (Flask backend integrated) -->
+    <!-- Add an existing supplier to Khatabook -->
     <div class="modal fade" id="addSupplierModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-info"></i> Add New Supplier</h5>
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-info"></i> Add Existing Supplier</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="{{ url_for('index') if request.endpoint else '#' }}">
+                <form method="POST" action="{{ url_for('khatabook') }}">
                     <div class="modal-body">
-                        <input type="hidden" name="action" value="add_party">
-                        <input type="hidden" name="type" value="supplier">
+                        <input type="hidden" name="action" value="add_supplier_party">
+                        <input type="hidden" name="supplier_id" id="selectedSupplierId">
                         <div class="mb-3">
-                            <label for="supplierName" class="form-label">Supplier Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="supplierName" name="name" placeholder="e.g., Gupta Traders" required>
+                            <label for="supplierSearchInput" class="form-label">Search suppliers by name</label>
+                            <input type="search" class="form-control" id="supplierSearchInput" autocomplete="off" placeholder="Type a supplier name...">
                         </div>
-                        <div class="mb-3">
-                            <label for="supplierPhone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="supplierPhone" name="phone" placeholder="+91 98765 43210">
-                        </div>
-                        <div class="mb-3">
-                            <label for="supplierAddress" class="form-label">Address</label>
-                            <textarea class="form-control" id="supplierAddress" name="address" rows="2" placeholder="City, State, Full address"></textarea>
-                        </div>
+                        <div id="supplierSearchStatus" class="small text-secondary mb-2" role="status"></div>
+                        <div id="supplierSearchResults" class="list-group mb-3" style="max-height: 260px; overflow-y: auto;"></div>
+                        <div id="selectedSupplierMessage" class="small text-info" aria-live="polite"></div>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-info px-4">Add Supplier</button>
+                        <button type="submit" class="btn btn-info px-4" id="addSelectedSupplierButton" disabled>Add to Khatabook</button>
                     </div>
                 </form>
             </div>
@@ -619,7 +614,7 @@
                     <h5 class="modal-title"><i class="fas fa-coins me-2 text-success"></i> Add New Transaction</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="{{ url_for('index') if request.endpoint else '#' }}">
+                <form method="POST" action="{{ url_for('khatabook') }}">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <div class="mb-3">
@@ -635,8 +630,8 @@
                             <label for="transType" class="form-label">Transaction Type <span class="text-danger">*</span></label>
                             <select class="form-control" id="transType" name="type" required>
                                 <option value="">Select Type</option>
-                                <option value="Credit">Credit (Money Received)</option>
-                                <option value="Debit">Debit (Money Given)</option>
+                                <option value="credit">Credit (Money Received)</option>
+                                <option value="debit">Debit (Money Given)</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -896,6 +891,89 @@
 
             document.getElementById('transactionsContent').innerHTML = html;
         }
+
+        // Search the existing supplier directory and add a selected supplier to Khatabook.
+        const supplierSearchInput = document.getElementById('supplierSearchInput');
+        const supplierSearchResults = document.getElementById('supplierSearchResults');
+        const supplierSearchStatus = document.getElementById('supplierSearchStatus');
+        const selectedSupplierId = document.getElementById('selectedSupplierId');
+        const selectedSupplierMessage = document.getElementById('selectedSupplierMessage');
+        const addSelectedSupplierButton = document.getElementById('addSelectedSupplierButton');
+        let supplierSearchTimer;
+        let supplierSearchSequence = 0;
+
+        supplierSearchInput?.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            const searchSequence = ++supplierSearchSequence;
+            clearTimeout(supplierSearchTimer);
+            selectedSupplierId.value = '';
+            selectedSupplierMessage.textContent = '';
+            addSelectedSupplierButton.disabled = true;
+            supplierSearchResults.replaceChildren();
+
+            if (searchTerm.length < 2) {
+                supplierSearchStatus.textContent = searchTerm
+                    ? 'Enter at least 2 characters to search.'
+                    : 'Type at least 2 characters to search your suppliers.';
+                return;
+            }
+
+            supplierSearchStatus.textContent = 'Searching suppliers...';
+            supplierSearchTimer = setTimeout(async function() {
+                try {
+                    const response = await fetch(
+                        `/api/suppliers/search?q=${encodeURIComponent(searchTerm)}`,
+                        { credentials: 'same-origin' }
+                    );
+                    if (!response.ok) {
+                        throw new Error(`Supplier search failed (HTTP ${response.status}).`);
+                    }
+
+                    const suppliers = await response.json();
+                    if (searchSequence !== supplierSearchSequence) return;
+                    if (!Array.isArray(suppliers)) {
+                        throw new Error('Supplier search returned an unexpected response.');
+                    }
+
+                    supplierSearchResults.replaceChildren();
+                    if (!suppliers.length) {
+                        supplierSearchStatus.textContent = 'No matching suppliers found.';
+                        return;
+                    }
+
+                    supplierSearchStatus.textContent = 'Choose a supplier to add:';
+                    suppliers.forEach(function(supplier) {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'list-group-item list-group-item-action text-start';
+                        const name = supplier.name || 'Unnamed supplier';
+                        const details = [supplier.phone, supplier.city].filter(Boolean).join(' · ');
+                        button.textContent = details ? `${name} — ${details}` : name;
+                        button.addEventListener('click', function() {
+                            selectedSupplierId.value = supplier.supplier_id;
+                            selectedSupplierMessage.textContent = `Selected: ${name}`;
+                            addSelectedSupplierButton.disabled = !supplier.supplier_id;
+                        });
+                        supplierSearchResults.appendChild(button);
+                    });
+                } catch (error) {
+                    if (searchSequence !== supplierSearchSequence) return;
+                    console.error('Error searching suppliers:', error);
+                    supplierSearchStatus.textContent = 'Could not search suppliers. Please try again.';
+                }
+            }, 250);
+        });
+
+        document.getElementById('addSupplierModal')?.addEventListener('hidden.bs.modal', function() {
+            supplierSearchSequence++;
+            clearTimeout(supplierSearchTimer);
+            supplierSearchInput.value = '';
+            selectedSupplierId.value = '';
+            selectedSupplierMessage.textContent = '';
+            supplierSearchResults.replaceChildren();
+            supplierSearchStatus.textContent = 'Type at least 2 characters to search your suppliers.';
+            addSelectedSupplierButton.disabled = true;
+        });
 
         // Customer search functionality
         document.getElementById('customerSearchInput')?.addEventListener('input', function(e) {

@@ -624,3 +624,39 @@ ALTER TABLE gate_reciept
         REFERENCES cost_centers(shop_id, id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE;
+
+
+CREATE TABLE parties (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) default NULL,
+    address TEXT,
+    type ENUM('customer', 'supplier') NOT NULL,
+    balance DECIMAL(10,2) DEFAULT 0.00,
+    shop_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_parties_shop (shop_id),
+    INDEX idx_parties_type (type),
+    INDEX idx_parties_name (name),
+    FOREIGN KEY (shop_id) REFERENCES Shops(shopid) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Transactions table
+CREATE TABLE transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    party_id INT NOT NULL,
+    type ENUM('debit', 'credit') NOT NULL,  -- debit: money given to party (you owe), credit: money received from party (party owes you)
+    amount DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    transaction_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255) NOT NULL,
+    shop_id INT NOT NULL,
+    INDEX idx_transactions_party (party_id),
+    INDEX idx_transactions_date (transaction_date),
+    INDEX idx_transactions_shop (shop_id),
+    INDEX idx_transactions_created_by (created_by),
+    FOREIGN KEY (party_id) REFERENCES parties(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES Users(userid) ON DELETE CASCADE,
+    FOREIGN KEY (shop_id) REFERENCES Shops(shopid) ON DELETE CASCADE
+) ENGINE=InnoDB;

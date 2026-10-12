@@ -4831,6 +4831,51 @@ def khatabook():
                                (name, phone, address, party_type, shop_id))
                     conn.commit()
                     flash("Party added successfully.", "success")
+            elif action == 'add_supplier_party':
+                supplier_id = request.form.get('supplier_id', '').strip()
+                if not supplier_id.isdigit():
+                    flash("Select a valid supplier.", "error")
+                else:
+                    cur.execute(
+                        """SELECT name, phone, address
+                           FROM supplier
+                           WHERE supplier_id = %s AND shop_id = %s
+                           LIMIT 1""",
+                        (supplier_id, shop_id),
+                    )
+                    supplier = cur.fetchone()
+                    if not supplier:
+                        flash("Supplier not found for the selected shop.", "error")
+                    else:
+                        supplier_phone = supplier.get('phone') or None
+                        cur.execute(
+                            """SELECT id FROM parties
+                               WHERE shop_id = %s AND type = 'supplier'
+                                 AND name = %s
+                                 AND (phone = %s OR (phone IS NULL AND %s IS NULL))
+                               LIMIT 1""",
+                            (
+                                shop_id,
+                                supplier['name'],
+                                supplier_phone,
+                                supplier_phone,
+                            ),
+                        )
+                        if cur.fetchone():
+                            flash("This supplier is already in Khatabook.", "info")
+                        else:
+                            cur.execute(
+                                """INSERT INTO parties (name, phone, address, type, shop_id)
+                                   VALUES (%s, %s, %s, 'supplier', %s)""",
+                                (
+                                    supplier['name'],
+                                    supplier_phone,
+                                    supplier.get('address'),
+                                    shop_id,
+                                ),
+                            )
+                            conn.commit()
+                            flash("Supplier added to Khatabook.", "success")
             elif action == 'add_transaction':
                 party_id = request.form.get('party_id')
                 trans_type = request.form.get('type')
@@ -4843,6 +4888,16 @@ def khatabook():
                 else:
                     cur.execute("INSERT INTO transactions (party_id, type, amount, description, transaction_date, created_by, shop_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                                (party_id, trans_type, amount, description, trans_date, session.get("user"), shop_id))
+                    if trans_type == 'credit':
+                        cur.execute(
+                            "UPDATE parties SET balance = balance + %s WHERE id = %s",
+                            (amount, party_id),
+                        )
+                    else:
+                        cur.execute(
+                            "UPDATE parties SET balance = balance - %s WHERE id = %s",
+                            (amount, party_id),
+                        )
                     conn.commit()
                     flash("Transaction added successfully.", "success")
         # Get parties
@@ -4857,6 +4912,7 @@ def khatabook():
         conn.close()
         return render_template('khatabook.html', parties=parties)
     except Exception as e:
+        conn.rollback()
         conn.close()
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for('dashboard'))
